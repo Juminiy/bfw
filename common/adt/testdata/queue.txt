@@ -1,0 +1,11 @@
+container adaptor
+容器的适配器, 对于底层的容器减少功能, 形成一个新的结构, 只要一个容器有empty, size, front, back, push_back, pop_front 这些方法就可以作为queue的底层容器
+
+queue::back
+queue::emplace
+queue::empty
+queue::front
+queue::pop
+queue::push
+queue::size
+queue::swap

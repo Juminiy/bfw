@@ -1,0 +1,54 @@
+list 顺序容器, 允许常数时间在任何序列位置插入删除操作, 也可以双向迭代
+list 实现是双向链表
+list 在已经获取迭代器的情况下，在任何位置上插入、访问、移动元素的大量操作整体性能和平均性能都比array, vector, deque要好
+list 的缺点是 不能直接通过位置获取元素, 获取位置的元素需要耗费时间和空间
+
+list::assign
+
+list::operator=
+
+list::clear
+
+list::empty
+
+list::swap
+
+list::resize
+
+list::reverse
+
+list::size
+
+
+list::front
+list::back
+
+
+list::insert
+list::push_front
+list::push_back
+list::emplace
+list::emplace_front
+list::emplace_back
+
+
+list::erase
+list::pop_front
+list::pop_back
+list::remove
+list::remove_if
+
+list::sort
+list::splice
+list::merge
+list::unique
+
+list::begin
+list::end
+list::rbegin
+list::rend
+
+list::cbegin
+list::cend
+list::crbegin
+list::crend

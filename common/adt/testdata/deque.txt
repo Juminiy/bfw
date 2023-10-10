@@ -1,0 +1,61 @@
+double ended queue 双端队列的stand_for('deck')
+特性: 任何的lib中都允许元素通过随机访问迭代器随机访问, 不保证连续存储的位置(通过offset指针获取元素会导致未定义的行为)
+lib: vector和deque的接口和使用意图非常相似, 但是内部的结构完全不同
+vector是一个严格线性的单一数组, 可以通过地址访问, 偶尔被重新分配已满足增长的需求
+deque的元素被放置在不同的存储块中, 容器内部维持着必要的信息以提供对所有元素常数时间的直接访问, 通过迭代器有统一的循序接口
+deque的内部结构比vector更加复杂, 这也允许在特定的情况下有效增长, 尤其是非常长的序列, 在重新分配变更复杂的形势下
+优点: 首尾的增删是高效的, 立刻插入删除指定位置的元素
+缺点: 更非连续性迭代器和引用, 连续性上差于list, forward_list
+
+deque::assign
+assign(first, last)
+assign(n, val)
+assign(il)
+
+deque::operator=
+
+deque::swap
+
+deque::clear
+
+deque::empty
+
+deque::size
+
+deque::shrink_to_fit
+
+deque::resize
+
+
+deque::operator[]
+deque::at
+deque::front
+deque::back
+
+
+deque::insert
+deque::push_front
+deque::push_back
+
+deque::emplace
+deque::emplace_back
+deque::emplace_front
+
+deque::erase
+deque::pop_front
+deque::pop_back
+
+
+deque::begin
+deque::end
+deque::rbegin
+deque::rend
+
+deque::cbegin
+deque::cend
+deque::crbegin
+deque::crend
+
+
+
+
