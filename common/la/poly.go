@@ -375,12 +375,14 @@ func (poly *Poly) setElemZero(index int) {
 	poly.getElem(index).setZero()
 }
 
+// one2OneOpt
+// '+' Test Pass
+// '-' Test Error
 func (poly *Poly) one2OneOpt(opt rune, p *Poly) *Poly {
-	if !poly.compareTo(p) {
-		poly.swap(p)
-	}
-	polyPSize := p.getSize()
-	for idx := 0; idx < polyPSize; idx++ {
+	polyDestMaxExp := lang.MaxInt(poly.maxExp, p.maxExp)
+	poly.resetMapExp(polyDestMaxExp)
+	p.resetMapExp(polyDestMaxExp)
+	for idx := 0; idx <= polyDestMaxExp; idx++ {
 		poly.setElemByOne2OneOpt(idx, opt, p)
 	}
 	return poly
@@ -682,6 +684,23 @@ func (poly *Poly) Merge(predict ...bool) *Poly {
 // merge the nodes by same exp
 func (poly *Poly) mergeNodeBySameExponent() *Poly {
 	return poly
+}
+
+func (poly *Poly) getValidNode() []*PolyNode {
+	validNode := make([]*PolyNode, 0)
+	for exp := 0; exp <= poly.maxExp; exp++ {
+		if poly.getElem(exp).validate() {
+			validNode = append(validNode, poly.getElem(exp).makeCopy())
+		}
+	}
+	return validNode
+}
+
+func (poly *Poly) PolyNode() *PolyNode {
+	if validNode := poly.getValidNode(); len(validNode) == 1 {
+		return validNode[0]
+	}
+	return &PolyNode{}
 }
 
 func (poly *Poly) Display(isPrintln bool, precisionBit ...int) *Poly {

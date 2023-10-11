@@ -25,7 +25,7 @@ func ConstructSolution(slice []complex128) *Solution {
 }
 
 func (s *Solution) Construct(slice []complex128) *Solution {
-
+	s.setValues(slice, len(slice))
 	return s
 }
 
@@ -101,6 +101,11 @@ func (s *Solution) setElem(index int, value complex128) {
 	s.slice[index] = value
 }
 
+func (s *Solution) EigenValues() *EigenValues {
+	eigenValues := &EigenValues{}
+	return eigenValues
+}
+
 func (s *Solution) Display(realPrecision, imagPrecision int) *Solution {
 	if s.size ==
 		solutionNoSize {
@@ -113,6 +118,10 @@ func (s *Solution) Display(realPrecision, imagPrecision int) *Solution {
 		lang.DisplayComplex128(realPrecision, imagPrecision, s.getElem(idx))
 	}
 	fmt.Printf("]")
+	return s
+}
+
+func (s *Solution) DisplayV2(realPrecision, imagPrecision int) *Solution {
 	return s
 }
 

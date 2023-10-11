@@ -10,6 +10,18 @@ const (
 	complex128ImagDefaultPrecision int = 2
 )
 
+type Complex128Slice []complex128
+
+func (p Complex128Slice) Len() int { return len(p) }
+func (p Complex128Slice) Less(i, j int) bool {
+	return real(p[i]) < real(p[j]) || (real(p[i]) == real(p[j]) && imag(p[i]) < imag(p[j]))
+}
+func (p Complex128Slice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+
+func ConstructComplex128Slice(slice []complex128) Complex128Slice {
+	return slice
+}
+
 func DisplayOneComplex128(a complex128, precision ...int) {
 	realPrec, imagPrec := complex128RealDefaultPrecision, complex128ImagDefaultPrecision
 	if precLen := len(precision); precLen > 0 {

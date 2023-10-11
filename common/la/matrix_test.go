@@ -98,7 +98,7 @@ func TestGenericMatrix_ALL(t *testing.T) {
 	m.setValues([][]float64{{0, 1, 0}, {0, 0, 1}, {-6, -11, -6}}, 3)
 	p := &Matrix{}
 	p.setValues([][]float64{{1, 1, 1}, {-1, -2, -3}, {1, 4, 9}}, 3)
-	m.Similar(p).Display()
+	m.SimilarityTransformation(p).Display()
 	//m.Display()
 	//p.Display()
 }
@@ -120,7 +120,7 @@ func TestMatrix_Approx(t *testing.T) {
 	//eigenVG.get(0).GetUnit().Display()
 	//eigenVGOrthBasis := eigenVG.GetSchmidt().GetUnit().Display()
 	//fmt.Println(eigenVGOrthBasis.ValidateOrthonormalBasis())
-	matrix.Similar(eigenO).Display()
+	matrix.SimilarityTransformation(eigenO).Display()
 }
 
 func TestVector_Add(t *testing.T) {
@@ -142,4 +142,19 @@ func TestMatrix_Total(t *testing.T) {
 	fmt.Println(mTest1.getLine(2))
 	mTest4 := ConstructMatrix([][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})
 	fmt.Println(mTest4.getRow(1), mTest4.getLine(2))
+}
+
+// A
+// 1 -2 2
+// -2 -2 4
+// 2 4 -2
+
+// A-λI
+// 1-λ -2 2
+// -2 -2-λ 4
+// 2 4 -2-λ
+func TestMatrix_PolyMatrix(t *testing.T) {
+	matrix := ConstructMatrix([][]float64{{1, -2, 2}, {-2, -2, 4}, {2, 4, -2}})
+	//matrix.PolyMatrix().Display(1)
+	matrix.EigenMatrix().Det().Display(true, 1).Solve().Display(3, 3)
 }

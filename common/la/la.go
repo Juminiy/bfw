@@ -2,7 +2,7 @@
 
 package la
 
-type AlgebraContainer interface {
+type RealAlgebraContainer interface {
 	validate() bool
 	get(int, int) float64
 	set(int, int, float64)

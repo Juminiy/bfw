@@ -247,6 +247,17 @@ func (pn *PolyNode) Derivative() *PolyNode {
 	return pn
 }
 
+func (pn *PolyNode) convertToPoly(aes rune) *Poly {
+	poly := &Poly{}
+	poly.setValues(make([]*PolyNode, pn.exp+1), pn.exp, aes)
+	poly.setElem(pn.exp, pn.makeCopy())
+	return poly
+}
+
+func (pn *PolyNode) Poly(aes rune) *Poly {
+	return pn.convertToPoly(aes)
+}
+
 // Display
 // print the poly node
 func (pn *PolyNode) Display(isPrintln bool, aes rune) *PolyNode {

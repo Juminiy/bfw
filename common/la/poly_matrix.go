@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+const (
+	eigenPolyMatrixDefaultAES rune = 'λ'
+)
+
 var (
 	NullPolyMatrix = &PolyMatrix{}
 )
@@ -73,11 +77,69 @@ func (pm *PolyMatrix) null() *PolyMatrix {
 	return &PolyMatrix{}
 }
 
+func (pm *PolyMatrix) assign(rowSize, lineSize int) {
+	pm.setValues(make([][]*Poly, rowSize), rowSize, lineSize)
+	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
+		pm.setRow(rowIdx, make([]*Poly, lineSize))
+	}
+}
+
+func (pm *PolyMatrix) swap(m *PolyMatrix) {
+	pmTemp := &PolyMatrix{}
+	pmTemp.setSelf(pm)
+	pm.setSelf(m)
+	m.setSelf(pmTemp)
+}
+
+func (pm *PolyMatrix) getSelf() *PolyMatrix {
+	return pm
+}
+
+func (pm *PolyMatrix) setSelf(pmt *PolyMatrix) {
+	pm.setValues(pmt.slice, pmt.rowSize, pmt.lineSize)
+}
+
+func (pm *PolyMatrix) setValues(slice [][]*Poly, rowSize, lineSize int) {
+	pm.setSlice(slice)
+	pm.setRowSize(rowSize)
+	pm.setLineSize(lineSize)
+}
+
+func (pm *PolyMatrix) setSlice(slice [][]*Poly) {
+	pm.slice = slice
+}
+
+func (pm *PolyMatrix) setRowSize(rowSize int) {
+	pm.rowSize = rowSize
+}
+
+func (pm *PolyMatrix) setLineSize(lineSize int) {
+	pm.lineSize = lineSize
+}
+
+func (pm *PolyMatrix) setElemByOne2OneOpt(rowIndex, lineIndex int, opt rune, pmt *PolyMatrix) {
+	if !pm.validateIndex(rowIndex, lineIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	pm.get(rowIndex, lineIndex).one2OneOpt(opt, pmt.get(rowIndex, lineIndex))
+}
+
+func (pm *PolyMatrix) setElemByOptElem(rowIndex, lineIndex int, opt rune, p *Poly) {
+	if !pm.validateIndex(rowIndex, lineIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	pm.get(rowIndex, lineIndex).one2OneOpt(opt, p)
+}
+
 func (pm *PolyMatrix) get(rowIndex, lineIndex int) *Poly {
 	if !pm.validateIndex(rowIndex, lineIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
 	return pm.slice[rowIndex][lineIndex]
+}
+
+func (pm *PolyMatrix) set(rowIndex, lineIndex int, value *Poly) {
+	pm.slice[rowIndex][lineIndex] = value
 }
 
 func (pm *PolyMatrix) getRow(rowIndex int) []*Poly {
@@ -87,8 +149,34 @@ func (pm *PolyMatrix) getRow(rowIndex int) []*Poly {
 	return pm.slice[rowIndex]
 }
 
-func (pm *PolyMatrix) Equal() bool {
+func (pm *PolyMatrix) setRow(rowIndex int, rowSlice []*Poly) {
+	if !pm.validateIndex(rowIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	pm.slice[rowIndex] = rowSlice
+}
+
+func (pm *PolyMatrix) Equal(pmt *PolyMatrix) bool {
+	if pm.sameShape(pmt) {
+		for rowIdx := 0; rowIdx < pm.rowSize; rowIdx++ {
+			for lineIdx := 0; lineIdx < pm.lineSize; lineIdx++ {
+				if !pm.get(rowIdx, lineIdx).Equal(pmt.get(rowIdx, lineIdx)) {
+					return false
+				}
+			}
+		}
+		return true
+	}
 	return false
+}
+
+func (pm *PolyMatrix) sameShape(pmt *PolyMatrix) bool {
+	if pmt == nil ||
+		pm.rowSize != pmt.rowSize ||
+		pm.lineSize != pmt.lineSize {
+		return false
+	}
+	return true
 }
 
 func (pm *PolyMatrix) isPhalanx() bool {
@@ -189,7 +277,7 @@ func (pm *PolyMatrix) eigenMatrixElementaryTransformation() {
 
 }
 
-func (pm *PolyMatrix) Display() *PolyMatrix {
+func (pm *PolyMatrix) Display(precisionBits ...int) *PolyMatrix {
 	if pm.isNull() {
 		fmt.Println("[null]")
 		return pm
@@ -197,7 +285,8 @@ func (pm *PolyMatrix) Display() *PolyMatrix {
 	for rowIdx := 0; rowIdx < pm.rowSize; rowIdx++ {
 		for lineIdx := 0; lineIdx < pm.lineSize; lineIdx++ {
 			poly := pm.get(rowIdx, lineIdx)
-			poly.Display(true)
+			poly.Display(false, precisionBits...)
+			fmt.Printf(" ")
 		}
 		fmt.Println()
 	}

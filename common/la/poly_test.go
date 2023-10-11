@@ -39,6 +39,7 @@ var (
 	polyNode61 = ConstructPolyNode(8, 1)
 	polyNode62 = ConstructPolyNode(-5, 2)
 	polyNode63 = ConstructPolyNode(1, 3)
+	polyNode69 = ConstructPolyNode(3, 9)
 
 	poly1 = &Poly{}
 	poly2 = &Poly{}
@@ -46,7 +47,9 @@ var (
 
 func TestPolyNode_Display(t *testing.T) {
 	polyNode0.swap(polyNode1)
+	// 2x
 	polyNode0.Display(true, 'x')
+	// 1
 	polyNode1.Display(true, 'x')
 }
 
@@ -54,10 +57,16 @@ func TestPoly_Display(t *testing.T) {
 	poly1.setNodeByOrder(polyNode0, polyNode1, polyNode4, polyNode9)
 	poly2.setNodeByOrder(polyNode20, polyNode22, polyNode26, polyNode215)
 
+	//1+2x+5x^4+10x^9
 	poly1.Display(true, 0)
+	//1+3x^2+7x^6+16x^15
 	poly2.Display(true, 0)
+
 	poly1.swap(poly2)
+
+	//1+3x^2+7x^6+16x^15
 	poly1.Display(true, 0)
+	//1+2x+5x^4+10x^9
 	poly2.Display(true, 0)
 }
 
@@ -66,6 +75,7 @@ func TestPoly_makeCopy(t *testing.T) {
 	poly2.setNodeByOrder(polyNode20, polyNode22, polyNode26, polyNode215)
 	poly1Copy := poly1.makeCopy()
 	poly1Copy.Display(true, 0)
+	// swap success is to show different address
 	fmt.Println(poly1)
 	fmt.Println(poly1Copy)
 }
@@ -82,6 +92,14 @@ func TestPoly_Add_Integral_Derivative(t *testing.T) {
 	poly1.Derivative().Display(true, 0)
 	//10x^4+10x^5+15x^6+25x^8+35x^10+50x^13+80x^19
 	poly1.MulNode(polyNode4).Display(true, 0)
+}
+
+func TestPoly_Sub(t *testing.T) {
+	poly1.setNodeByOrder(polyNode50, polyNode51, polyNode52, polyNode53)
+	poly1.Display(true, 0)
+	poly2.setNodeByOrder(polyNode60, polyNode61, polyNode62, polyNode69)
+	poly2.Display(true, 0)
+	poly1.Sub(poly2).Display(true, 0)
 }
 
 func TestPoly_Mul(t *testing.T) {
@@ -101,7 +119,9 @@ func TestPoly_Mul(t *testing.T) {
 }
 
 func Test_Math(t *testing.T) {
+	// 2.9999999999999996
 	fmt.Println(math.Pow(27.0, 1.0/3))
+	// 3
 	fmt.Println(math.Sqrt(9.0))
 }
 
@@ -114,15 +134,19 @@ func TestPoly_Solve(t *testing.T) {
 	poly1.setNull()
 	poly1.setNodeByOrder(polyNode40, polyNode41, polyNode42, polyNode43)
 	//[2.33333, 1.6, 1.22222]
-	poly1.Solve().Display(5, 5)
+	poly1.Solve().Display(6, 6)
+	fmt.Println()
 
 	poly1.setNull()
 	poly1.setNodeByOrder(polyNode50, polyNode51, polyNode52, polyNode53)
 	//[2, 2, 2]
 	poly1.Solve().Display(5, 5)
+	fmt.Println()
 
 	poly1.setNull()
 	poly1.setNodeByOrder(polyNode60, polyNode61, polyNode62, polyNode63)
-	//[1, 1, 2]
+	//[1, 2, 2]
 	poly1.Solve().Display(5, 5)
+	fmt.Println()
+
 }
