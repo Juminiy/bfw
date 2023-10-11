@@ -167,7 +167,7 @@ func (sm *SparseMatrix) swapKeyRowLineIndex(key string) string {
 }
 
 func (sm *SparseMatrix) convertToMatrix() *Matrix {
-	return NullMatrix
+	return &Matrix{}
 }
 
 func (sm *SparseMatrix) Matrix() *Matrix {
@@ -180,7 +180,7 @@ func (sm *SparseMatrix) transpose() *SparseMatrix {
 		key = sm.swapKeyRowLineIndex(key)
 		sm.setKV(key, value)
 	}
-	return NullSparseMatrix
+	return &SparseMatrix{}
 }
 
 func (sm *SparseMatrix) GetTranspose() *SparseMatrix {

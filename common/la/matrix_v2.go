@@ -42,7 +42,7 @@ func (gm *GenericMatrix) null() *GenericMatrix {
 }
 
 func (gm *GenericMatrix) convertToMatrix() *Matrix {
-	return NullMatrix
+	return &Matrix{}
 }
 
 func (gm *GenericMatrix) Matrix() *Matrix {

@@ -6,5 +6,6 @@ import (
 )
 
 func TestFloat64ToString(t *testing.T) {
-	fmt.Println(Float64ToString(3.14))
+	DisplayOneComplex128(complex(0, 0))
+	fmt.Println()
 }

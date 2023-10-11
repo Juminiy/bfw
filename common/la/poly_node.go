@@ -28,15 +28,6 @@ type PolyNode struct {
 	exp int
 }
 
-func constructPolyNode(coe float64, exp int, null ...bool) *PolyNode {
-	if len(null) != 0 && null[0] {
-		return &PolyNode{}
-	}
-	pn := &PolyNode{}
-	pn.setValues(coe, exp)
-	return pn
-}
-
 func ConstructPolyNode(coe float64, exp int) *PolyNode {
 	return constructPolyNode(coe, exp)
 }
@@ -47,6 +38,19 @@ func ConstructNullPolyNode() *PolyNode {
 
 func ConstructValidPolyNode(exp int) *PolyNode {
 	return constructPolyNode(polyNodeCoefficientZero, exp)
+}
+
+func constructPolyNode(coe float64, exp int, null ...bool) *PolyNode {
+	if len(null) != 0 && null[0] {
+		return &PolyNode{}
+	}
+	pn := &PolyNode{}
+	return pn.Construct(coe, exp)
+}
+
+func (pn *PolyNode) Construct(coe float64, exp int) *PolyNode {
+	pn.setValues(coe, exp)
+	return pn
 }
 
 func (pn *PolyNode) validate() bool {
@@ -121,6 +125,9 @@ func (pn *PolyNode) isConstant() bool {
 }
 
 func (pn *PolyNode) one2OneOpt(opt rune, pnt *PolyNode) *PolyNode {
+	if pnt == nil {
+		panic(polyNodeInvalidError)
+	}
 	switch opt {
 	case '+':
 		{
@@ -172,16 +179,36 @@ func (pn *PolyNode) Add(pnt *PolyNode) *PolyNode {
 	return pn.one2OneOpt('+', pnt)
 }
 
+func (pn *PolyNode) GetPlus(pnt *PolyNode) *PolyNode {
+	pnCopy := pn.makeCopy()
+	return pnCopy.Add(pnt)
+}
+
 func (pn *PolyNode) Sub(pnt *PolyNode) *PolyNode {
 	return pn.one2OneOpt('-', pnt)
+}
+
+func (pn *PolyNode) GetMinus(pnt *PolyNode) *PolyNode {
+	pnCopy := pn.makeCopy()
+	return pnCopy.Sub(pnt)
 }
 
 func (pn *PolyNode) Mul(pnt *PolyNode) *PolyNode {
 	return pn.one2OneOpt('*', pnt)
 }
 
+func (pn *PolyNode) GetTimes(pnt *PolyNode) *PolyNode {
+	pnCopy := pn.makeCopy()
+	return pnCopy.Mul(pnt)
+}
+
 func (pn *PolyNode) Div(pnt *PolyNode) *PolyNode {
 	return pn.one2OneOpt('/', pnt)
+}
+
+func (pn *PolyNode) GetQuotient(pnt *PolyNode) *PolyNode {
+	pnCopy := pn.makeCopy()
+	return pnCopy.Div(pnt)
 }
 
 func (pn *PolyNode) Exp(exp int) *PolyNode {
@@ -222,11 +249,14 @@ func (pn *PolyNode) Derivative() *PolyNode {
 
 // Display
 // print the poly node
-func (pn *PolyNode) Display(aes rune) *PolyNode {
+func (pn *PolyNode) Display(isPrintln bool, aes rune) *PolyNode {
 	if pn.CanDisplay(aes) {
 		pn.displayCoefficient().
 			displayAES(aes).
 			displayExponent()
+	}
+	if isPrintln {
+		fmt.Println()
 	}
 	return pn
 }

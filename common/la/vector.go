@@ -392,7 +392,7 @@ func (vector *Vector) MulMatrix(m *Matrix) *Vector {
 		}
 		return vector
 	}
-	return NullVector
+	return &Vector{}
 }
 
 // PowerMatrix

@@ -1,7 +1,7 @@
 package la
 
 import (
-	lang2 "bfw/common/lang"
+	"bfw/common/lang"
 	"errors"
 	"fmt"
 )
@@ -196,7 +196,7 @@ func (vg *VectorGroup) Construct(real2DArray [][]float64, shape ...bool) *Vector
 		vShape = shape[0]
 	}
 	for idx := 0; idx < size; idx++ {
-		vSize = lang2.MaxInt(vSize, len(real2DArray[idx]))
+		vSize = lang.MaxInt(vSize, len(real2DArray[idx]))
 	}
 	vg.setSize(size)
 	vg.setShape(vShape)
@@ -209,7 +209,7 @@ func (vg *VectorGroup) Construct(real2DArray [][]float64, shape ...bool) *Vector
 	// 2. set each vector
 	vg.setGroup(make([]*Vector, size))
 	for idx := 0; idx < size; idx++ {
-		vg.set(idx, ConstructVector(lang2.GetReal2DArrayLine(real2DArray, idx), vShape))
+		vg.set(idx, ConstructVector(lang.GetReal2DArrayLine(real2DArray, idx), vShape))
 	}
 	return vg
 }

@@ -1,7 +1,7 @@
 package la
 
 import (
-	lang2 "bfw/common/lang"
+	lang "bfw/common/lang"
 	"errors"
 	"fmt"
 )
@@ -15,9 +15,11 @@ const (
 )
 
 var (
-	polyIndexOutOfBound = errors.New("poly index is out of bound")
-	polyInvalidError    = errors.New("poly is invalid")
-	NullPoly            = &Poly{}
+	polyIndexOutOfBound            = errors.New("poly index is out of bound")
+	polyInvalidError               = errors.New("poly is invalid")
+	polyEquationNoSolution         = errors.New("poly equation has no solution")
+	polyEquationSolutionNotDevelop = errors.New("poly equation solution has not developed")
+	NullPoly                       = &Poly{}
 )
 
 // Poly
@@ -34,9 +36,59 @@ type Poly struct {
 	aes    rune
 }
 
+func ConstructPoly(real2DArray [][]float64, aes ...rune) *Poly {
+	poly := &Poly{}
+	return poly.Construct(real2DArray, aes...)
+}
+
+func ConstructNullPoly() *Poly {
+	poly := &Poly{}
+	poly.setZero()
+	return poly
+}
+
+func (poly *Poly) Construct(real2DArray [][]float64, aes ...rune) *Poly {
+	if real2DArray == nil ||
+		len(real2DArray) == polyNoSize {
+		return poly
+	}
+	var (
+		real2DArraySize int         = len(real2DArray)
+		maxExp          int         = 0
+		nodes           []*PolyNode = make([]*PolyNode, 0)
+	)
+	for idx := 0; idx < real2DArraySize; idx++ {
+		node := real2DArray[idx]
+		if len(node) > 2 {
+			maxExp = lang.MaxInt(maxExp, int(node[1]))
+			nodes = append(nodes, ConstructPolyNode(node[0], int(node[1])))
+		}
+	}
+	poly.assign(maxExp)
+	poly.setNodeByOrder(nodes...)
+	return poly
+}
+
+func (poly *Poly) setNullNodeByIndexRange(startIndex, endIndex int) {
+	polyNode := &PolyNode{}
+	for idx := startIndex; idx <= endIndex; idx++ {
+		poly.setElem(idx, polyNode.null())
+	}
+}
+
+func (poly *Poly) setNodeByOrder(node ...*PolyNode) {
+	if nodeLen := len(node); nodeLen > 0 {
+		maxExp := node[nodeLen-1].exp
+		poly.setValues(make([]*PolyNode, maxExp+1), maxExp, polyDefaultAes)
+		for idx := 0; idx < nodeLen; idx++ {
+			nodeNode := node[idx]
+			poly.setElem(nodeNode.exp, nodeNode)
+		}
+	}
+}
+
 func (poly *Poly) validate() bool {
-	polySize := poly.maxExp + 1
-	if polySize == polyNoSize ||
+	if poly.getSize() == polyNoSize ||
 		poly.nodes == nil {
 		return false
 	}
@@ -82,12 +134,67 @@ func (poly *Poly) validateNode(index ...int) bool {
 	return true
 }
 
+// Equal
+// ignore the aes
+func (poly *Poly) Equal(p *Poly) bool {
+	if !poly.validate() ||
+		!p.validate() {
+		panic(polyInvalidError)
+	}
+	if !poly.sameShape(p) {
+		return false
+	}
+	polySize, pSize := poly.getSize(), p.getSize()
+	if polySize == pSize {
+		for idx := 0; idx < polySize; idx++ {
+			if !poly.getElem(idx).Equal(p.getElem(idx)) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+func (poly *Poly) sameShape(p *Poly) bool {
+	if !poly.validate() ||
+		!p.validate() {
+		panic(polyInvalidError)
+	}
+	if poly.getSize() != p.getSize() {
+		return false
+	}
+	return true
+}
+
+func (poly *Poly) compareTo(p *Poly) bool {
+	if !poly.validate() ||
+		!p.validate() {
+		panic(polyInvalidError)
+	}
+	return poly.getSize() > p.getSize()
+}
+
+func (poly *Poly) swap(p *Poly) {
+	polyTemp := &Poly{}
+	polyTemp.setSelf(poly)
+	poly.setSelf(p)
+	p.setSelf(polyTemp)
+}
+
 // assign
 // assigns the poly nodes for the maxExp+1 length nil value
 func (poly *Poly) assign(maxExp int) {
 	poly.setMaxExp(maxExp)
 	polySize := poly.getSize()
 	poly.setValues(make([]*PolyNode, polySize), maxExp, polyDefaultAes)
+	for idx := 0; idx < polySize; idx++ {
+		poly.getSetInvalidElem(idx, idx)
+	}
+}
+
+func (poly *Poly) getSize() int {
+	return poly.maxExp + 1
 }
 
 func (poly *Poly) isNull() bool {
@@ -108,10 +215,10 @@ func (poly *Poly) setZero() {
 
 func (poly *Poly) makeCopy() *Poly {
 	polyCopy := &Poly{}
-	polySize := poly.maxExp + 1
+	polySize := poly.getSize()
 	polyCopy.setValues(make([]*PolyNode, polySize), poly.maxExp, poly.aes)
 	for exp := 0; exp < polySize; exp++ {
-		polyCopy.setElem(exp, poly.getElem(exp).makeCopy())
+		polyCopy.setElem(exp, poly.getSetElem(exp, exp).makeCopy())
 	}
 	return polyCopy
 }
@@ -123,6 +230,12 @@ func (poly *Poly) setSelf(p *Poly) {
 	poly.setValues(p.nodes, p.maxExp, p.aes)
 }
 
+func (poly *Poly) setValues(nodes []*PolyNode, maxExp int, aes rune) {
+	poly.setNodes(nodes)
+	poly.setMaxExp(maxExp)
+	poly.setAES(aes)
+}
+
 func (poly *Poly) setNodes(nodes []*PolyNode) {
 	poly.nodes = nodes
 }
@@ -131,18 +244,36 @@ func (poly *Poly) setMaxExp(maxExp int) {
 	poly.maxExp = maxExp
 }
 
+func (poly *Poly) resetMapExp(maxExp int) {
+	if maxExp <= polyInvalidMaxExp {
+		poly.setNull()
+	}
+	if maxExp > poly.maxExp {
+		appendNodes := make([]*PolyNode, maxExp-poly.maxExp)
+		poly.nodes = append(poly.nodes, appendNodes...)
+	} else if maxExp < poly.maxExp {
+		for idx := maxExp + 1; idx <= poly.maxExp; idx++ {
+			poly.setElem(idx, nil)
+		}
+		poly.nodes = poly.nodes[:maxExp+1]
+	}
+	poly.setMaxExp(maxExp)
+}
+
+func (poly *Poly) validateMaxExp() {
+	validMaxExp := poly.maxExp
+	for exp := poly.maxExp; exp >= polyNodeExponentZero; exp-- {
+		elem := poly.getSetInvalidElem(exp, exp)
+		if !elem.validateCoefficient() {
+			validMaxExp = exp - 1
+			break
+		}
+	}
+	poly.resetMapExp(validMaxExp)
+}
+
 func (poly *Poly) setAES(aes rune) {
 	poly.aes = aes
-}
-
-func (poly *Poly) getSize() int {
-	return poly.maxExp + 1
-}
-
-func (poly *Poly) setValues(nodes []*PolyNode, maxExp int, aes rune) {
-	poly.setNodes(nodes)
-	poly.setMaxExp(maxExp)
-	poly.setAES(aes)
 }
 
 func (poly *Poly) setElem(index int, node *PolyNode) {
@@ -153,27 +284,30 @@ func (poly *Poly) setElem(index int, node *PolyNode) {
 }
 
 func (poly *Poly) setElemValues(index int, node *PolyNode) {
-	if !poly.validateIndex(index) {
-		panic(polyIndexOutOfBound)
+	if node != nil {
+		poly.setElemCoe(index, node.coe)
+		poly.setElemExp(index, node.exp)
 	}
-	if poly.nodes[index] == nil {
-		poly.nodes[index] = ConstructValidPolyNode(index)
-	}
-	poly.nodes[index].setValues(node.coe, node.exp)
-}
-
-func (poly *Poly) setElemExp(index, exp int) {
-	if !poly.validateIndex(index) {
-		panic(polyIndexOutOfBound)
-	}
-	poly.nodes[index].exp = exp
 }
 
 func (poly *Poly) setElemCoe(index int, coe float64) {
 	if !poly.validateIndex(index) {
 		panic(polyIndexOutOfBound)
 	}
-	poly.nodes[index].coe = coe
+	if poly.nodes[index] == nil {
+		poly.nodes[index] = ConstructValidPolyNode(index)
+	}
+	poly.nodes[index].setValues(coe, index)
+}
+
+func (poly *Poly) setElemExp(index, exp int) {
+	if !poly.validateIndex(index) {
+		panic(polyIndexOutOfBound)
+	}
+	if poly.nodes[index] == nil {
+		poly.nodes[index] = ConstructValidPolyNode(exp)
+	}
+	poly.nodes[index].setExp(exp)
 }
 
 func (poly *Poly) getElem(index int) *PolyNode {
@@ -200,24 +334,29 @@ func (poly *Poly) getSetInvalidElem(index, exp int) *PolyNode {
 	return poly.getSetElem(index, exp, polyNodeInvalidCoefficient)
 }
 
-func (poly *Poly) getSetValidElem(index, exp int) *PolyNode {
+func (poly *Poly) getSetUnitElem(index, exp int) *PolyNode {
 	return poly.getSetElem(index, exp, polyNodeCoefficientOne)
 }
 
-func (poly *Poly) getSetElem(index, exp int, coe float64) *PolyNode {
+func (poly *Poly) getSetElem(index, exp int, coe ...float64) *PolyNode {
 	if !poly.validateIndex(index) {
 		panic(polyIndexOutOfBound)
 	}
 	if polyIndexNode := poly.nodes[index]; polyIndexNode != nil {
+		poly.nodes[index].setExp(exp)
 		return polyIndexNode
 	} else {
-		polyNode := constructPolyNode(coe, exp)
-		poly.setElem(index, polyNode)
-		return polyNode
+		destCoe := polyNodeCoefficientZero
+		if len(coe) > 0 {
+			destCoe = coe[0]
+		}
+		newPolyNode := constructPolyNode(destCoe, exp)
+		poly.setElem(index, newPolyNode)
+		return newPolyNode
 	}
 }
 
-func (poly *Poly) setElemOne2OneOpt(index int, opt rune, p *Poly) {
+func (poly *Poly) setElemByOne2OneOpt(index int, opt rune, p *Poly) {
 	if !p.validate() {
 		panic(polyInvalidError)
 	}
@@ -236,134 +375,27 @@ func (poly *Poly) setElemZero(index int) {
 	poly.getElem(index).setZero()
 }
 
-func (poly *Poly) resetMapExp(maxExp int) {
-	if maxExp > poly.maxExp {
-		appendNodes := make([]*PolyNode, maxExp-poly.maxExp)
-		poly.nodes = append(poly.nodes, appendNodes...)
-	} else if maxExp < poly.maxExp {
-		for idx := maxExp + 1; idx <= poly.maxExp; idx++ {
-			poly.setElem(idx, nil)
-		}
-		poly.nodes = poly.nodes[:maxExp+1]
-	}
-	poly.maxExp = maxExp
-}
-
-func (poly *Poly) Solve(value float64) float64 {
-	return 0.0
-}
-
-// Equal
-// ignore the aes
-func (poly *Poly) Equal(p *Poly) bool {
-	if !poly.validate() ||
-		!p.validate() {
-		panic(polyInvalidError)
-	}
-	polySize, pSize := poly.getSize(), p.getSize()
-	if polySize == pSize {
-		for idx := 0; idx < polySize; idx++ {
-			if !poly.getElem(idx).Equal(p.getElem(idx)) {
-				return false
-			}
-		}
-		return true
-	}
-	return false
-}
-
-func (poly *Poly) Construct(real2DArray [][]float64, aes ...rune) *Poly {
-	if real2DArray == nil ||
-		len(real2DArray) == polyNoSize {
-		return poly
-	}
-	var (
-		real2DArraySize int         = len(real2DArray)
-		maxExp          int         = 0
-		nodes           []*PolyNode = make([]*PolyNode, 0)
-	)
-	for idx := 0; idx < real2DArraySize; idx++ {
-		node := real2DArray[idx]
-		if len(node) > 2 {
-			maxExp = lang2.MaxInt(maxExp, int(node[1]))
-			nodes = append(nodes, ConstructPolyNode(node[0], int(node[1])))
-		}
-	}
-	poly.assign(maxExp)
-	poly.setNodeByOrder(nodes...)
-	return poly
-}
-
-func ConstructPoly(real2DArray [][]float64, aes ...rune) *Poly {
-	poly := &Poly{}
-	return poly.Construct(real2DArray, aes...)
-}
-
-func ConstructNullPoly() *Poly {
-	poly := &Poly{}
-	poly.setZero()
-	return poly
-}
-
-func (poly *Poly) setNullNodeByIndexRange(startIndex, endIndex int) {
-	polyNode := &PolyNode{}
-	for idx := startIndex; idx <= endIndex; idx++ {
-		poly.setElem(idx, polyNode.null())
-	}
-}
-
-func (poly *Poly) setNodeByOrder(node ...*PolyNode) {
-	if nodeLen := len(node); nodeLen > 0 {
-		maxExp := node[nodeLen-1].exp
-		poly.setValues(make([]*PolyNode, maxExp+1), maxExp, polyDefaultAes)
-		for idx := 0; idx < nodeLen; idx++ {
-			nodeNode := node[idx]
-			poly.setElem(nodeNode.exp, nodeNode)
-		}
-	}
-}
-
-func (poly *Poly) sameShape(p *Poly) bool {
-	if !poly.validate() ||
-		p.validate() {
-		panic(polyInvalidError)
-	}
-	if poly.getSize() != p.getSize() {
-		return false
-	}
-	return true
-}
-
-func (poly *Poly) compareTo(p *Poly) bool {
-	if !poly.validate() ||
-		!p.validate() {
-		panic(polyInvalidError)
-	}
-	return poly.getSize() > p.getSize()
-}
-
-func (poly *Poly) swap(p *Poly) {
-	polyTemp := &Poly{}
-	polyTemp.setSelf(poly)
-	poly.setSelf(p)
-	p.setSelf(polyTemp)
-}
-
 func (poly *Poly) one2OneOpt(opt rune, p *Poly) *Poly {
 	if !poly.compareTo(p) {
 		poly.swap(p)
 	}
 	polyPSize := p.getSize()
 	for idx := 0; idx < polyPSize; idx++ {
-		poly.setElemOne2OneOpt(idx, opt, p)
+		poly.setElemByOne2OneOpt(idx, opt, p)
 	}
 	return poly
 }
 
 func (poly *Poly) AddNode(node *PolyNode) *Poly {
-	if node != nil &&
-		node.validate() {
+	if node != nil {
 		poly.setGetElemOpt(node.exp, node.exp, '+', node)
+	}
+	return poly
+}
+
+func (poly *Poly) SubNode(node *PolyNode) *Poly {
+	if node != nil {
+		poly.setGetElemOpt(node.exp, node.exp, '-', node)
 	}
 	return poly
 }
@@ -396,23 +428,46 @@ func (poly *Poly) GetTimes(p *Poly) *Poly {
 	return polyCopy.Mul(p)
 }
 
-func (poly *Poly) MulNode(node *PolyNode) *Poly {
-	if node == nil ||
-		!node.validate() {
-		panic(polyNodeInvalidError)
+// simpleMul
+// must use heap to accelerate the calculation
+func (poly *Poly) simpleMul(p *Poly) *Poly {
+	if !poly.validate() ||
+		!p.validate() {
+		panic(polyInvalidError)
 	}
 	var (
-		polyMaxExp int       = poly.maxExp
-		nodeCopy   *PolyNode = node.makeCopy()
+		pSize      int   = p.getSize()
+		polyResult *Poly = &Poly{}
+		polyCopy   *Poly
+		polyPNode  *PolyNode
 	)
-	poly.resetMapExp(polyMaxExp + nodeCopy.exp)
-	for idx := polyMaxExp; idx >= polyNodeExponentZero; idx-- {
-		if poly.getElem(idx).validateCoefficient() {
-			setExp := idx + nodeCopy.exp
-			poly.setElemValues(setExp, poly.setGetElemOpt(idx, setExp, '*', nodeCopy))
-			poly.setElemZero(idx)
+	polyResult.assign(poly.maxExp + p.maxExp)
+	for pIdx := 0; pIdx < pSize; pIdx++ {
+		polyCopy = poly.makeCopy()
+		polyPNode = p.getSetInvalidElem(pIdx, pIdx)
+		if polyPNode.validate() {
+			//polyCopy.Display(0)
+			polyCopy.MulNode(polyPNode)
+			//fmt.Printf(" * ")
+			//polyPNode.Display(polyDefaultAes)
+			//fmt.Printf(" = ")
+			//polyCopy.Display(0)
+			//fmt.Println()
+			polyResult.Add(polyCopy)
 		}
 	}
+	return polyResult
+}
+
+// use heap to accelerate the polynomial multiply
+func (poly *Poly) simpleMulV2(p *Poly) *Poly {
+	var (
+		polyResult *Poly
+	)
+	return polyResult
+}
+
+func (poly *Poly) fftMul(p *Poly) *Poly {
 	return poly
 }
 
@@ -426,25 +481,29 @@ func (poly *Poly) judgeMulAlgo() bool {
 	return false
 }
 
-func (poly *Poly) simpleMul(p *Poly) *Poly {
-	if !poly.validate() ||
-		!p.validate() {
-		panic(polyInvalidError)
+func (poly *Poly) MulNode(node *PolyNode) *Poly {
+	if node == nil {
+		panic(polyNodeInvalidError)
 	}
 	var (
-		pSize      int   = p.getSize()
-		polyResult *Poly = &Poly{}
-		polyCopy   *Poly
+		polyMaxExp int       = poly.maxExp
+		nodeCopy   *PolyNode = node.makeCopy()
 	)
-	polyResult.assign(poly.maxExp + p.maxExp)
-	for pIdx := 0; pIdx < pSize; pIdx++ {
-		polyCopy = poly.makeCopy()
-		polyResult.Add(polyCopy.MulNode(p.getSetInvalidElem(pIdx, pIdx)))
+	if node.isConstant() {
+		for idx := 0; idx <= polyMaxExp; idx++ {
+			poly.setGetElemOpt(idx, idx, '*', nodeCopy)
+		}
+	} else {
+		poly.resetMapExp(polyMaxExp + nodeCopy.exp)
+		for idx := polyMaxExp; idx >= polyNodeExponentZero; idx-- {
+			if poly.getSetInvalidElem(idx, idx).validateCoefficient() {
+				setExp := idx + nodeCopy.exp
+				poly.setElemValues(setExp, poly.setGetElemOpt(idx, setExp, '*', nodeCopy))
+				poly.setElemZero(idx)
+			}
+		}
 	}
-	return poly
-}
 
-func (poly *Poly) fftMul(p *Poly) *Poly {
 	return poly
 }
 
@@ -470,12 +529,12 @@ func (poly *Poly) Integral() *Poly {
 	)
 	if poly.validate() {
 		polyMaxExp = poly.maxExp
-		poly.nodes = append(poly.nodes, poly.getElem(polyMaxExp).Integral().makeCopy())
+		poly.nodes = append(poly.nodes, poly.getSetElem(polyMaxExp, polyMaxExp).Integral().makeCopy())
 		for idx := polyMaxExp; idx > polyNodeExponentZero; idx-- {
-			poly.setElemValues(idx, poly.getElem(idx-1).Integral())
+			poly.setElemValues(idx, poly.getSetElem(idx-1, idx-1).Integral())
 		}
 		poly.getElem(polyNodeExponentZero).setZero()
-		poly.maxExp++
+		poly.setMaxExp(poly.maxExp + 1)
 	}
 	return poly
 }
@@ -488,15 +547,92 @@ func (poly *Poly) Derivative() *Poly {
 	if poly.validate() {
 		polyMaxExp = poly.maxExp
 		for idx := polyNodeExponentZero; idx < polyMaxExp; idx++ {
-			poly.setElemValues(idx, poly.getElem(idx+1).Derivative())
+			poly.setElemValues(idx, poly.getSetElem(idx+1, idx+1).Derivative())
 		}
 		poly.resetMapExp(polyMaxExp - 1)
 	}
 	return poly
 }
 
+func (poly *Poly) SolvePoly(p *Poly) *Solution {
+	return poly.Sub(p).Solve()
+}
+
+func (poly *Poly) SolveValue(value float64) *Solution {
+	return poly.SubNode(ConstructPolyNode(value, polyNodeExponentZero)).Solve()
+}
+
+func (poly *Poly) getElemQuotient(indexI, indexJ int) *PolyNode {
+	if !poly.validateIndex(indexI, indexJ) {
+		panic(polyIndexOutOfBound)
+	}
+	return poly.getElem(indexI).GetQuotient(poly.getElem(indexJ))
+}
+
+func (poly *Poly) getElemQuotientCoe(indexI, indexJ int) float64 {
+	return poly.getElemQuotient(indexI, indexJ).coe
+}
+
+// Solve
+// poly equation 0.0
+func (poly *Poly) Solve() *Solution {
+	s := &Solution{}
+	poly.validateMaxExp()
+	switch poly.maxExp {
+	case 0:
+		{
+			panic(polyEquationNoSolution)
+		}
+	case 1:
+		{
+			s.setValues(make([]complex128, 1), 1)
+			exp0Value := poly.getSetElem(0, 0).coe
+			exp1Coe := poly.getSetElem(1, 1).coe
+			if lang.EqualFloat64ByAccuracy(exp1Coe, 0.0) {
+				panic(polyEquationNoSolution)
+			}
+			s.setElem(0, complex(exp0Value*-1.0/exp1Coe, 0.0))
+		}
+	case 2:
+		{
+			s.setValues(make([]complex128, 2), 2)
+			exp0Coe := poly.getSetElem(0, 0).coe
+			exp1Coe := poly.getSetElem(1, 1).coe
+			exp2Coe := poly.getSetElem(2, 2).coe
+			solution1, solution2, validateSolve :=
+				lang.SolveQuadraticEquationOfOneVariable(exp2Coe, exp1Coe, exp0Coe)
+			if !validateSolve {
+				panic(polyEquationNoSolution)
+			}
+			s.setElem(0, solution1)
+			s.setElem(1, solution2)
+		}
+	case 3:
+		{
+			s.setValues(make([]complex128, 3), 3)
+			exp0Coe := poly.getSetElem(0, 0).coe
+			exp1Coe := poly.getSetElem(1, 1).coe
+			exp2Coe := poly.getSetElem(2, 2).coe
+			exp3Coe := poly.getSetElem(3, 3).coe
+			solution1, solution2, solution3, validateSolve :=
+				lang.SolveCubicEquationOfOneVariableBySJ(exp3Coe, exp2Coe, exp1Coe, exp0Coe)
+			if !validateSolve {
+				panic(polyEquationNoSolution)
+			}
+			s.setElem(0, solution1)
+			s.setElem(1, solution2)
+			s.setElem(2, solution3)
+		}
+	default:
+		{
+			panic(polyEquationSolutionNotDevelop)
+		}
+	}
+	return s
+}
+
 func (poly *Poly) Factoring() *PolyFactors {
-	return nil
+	return &PolyFactors{}
 }
 
 func (poly *Poly) Normal() *Poly {
@@ -516,6 +652,8 @@ func (poly *Poly) Discard(predict ...bool) *Poly {
 	return poly
 }
 
+// removeZeroNullInvalidNode
+// get rid of invalid nodes
 func (poly *Poly) removeZeroNullInvalidNode() *Poly {
 	return poly
 }
@@ -527,6 +665,8 @@ func (poly *Poly) Sort(predict ...bool) *Poly {
 	return poly
 }
 
+// sortNodeByExponent
+// sort the nodes by exp asc
 func (poly *Poly) sortNodeByExponent() *Poly {
 	return poly
 }
@@ -544,20 +684,20 @@ func (poly *Poly) mergeNodeBySameExponent() *Poly {
 	return poly
 }
 
-func (poly *Poly) Display(precisionBit ...int) *Poly {
+func (poly *Poly) Display(isPrintln bool, precisionBit ...int) *Poly {
 	var (
 		polySize     int       = poly.getSize()
 		preDisplayed bool      = false
 		node         *PolyNode = poly.getElem(0)
 	)
-	if nodeStr := node.ToString(poly.aes, precisionBit...); !lang2.StringIsNull(nodeStr) {
+	if nodeStr := node.ToString(poly.aes, precisionBit...); !lang.StringIsNull(nodeStr) {
 		fmt.Print(nodeStr)
 		preDisplayed = true
 	}
 	for idx := 1; idx < polySize; idx++ {
 		node = poly.getElem(idx)
-		if nodeStr := node.ToString(poly.aes, precisionBit...); !lang2.StringIsNull(nodeStr) {
-			if !lang2.Float64StringIsMinus(nodeStr) &&
+		if nodeStr := node.ToString(poly.aes, precisionBit...); !lang.StringIsNull(nodeStr) {
+			if !lang.Float64StringIsMinus(nodeStr) &&
 				preDisplayed {
 				fmt.Print("+")
 			}
@@ -565,6 +705,8 @@ func (poly *Poly) Display(precisionBit ...int) *Poly {
 			preDisplayed = true
 		}
 	}
-	fmt.Println()
+	if isPrintln {
+		fmt.Println()
+	}
 	return poly
 }

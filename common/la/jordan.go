@@ -27,7 +27,7 @@ type JordanBlock struct {
 }
 
 func (jb *JordanBlock) Power() *Matrix {
-	return NullMatrix
+	return &Matrix{}
 }
 
 func (jb *JordanBlock) Display() *JordanBlock {

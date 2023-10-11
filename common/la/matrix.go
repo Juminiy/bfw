@@ -1,7 +1,7 @@
 package la
 
 import (
-	lang2 "bfw/common/lang"
+	"bfw/common/lang"
 	"errors"
 	"fmt"
 	"math"
@@ -185,7 +185,7 @@ func (matrix *Matrix) setLine(lineIndex int, lineSlice []float64) {
 }
 
 func (matrix *Matrix) getLine(lineIndex int) []float64 {
-	return lang2.GetReal2DArrayLine(matrix.GetSlice(), lineIndex)
+	return lang.GetReal2DArrayLine(matrix.GetSlice(), lineIndex)
 }
 
 func (matrix *Matrix) getLineCopy(lineIndex int) []float64 {
@@ -339,13 +339,13 @@ func (matrix *Matrix) getPhalanxByIgnoreCentral(rowIndex, lineIndex int) *Matrix
 // chained option
 func (matrix *Matrix) getPhalanxByIgnoreKCentral(rowIndexMap, lineIndexMap map[int]bool) (*Matrix, *Matrix) {
 	if rowIndexMap == nil || lineIndexMap == nil {
-		return NullMatrix, NullMatrix
+		return &Matrix{}, &Matrix{}
 	}
 	phalanxSize := matrix.getPhalanxSize()
 	rowsK, linesK := len(rowIndexMap), len(lineIndexMap)
 	if rowsK != linesK ||
 		phalanxSize < rowsK {
-		return NullMatrix, NullMatrix
+		return &Matrix{}, &Matrix{}
 	}
 	selected, remained := &Matrix{}, &Matrix{}
 	selectedSize, remainedSize := rowsK, phalanxSize-rowsK
@@ -403,7 +403,7 @@ func (matrix *Matrix) Construct(real2DArray [][]float64) *Matrix {
 	)
 	matrix.setValues(real2DArray, rowSize, maxLineSize)
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
-		maxLineSize = lang2.MaxInt(maxLineSize, len(real2DArray[rowIdx]))
+		maxLineSize = lang.MaxInt(maxLineSize, len(real2DArray[rowIdx]))
 	}
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
 		matrix.setRowZeroPadding(maxLineSize, rowIdx)
@@ -420,7 +420,7 @@ func ConstructMatrix(real2DArray [][]float64) *Matrix {
 // Rank
 // uncompleted
 func (matrix *Matrix) Rank() int {
-	if lang2.EqualFloat64ByAccuracy(matrix.Det(), matrixDeterminantZero) {
+	if lang.EqualFloat64ByAccuracy(matrix.Det(), matrixDeterminantZero) {
 		return matrix.getPhalanxSize()
 	}
 	return 0
@@ -452,7 +452,7 @@ func (matrix *Matrix) det() float64 {
 		// 2. laplace calculation
 		//return matrix.laplaceDet(n)
 		// 3. mixture calculation
-		if lang2.Odd(n) {
+		if lang.Odd(n) {
 			return matrix.simpleDet(n)
 		} else {
 			return matrix.laplaceDet(n)
@@ -462,13 +462,13 @@ func (matrix *Matrix) det() float64 {
 
 func (matrix *Matrix) simpleDet(totalN int) float64 {
 	var (
-		randomRow      int     = lang2.GetRandomIntValue(matrix.getPhalanxSize())
+		randomRow      int     = lang.GetRandomIntValue(matrix.getPhalanxSize())
 		sumByRandomRow float64 = 0.0
 	)
 	for lineIdx := 0; lineIdx < totalN; lineIdx++ {
 		sumByRandomRow += matrix.getPhalanxByIgnoreCentral(randomRow, lineIdx).det() *
 			matrix.get(randomRow, lineIdx) *
-			float64(lang2.MinusOnePower(randomRow+lineIdx))
+			float64(lang.MinusOnePower(randomRow+lineIdx))
 	}
 	return sumByRandomRow
 }
@@ -476,14 +476,14 @@ func (matrix *Matrix) simpleDet(totalN int) float64 {
 func (matrix *Matrix) laplaceDet(totalN int) float64 {
 	var (
 		randomKRow      int            = matrix.getPhalanxSize() / 2
-		randomKRows     map[int]bool   = lang2.GetRandomMapValue(totalN, randomKRow)
-		kLinesMap       []map[int]bool = lang2.GetCombinationSliceMap(totalN, randomKRow)
+		randomKRows     map[int]bool   = lang.GetRandomMapValue(totalN, randomKRow)
+		kLinesMap       []map[int]bool = lang.GetCombinationSliceMap(totalN, randomKRow)
 		sumByRandomKRow float64        = 0.0
 	)
 	for _, linesMap := range kLinesMap {
 		sel, rem := matrix.getPhalanxByIgnoreKCentral(randomKRows, linesMap)
 		power := matrix.getPhalanxMinusOnePower(randomKRows, linesMap)
-		sumByRandomKRow += sel.det() * rem.det() * float64(lang2.MinusOnePower(power))
+		sumByRandomKRow += sel.det() * rem.det() * float64(lang.MinusOnePower(power))
 	}
 	return sumByRandomKRow
 }
@@ -494,7 +494,7 @@ func (matrix *Matrix) GetSameSizeIdentity() *Identity {
 			size: size,
 		}
 	}
-	return NullIdentity
+	return &Identity{}
 }
 
 func (matrix *Matrix) isDiagonalMatrix(value ...interface{}) bool {
@@ -524,17 +524,17 @@ func (matrix *Matrix) isDiagonalMatrix(value ...interface{}) bool {
 				val := matrix.get(rowIdx, lineIdx)
 				if rowIdx == lineIdx {
 					if compValue != math.Inf(0) {
-						if !lang2.EqualFloat64ByAccuracy(1.0, val) {
+						if !lang.EqualFloat64ByAccuracy(1.0, val) {
 							return false
 						}
 					}
 					if compSlice != nil && len(compSlice) > rowIdx {
-						if !lang2.EqualFloat64ByAccuracy(compSlice[rowIdx], val) {
+						if !lang.EqualFloat64ByAccuracy(compSlice[rowIdx], val) {
 							return false
 						}
 					}
 				} else {
-					if !lang2.EqualFloat64ByAccuracy(0.0, val) {
+					if !lang.EqualFloat64ByAccuracy(0.0, val) {
 						return false
 					}
 				}
@@ -565,7 +565,7 @@ func (matrix *Matrix) inverse() *Matrix {
 		panic(matrixRowLineDiffer)
 	}
 	det := matrix.det()
-	if lang2.EqualFloat64ByAccuracy(det, matrixDeterminantZero) {
+	if lang.EqualFloat64ByAccuracy(det, matrixDeterminantZero) {
 		panic(matrixCanNotBeInverseError)
 	}
 	matrix.adjoin()
@@ -595,7 +595,7 @@ func (matrix *Matrix) adjoin() *Matrix {
 	for rowIdx := 0; rowIdx < size; rowIdx++ {
 		for lineIdx := 0; lineIdx < size; lineIdx++ {
 			algebraicRemainderValue := matrix.getPhalanxByIgnoreCentral(rowIdx, lineIdx).det() *
-				float64(lang2.MinusOnePower(rowIdx+lineIdx))
+				float64(lang.MinusOnePower(rowIdx+lineIdx))
 			adjoinMatrix.set(rowIdx, lineIdx, algebraicRemainderValue)
 		}
 	}
@@ -640,26 +640,26 @@ func (matrix *Matrix) EigenValues() *EigenValue {
 	if !matrix.isPhalanx() {
 		panic(matrixRowLineDiffer)
 	}
-	return nil
+	return &EigenValue{}
 }
 
 func (matrix *Matrix) EigenVectors() *EigenVector {
 	if !matrix.isPhalanx() {
 		panic(matrixRowLineDiffer)
 	}
-	return nil
+	return &EigenVector{}
 }
 
 func (matrix *Matrix) EigenMatrix() *PolyMatrix {
-	return NullPolyMatrix
+	return &PolyMatrix{}
 }
 
 func (matrix *Matrix) SmithStandard() *PolyDiagonal {
-	return NullPolyDiagonal
+	return &PolyDiagonal{}
 }
 
 func (matrix *Matrix) JordanStandard() *JordanMatrix {
-	return NullJordanMatrix
+	return &JordanMatrix{}
 }
 
 func (matrix *Matrix) dkLambda(k int) *Poly {
@@ -774,7 +774,7 @@ func (matrix *Matrix) approximation(accAfterDotBits ...int) *Matrix {
 			if err != nil {
 				panic(err)
 			}
-			if lang2.IsStringValueIntZero(valStr) {
+			if lang.IsStringValueIntZero(valStr) {
 				newVal = 0
 			} else {
 				newVal = valF
@@ -794,7 +794,7 @@ func (matrix *Matrix) Equal(m *Matrix) bool {
 	if matrix.sameShape(m) {
 		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 			for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
-				if !lang2.EqualFloat64ByAccuracy(matrix.get(rowIdx, lineIdx), m.get(rowIdx, lineIdx)) {
+				if !lang.EqualFloat64ByAccuracy(matrix.get(rowIdx, lineIdx), m.get(rowIdx, lineIdx)) {
 					return false
 				}
 			}
@@ -840,14 +840,14 @@ func (matrix *Matrix) GetRowAsVector(rowIndex int) *Vector {
 	if !matrix.validateIndex(rowIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	return ConstructVector(lang2.GetReal2DArrayRow(matrix.GetSlice(), rowIndex), false)
+	return ConstructVector(lang.GetReal2DArrayRow(matrix.GetSlice(), rowIndex), false)
 }
 
 func (matrix *Matrix) GetLineAsVector(lineIndex int) *Vector {
 	if !matrix.validateIndex(0, lineIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	return ConstructVector(lang2.GetReal2DArrayLine(matrix.GetSlice(), lineIndex), true)
+	return ConstructVector(lang.GetReal2DArrayLine(matrix.GetSlice(), lineIndex), true)
 }
 
 // Mul
@@ -912,7 +912,7 @@ func (matrix *Matrix) MulVector(v *Vector) *Vector {
 		}
 		return v
 	}
-	return NullVector
+	return &Vector{}
 }
 
 // Power
@@ -975,7 +975,7 @@ func (matrix *Matrix) Display() *Matrix {
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 		for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
 			val := matrix.get(rowIdx, lineIdx)
-			if lang2.EqualFloat64ByAccuracy(0.0, val) {
+			if lang.EqualFloat64ByAccuracy(0.0, val) {
 				val = 0.0
 			}
 			fmt.Printf(" %.5v", val)
@@ -1094,7 +1094,7 @@ func (matrix *Matrix) GetEye(size ...int) *Matrix {
 		eyeIdentity := &Identity{size[0]}
 		return eyeIdentity.Matrix()
 	}
-	return NullMatrix
+	return &Matrix{}
 }
 
 func (matrix *Matrix) IsDiagonal() bool {
@@ -1110,7 +1110,7 @@ func (matrix *Matrix) Diagonal() *Diagonal {
 		}
 		return d
 	}
-	return NullDiagonal
+	return &Diagonal{}
 }
 
 func (matrix *Matrix) CanDiagonalizing() bool {
@@ -1118,7 +1118,7 @@ func (matrix *Matrix) CanDiagonalizing() bool {
 }
 
 func (matrix *Matrix) Diagonalizing() *Diagonal {
-	return NullDiagonal
+	return &Diagonal{}
 }
 
 func (matrix *Matrix) IsSimilar(m *Matrix) bool {
@@ -1133,7 +1133,7 @@ func (matrix *Matrix) Similar(m *Matrix) *Matrix {
 // current version do not support vector expand
 func (matrix *Matrix) schmidtOrthogonality() *Matrix {
 	if !matrix.isPhalanx() {
-		return NullMatrix
+		return &Matrix{}
 	}
 	return matrix.VectorGroup(true).GetSchmidt().Matrix()
 }
@@ -1145,7 +1145,7 @@ func (matrix *Matrix) Schmidt() *Matrix {
 
 func (matrix *Matrix) unitization() *Matrix {
 	if !matrix.isPhalanx() {
-		return NullMatrix
+		return &Matrix{}
 	}
 	return matrix.VectorGroup(true).GetUnit().Matrix()
 }
