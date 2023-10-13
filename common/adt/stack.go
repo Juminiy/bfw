@@ -1,7 +1,7 @@
 package adt
 
 import (
-	"bfw/common/type_ref"
+	"bfw/common/lang"
 )
 
 // GenericStack Template Type of stack
@@ -18,7 +18,7 @@ func (stack *GenericStack[T]) SetSlice(ts []T) {
 }
 
 func (stack *GenericStack[T]) Empty() bool {
-	return !type_ref.ValidateInterfaceArrayOrSlice(stack.slice)
+	return !lang.ValidateInterfaceArrayOrSlice(stack.slice)
 }
 
 func (stack *GenericStack[T]) Len() int {

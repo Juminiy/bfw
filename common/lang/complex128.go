@@ -34,11 +34,11 @@ func DisplayOneComplex128(a complex128, precision ...int) {
 		}
 	}
 	realDisplayed := false
-	if realA := real(a); !EqualFloat64ByAccuracy(realA, 0.0) {
+	if realA := real(a); !EqualFloat64Zero(realA) {
 		fmt.Printf("%."+strconv.Itoa(realPrec)+"v", realA)
 		realDisplayed = true
 	}
-	if imagA := imag(a); !EqualFloat64ByAccuracy(imagA, 0.0) {
+	if imagA := imag(a); !EqualFloat64Zero(imagA) {
 		if realDisplayed && imagA > 0 {
 			fmt.Printf("+")
 		}
@@ -55,4 +55,34 @@ func DisplayComplex128(realPrecision, imagPrecision int, a ...complex128) {
 			DisplayOneComplex128(a[idx], realPrecision, imagPrecision)
 		}
 	}
+}
+
+func IsOneComplex128PureReal(a complex128) bool {
+	return EqualFloat64Zero(imag(a))
+}
+
+func IsOneComplex128PureImag(a complex128) bool {
+	return EqualFloat64Zero(real(a))
+}
+
+func IsComplex128PureReal(a ...complex128) bool {
+	if aLen := len(a); aLen > 0 {
+		for aIdx := 0; aIdx < aLen; aIdx++ {
+			if !IsOneComplex128PureReal(a[aIdx]) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func IsComplex128PureImag(a ...complex128) bool {
+	if aLen := len(a); aLen > 0 {
+		for aIdx := 0; aIdx < aLen; aIdx++ {
+			if !IsOneComplex128PureImag(a[aIdx]) {
+				return false
+			}
+		}
+	}
+	return true
 }

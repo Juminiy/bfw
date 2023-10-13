@@ -41,6 +41,12 @@ var (
 	polyNode63 = ConstructPolyNode(1, 3)
 	polyNode69 = ConstructPolyNode(3, 9)
 
+	// (x-3)(x-(2+i))(x-(2-i))
+	polyNode70 = ConstructPolyNode(-15, 0)
+	polyNode71 = ConstructPolyNode(17, 1)
+	polyNode72 = ConstructPolyNode(-7, 2)
+	polyNode73 = ConstructPolyNode(1, 3)
+
 	poly1 = &Poly{}
 	poly2 = &Poly{}
 )
@@ -96,9 +102,14 @@ func TestPoly_Add_Integral_Derivative(t *testing.T) {
 
 func TestPoly_Sub(t *testing.T) {
 	poly1.setNodeByOrder(polyNode50, polyNode51, polyNode52, polyNode53)
+	//-8+12x-6x^2+1x^3
 	poly1.Display(true, 0)
+
 	poly2.setNodeByOrder(polyNode60, polyNode61, polyNode62, polyNode69)
+	//-4+8x-5x^2+3x^9
 	poly2.Display(true, 0)
+
+	//-4+4x-1x^2+1x^3-3x^9
 	poly1.Sub(poly2).Display(true, 0)
 }
 
@@ -114,6 +125,9 @@ func TestPoly_Mul(t *testing.T) {
 	//16x^15+32x^16+80x^19+160x^24
 	//poly1.MulNode(polyNode215).Display(true, 0)
 
+	//simpleMul
+	//1+2x+3x^2+6x^3+5x^4+22x^6+14x^7+10x^9+35x^10+30x^11+86x^15+32x^16+80x^19+160x^24
+	//simpleMulV2
 	//1+2x+3x^2+6x^3+5x^4+22x^6+14x^7+10x^9+35x^10+30x^11+86x^15+32x^16+80x^19+160x^24
 	poly1.Mul(poly2).Display(true, 0)
 }
@@ -149,4 +163,24 @@ func TestPoly_Solve(t *testing.T) {
 	poly1.Solve().Display(5, 5)
 	fmt.Println()
 
+	poly1.setNull()
+	poly1.setNodeByOrder(polyNode70, polyNode71, polyNode72, polyNode73)
+	//[3, 2+i, 2-i]
+	poly1.Solve().Display(5, 5)
+	fmt.Println()
+
+}
+
+func TestPoly_Factoring(t *testing.T) {
+	poly1.setNull()
+	poly1.setNodeByOrder(polyNode60, polyNode61, polyNode62, polyNode63)
+	//[1, 2, 2]
+	poly1.Factoring().Display(0)
+	fmt.Println()
+
+	//poly1.setNull()
+	//poly1.setNodeByOrder(polyNode70, polyNode71, polyNode72, polyNode73)
+	////[3, 2+i, 2-i]
+	//poly1.Factoring().Display(1)
+	fmt.Println()
 }

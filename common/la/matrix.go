@@ -806,6 +806,23 @@ func (matrix *Matrix) MulLambda(lambda float64) *Matrix {
 	return matrix
 }
 
+func (matrix *Matrix) MulVector(v *Vector) *Vector {
+	if v != nil &&
+		v.shape &&
+		matrix.lineSize == v.size {
+		vCopy := v.makeCopy()
+		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+			var rowSum float64 = 0.0
+			for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
+				rowSum += vCopy.get(lineIdx, lineIdx) * matrix.get(rowIdx, lineIdx)
+			}
+			v.slice[rowIdx] = rowSum
+		}
+		return v
+	}
+	return &Vector{}
+}
+
 func (matrix *Matrix) GetTimes(m *Matrix) *Matrix {
 	mCopy := matrix.makeCopy()
 	return mCopy.DotMul(m)
@@ -841,6 +858,14 @@ func (matrix *Matrix) DotPower(m *Matrix) *Matrix {
 }
 
 // Matrix generate Matrix
+
+func (matrix *Matrix) Gen() {
+
+}
+
+func (matrix *Matrix) generateMatrix() {
+
+}
 
 func (matrix *Matrix) generateSameSizeMatrix(value interface{}, size ...int) *Matrix {
 	generatedMatrix := &Matrix{}
@@ -901,7 +926,7 @@ func (matrix *Matrix) SetEye(size ...int) *Matrix {
 
 func (matrix *Matrix) GetEye(size ...int) *Matrix {
 	if sizeLen := len(size); sizeLen > 0 {
-		eyeIdentity := &Identity{size[0]}
+		eyeIdentity := ConstructIdentity(size[0])
 		return eyeIdentity.Matrix()
 	}
 	return &Matrix{}
@@ -965,6 +990,7 @@ func (matrix *Matrix) EigenValues() *EigenValues {
 	return solution.EigenValues()
 }
 
+// TODO: 1.
 func (matrix *Matrix) EigenVectors() *EigenVectors {
 	if !matrix.isPhalanx() {
 		panic(matrixRowLineDiffer)
@@ -1087,16 +1113,14 @@ func (matrix *Matrix) IsIdentity() bool {
 
 func (matrix *Matrix) Identity() *Identity {
 	if matrix.IsIdentity() {
-		return &Identity{size: matrix.getPhalanxSize()}
+		return ConstructIdentity(matrix.getPhalanxSize())
 	}
 	panic(matrixCanNotBeIdentityError)
 }
 
 func (matrix *Matrix) GetSameSizeIdentity() *Identity {
 	if size := matrix.getPhalanxSize(); size != matrixNoSize {
-		return &Identity{
-			size: size,
-		}
+		return ConstructIdentity(size)
 	}
 	return &Identity{}
 }
@@ -1142,7 +1166,7 @@ func (matrix *Matrix) isDiagonalMatrix(value ...interface{}) bool {
 						}
 					}
 				} else {
-					if !lang.EqualFloat64ByAccuracy(0.0, val) {
+					if !lang.EqualFloat64Zero(val) {
 						return false
 					}
 				}
@@ -1207,23 +1231,6 @@ func (matrix *Matrix) GetLineAsVector(lineIndex int) *Vector {
 	return ConstructVector(lang.GetReal2DArrayLine(matrix.GetSlice(), lineIndex), true)
 }
 
-func (matrix *Matrix) MulVector(v *Vector) *Vector {
-	if v != nil &&
-		v.shape &&
-		matrix.lineSize == v.size {
-		vCopy := v.makeCopy()
-		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-			var rowSum float64 = 0.0
-			for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
-				rowSum += vCopy.get(lineIdx, lineIdx) * matrix.get(rowIdx, lineIdx)
-			}
-			v.slice[rowIdx] = rowSum
-		}
-		return v
-	}
-	return &Vector{}
-}
-
 func (matrix *Matrix) VectorGroup(shape bool) *VectorGroup {
 	return matrix.convertToVectorGroup(shape)
 }
@@ -1258,7 +1265,7 @@ func (matrix *Matrix) Display() *Matrix {
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 		for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
 			val := matrix.get(rowIdx, lineIdx)
-			if lang.EqualFloat64ByAccuracy(0.0, val) {
+			if lang.EqualFloat64Zero(val) {
 				val = 0.0
 			}
 			fmt.Printf(" %.5v", val)

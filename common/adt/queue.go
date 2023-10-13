@@ -1,7 +1,7 @@
 package adt
 
 import (
-	"bfw/common/type_ref"
+	"bfw/common/lang"
 )
 
 // GenericQueue Template Type of queue
@@ -18,7 +18,7 @@ func (queue *GenericQueue[T]) SetSlice(ts []T) {
 }
 
 func (queue *GenericQueue[T]) Empty() bool {
-	return !type_ref.ValidateInterfaceArrayOrSlice(queue.slice)
+	return !lang.ValidateInterfaceArrayOrSlice(queue.slice)
 }
 
 func (queue *GenericQueue[T]) Len() int {

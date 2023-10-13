@@ -1,11 +1,7 @@
-package type_ref
+package lang
 
 import (
 	"errors"
-)
-
-const (
-	undefinedString string = ""
 )
 
 func GetDataSourceBackendColumnType(backend string) ([]string, error) {

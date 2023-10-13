@@ -154,7 +154,8 @@ func TestMatrix_Total(t *testing.T) {
 // -2 -2-λ 4
 // 2 4 -2-λ
 func TestMatrix_PolyMatrix(t *testing.T) {
-	matrix := ConstructMatrix([][]float64{{1, -2, 2}, {-2, -2, 4}, {2, 4, -2}})
+	matrix := ConstructMatrix([][]float64{{1, 1, 0}, {0, 1, 1}, {-1, 0, 1}})
 	//matrix.PolyMatrix().Display(1)
-	matrix.EigenMatrix().Det().Display(true, 1).Solve().Display(3, 3)
+	//matrix.EigenMatrix().Det().Display(true, 1).Solve().Display(3, 3)
+	matrix.EigenValues().Display()
 }

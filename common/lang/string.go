@@ -94,3 +94,51 @@ func InterfaceToString(inter interface{}) (string, string) {
 		return undefinedString, undefinedString
 	}
 }
+
+func charByteEqualAnyChar(charByte byte, char ...byte) bool {
+	if charLen := len(char); charLen > 0 {
+		for charIdx := 0; charIdx < charLen; charIdx++ {
+			if char[charIdx] == charByte {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func TruncateStringPrefixByte(a string, char ...byte) string {
+	startIdx, aLen := 0, len(a)
+	for startIdx < aLen &&
+		charByteEqualAnyChar(a[startIdx], char...) {
+		startIdx++
+	}
+	return a[startIdx:]
+}
+
+func TruncateStringSuffixByte(a string, char ...byte) string {
+	endIdx := len(a) - 1
+	for endIdx >= 0 &&
+		charByteEqualAnyChar(a[endIdx], char...) {
+		endIdx--
+	}
+	return a[:endIdx+1]
+}
+
+func TruncateStringPrefixSuffixByte(a string, char ...byte) string {
+	a = TruncateStringPrefixByte(a, char...)
+	a = TruncateStringSuffixByte(a, char...)
+	return a
+}
+
+func TruncateStringPrefixSuffixSpace(a string) string {
+	return TruncateStringPrefixSuffixByte(a, ' ', '\n', '\t')
+}
+
+func TruncateStringPrefixZero(a string) string {
+	a = TruncateStringPrefixByte(a, '0')
+	if len(a) > 0 {
+		return a
+	} else {
+		return "0"
+	}
+}

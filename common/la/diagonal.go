@@ -170,7 +170,7 @@ func (diagonal *Diagonal) Identity() *Identity {
 	if !diagonal.IsIdentity() {
 		panic(matrixCanNotBeIdentityError)
 	}
-	return &Identity{diagonal.size}
+	return ConstructIdentity(diagonal.size)
 }
 
 func (diagonal *Diagonal) Matrix() *Matrix {

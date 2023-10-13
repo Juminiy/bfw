@@ -102,8 +102,11 @@ func (s *Solution) setElem(index int, value complex128) {
 }
 
 func (s *Solution) EigenValues() *EigenValues {
-	eigenValues := &EigenValues{}
-	return eigenValues
+	return ConstructEigenValues(s.slice)
+}
+
+func (s *Solution) PolyFactors() *PolyFactors {
+	return ConstructPolyFactors(s.slice)
 }
 
 func (s *Solution) Display(realPrecision, imagPrecision int) *Solution {

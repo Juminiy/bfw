@@ -285,7 +285,7 @@ func (vg *VectorGroup) validateUnit() bool {
 func (vg *VectorGroup) validateOrthonormal() bool {
 	for idxI := 0; idxI < vg.size; idxI++ {
 		for idxJ := idxI + 1; idxJ < vg.size; idxJ++ {
-			if !vg.get(idxI).ValidateOrthogonal(vg.get(idxJ)) {
+			if !vg.get(idxI).validateOrthogonal(vg.get(idxJ)) {
 				return false
 			}
 		}

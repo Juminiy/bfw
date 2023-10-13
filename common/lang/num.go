@@ -7,11 +7,21 @@ import (
 )
 
 const (
-	defaultFloat32Accuracy      = 1e-5
-	defaultFloat64Accuracy      = 1e-7
-	defaultFloat32Precision int = 5
-	defaultFloat64Precision int = 5
+	float64Zero             float64 = 0.0
+	float32Zero             float32 = 0.0
+	defaultFloat32Accuracy          = 1e-5
+	defaultFloat64Accuracy          = 1e-7
+	defaultFloat32Precision int     = 5
+	defaultFloat64Precision int     = 5
 )
+
+func EqualFloat32Zero(a float32) bool {
+	return EqualFloat32ByAccuracy(a, float32Zero)
+}
+
+func EqualFloat64Zero(a float64) bool {
+	return EqualFloat64ByAccuracy(a, float64Zero)
+}
 
 func EqualFloat32ByAccuracy(a, b float32, acc ...float32) bool {
 	var rAcc float32 = 0.0
@@ -155,7 +165,7 @@ func Float64ToString(a float64, precision ...int) string {
 
 // delta = b^2-4a*c
 func SolveQuadraticEquationOfOneVariable(a, b, c float64) (complex128, complex128, bool) {
-	if EqualFloat64ByAccuracy(a, 0.0) {
+	if EqualFloat64Zero(a) {
 		return 0, 0, false
 	}
 	delta := b*b - 4.0*a*c
@@ -169,7 +179,7 @@ func SolveQuadraticEquationOfOneVariable(a, b, c float64) (complex128, complex12
 }
 
 func SolveCubicEquationOfOneVariableByCommon(a, b, c, d float64) (complex128, complex128, complex128, bool) {
-	if EqualFloat64ByAccuracy(a, 0.0) {
+	if EqualFloat64Zero(a) {
 		return 0, 0, 0, false
 	}
 	var (
@@ -186,9 +196,9 @@ func SolveCubicEquationOfOneVariableByCommon(a, b, c, d float64) (complex128, co
 		complexSolutionPart2 = complex(solutionPart2, 0.0)                                                              // complex
 		complexSolutionPart3 = complex(solutionPart3, 0.0)                                                              // complex
 	)
-	if EqualFloat64ByAccuracy(delta, 0.0) {
+	if EqualFloat64Zero(delta) {
 		if EqualFloat64ByAccuracy(deltaPart1, -deltaPart2) {
-			if EqualFloat64ByAccuracy(deltaPart1, 0.0) {
+			if EqualFloat64Zero(deltaPart1) {
 				// three same real solutions
 				tripleSolution := complexSolutionPart1
 				return tripleSolution, tripleSolution, tripleSolution, true
@@ -219,19 +229,19 @@ func SolveCubicEquationOfOneVariableByCommon(a, b, c, d float64) (complex128, co
 
 func SolveCubicEquationOfOneVariableBySJ(a, b, c, d float64) (complex128, complex128, complex128, bool) {
 	var (
-		A                    = math.Pow(b*1.0, 2) - 3.0*a*c
+		A                    = math.Pow(b*1.0, 2.0) - 3.0*a*c
 		B                    = b*c - 9.0*a*d
-		C                    = math.Pow(c*1.0, 2) - 3.0*b*d
-		Delta                = math.Pow(B*1.0, 2) - 4.0*A*C
+		C                    = math.Pow(c*1.0, 2.0) - 3.0*b*d
+		Delta                = math.Pow(B*1.0, 2.0) - 4.0*A*C
 		solutionPart1        = -b / (3.0 * a)
 		complexSolutionPart1 = complex(solutionPart1, 0.0)
 	)
-	if EqualFloat64ByAccuracy(B, 0.0) &&
-		EqualFloat64ByAccuracy(A, 0.0) {
+	if EqualFloat64Zero(B) &&
+		EqualFloat64Zero(A) {
 		return complexSolutionPart1, complexSolutionPart1, complexSolutionPart1, true
 	}
-	if EqualFloat64ByAccuracy(Delta, 0.0) {
-		if !EqualFloat64ByAccuracy(A, 0.0) {
+	if EqualFloat64Zero(Delta) {
+		if !EqualFloat64Zero(A) {
 			k := B * 1.0 / A
 			resPart1, resPart2 := -b*1.0/a, -k*1.0/2
 			return complex(resPart1+k, 0.0), complex(resPart2, 0.0), complex(resPart2, 0.0), true
@@ -239,10 +249,11 @@ func SolveCubicEquationOfOneVariableBySJ(a, b, c, d float64) (complex128, comple
 	} else if Delta > 0.0 {
 		tPart1, tPart2 := A*b*1.0+(-3.0*a*B)/2, 3.0*a*math.Sqrt(math.Pow(B*1.0, 2.0)-4.0*A*C)/2
 		y1, y2 := tPart1+tPart2, tPart1-tPart2
-		resPart1, resPart2, resPart3 :=
-			solutionPart1,
-			(math.Pow(y1, 1.0/3)+math.Pow(y2, 1.0/3))/(6.0*a),
-			math.Sqrt(3.0)*(math.Pow(y1, 1.0/3)-math.Pow(y2, 1.0/3))/(6.0*a)
+		resPart1 := solutionPart1
+		restPart2t1 := Float64PowerPositivePower(y1, 1.0/3)
+		restPart2t2 := Float64PowerPositivePower(y2, 1.0/3)
+		resPart2 := (restPart2t1 + restPart2t2) / (6.0 * a)
+		resPart3 := (math.Sqrt(3.0) * (restPart2t1 - restPart2t2)) / (6.0 * a)
 		res1 := complex(resPart1-2.0*resPart2, 0.0)
 		res2 := complex(resPart1+resPart2, resPart3)
 		res3 := complex(resPart1+resPart2, -resPart3)
@@ -263,4 +274,14 @@ func SolveCubicEquationOfOneVariableBySJ(a, b, c, d float64) (complex128, comple
 		}
 	}
 	return 0, 0, 0, false
+}
+
+func Float64PowerPositivePower(real float64, power float64) float64 {
+	if EqualFloat64Zero(real) {
+		return 0.0
+	} else if real > 0.0 {
+		return math.Pow(real, power)
+	} else {
+		return -math.Pow(math.Abs(real), power)
+	}
 }

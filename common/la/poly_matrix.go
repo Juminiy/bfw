@@ -197,6 +197,10 @@ func (pm *PolyMatrix) Det() *Poly {
 	return pm.det()
 }
 
+// det
+// TODO: to complete the PolyMatrix det algorithm
+// simpleDet
+// laplaceDet
 func (pm *PolyMatrix) det() *Poly {
 	if n := pm.getPhalanxSize(); n == simplePhalanxSizeOne {
 		return pm.get(0, 0)

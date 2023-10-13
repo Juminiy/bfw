@@ -1,4 +1,8 @@
-// 1. all makeCopy() is deep copy
+// la
+// 1. makeCopy() is deep copy
+// 2. ConstructXXX() is for global use
+
+// stand for Linear Algebra
 
 package la
 

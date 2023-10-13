@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"bfw/common/type_ref"
+	"bfw/common/lang"
 	"strings"
 )
 
@@ -193,7 +193,7 @@ func (phrase *Phrase) AddCharacter(char rune) *Phrase {
 }
 
 func (phrase *Phrase) AddCharacters(char ...rune) *Phrase {
-	if type_ref.ValidateInterfaceArrayOrSlice(char) {
+	if lang.ValidateInterfaceArrayOrSlice(char) {
 		for _, ch := range char {
 			phrase.AddCharacter(ch)
 		}

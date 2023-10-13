@@ -12,8 +12,26 @@ type Identity struct {
 	size int
 }
 
+func ConstructIdentity(size int) *Identity {
+	identity := &Identity{}
+	return identity.Construct(size)
+}
+
+func (identity *Identity) Construct(size int) *Identity {
+	identity.setValues(size)
+	return identity
+}
+
 func (identity *Identity) null() *Identity {
 	return &Identity{}
+}
+
+func (identity *Identity) setValues(size int) {
+	identity.setSize(size)
+}
+
+func (identity *Identity) setSize(size int) {
+	identity.size = size
 }
 
 func (identity *Identity) Matrix() *Matrix {

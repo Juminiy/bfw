@@ -247,15 +247,19 @@ func (pn *PolyNode) Derivative() *PolyNode {
 	return pn
 }
 
-func (pn *PolyNode) convertToPoly(aes rune) *Poly {
+func (pn *PolyNode) convertToPoly(aes ...rune) *Poly {
 	poly := &Poly{}
-	poly.setValues(make([]*PolyNode, pn.exp+1), pn.exp, aes)
+	AES := polyDefaultAes
+	if len(aes) > 0 {
+		AES = aes[0]
+	}
+	poly.setValues(make([]*PolyNode, pn.exp+1), pn.exp, AES)
 	poly.setElem(pn.exp, pn.makeCopy())
 	return poly
 }
 
-func (pn *PolyNode) Poly(aes rune) *Poly {
-	return pn.convertToPoly(aes)
+func (pn *PolyNode) Poly(aes ...rune) *Poly {
+	return pn.convertToPoly(aes...)
 }
 
 // Display
@@ -276,6 +280,7 @@ func (pn *PolyNode) CanDisplay(aes rune) bool {
 	return pn.ToString(aes) != undefinedString
 }
 
+// ToString
 func (pn *PolyNode) ToString(aes rune, precision ...int) string {
 	return pn.getCoefficientStr(precision...) + pn.getAESStr(aes) + pn.getExponentStr()
 }

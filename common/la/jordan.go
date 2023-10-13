@@ -10,6 +10,15 @@ type JordanMatrix struct {
 	size      int
 }
 
+func ConstructJordanMatrix() *JordanMatrix {
+	jm := &JordanMatrix{}
+	return jm.Construct()
+}
+
+func (jm *JordanMatrix) Construct() *JordanMatrix {
+	return &JordanMatrix{}
+}
+
 // Sort
 // order = true, lambda asc
 // order = false, lambda desc

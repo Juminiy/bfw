@@ -1,0 +1,65 @@
+Date : 2023-10-12 10:28:20
+Directory : /Users/chisato/go/src/bfw/common
+Total : 31 files,  2589 codes, 229 comments, 436 blanks, all 3254 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Go       |         30 |      2,582 |        229 |        435 |      3,246 |
+| JSON     |          1 |          7 |          0 |          1 |          8 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                          | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                             |         31 |      2,589 |        229 |        436 |      3,254 |
+| adt                                                           |          6 |        494 |         59 |         94 |        647 |
+| fft                                                           |          1 |          1 |          0 |          1 |          2 |
+| la                                                            |          4 |         48 |          9 |          8 |         65 |
+| lang                                                          |          8 |        567 |         29 |         81 |        677 |
+| reflect                                                       |          4 |        106 |          9 |         26 |        141 |
+| sql                                                           |          2 |        405 |         40 |         79 |        524 |
+| type_ref                                                      |          1 |        182 |          1 |         14 |        197 |
+| utils                                                         |          3 |        623 |         81 |         90 |        794 |
+| workpool                                                      |          2 |        163 |          1 |         43 |        207 |
++---------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                      | language | code       | comment    | blank      | total      |
++---------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /Users/chisato/go/src/bfw/common/adt/adt.go                   | Go       |         17 |          3 |          4 |         24 |
+| /Users/chisato/go/src/bfw/common/adt/adt_test.go              | Go       |         25 |          9 |          4 |         38 |
+| /Users/chisato/go/src/bfw/common/adt/list.go                  | Go       |        348 |         45 |         56 |        449 |
+| /Users/chisato/go/src/bfw/common/adt/priority_queue.go        | Go       |         17 |          0 |          9 |         26 |
+| /Users/chisato/go/src/bfw/common/adt/queue.go                 | Go       |         47 |          1 |         11 |         59 |
+| /Users/chisato/go/src/bfw/common/adt/stack.go                 | Go       |         40 |          1 |         10 |         51 |
+| /Users/chisato/go/src/bfw/common/fft/fft.go                   | Go       |          1 |          0 |          1 |          2 |
+| /Users/chisato/go/src/bfw/common/la/matrix_poly.go            | Go       |          8 |          0 |          3 |         11 |
+| /Users/chisato/go/src/bfw/common/la/poly.go                   | Go       |         39 |          3 |          2 |         44 |
+| /Users/chisato/go/src/bfw/common/la/poly_test.go              | Go       |          0 |          6 |          2 |          8 |
+| /Users/chisato/go/src/bfw/common/la/vector_v2.go              | Go       |          1 |          0 |          1 |          2 |
+| /Users/chisato/go/src/bfw/common/lang/array.go                | Go       |         71 |          0 |         12 |         83 |
+| /Users/chisato/go/src/bfw/common/lang/big_num.go              | Go       |         13 |          0 |          6 |         19 |
+| /Users/chisato/go/src/bfw/common/lang/complex128.go           | Go       |         78 |          0 |         11 |         89 |
+| /Users/chisato/go/src/bfw/common/lang/io.go                   | Go       |         43 |         15 |         10 |         68 |
+| /Users/chisato/go/src/bfw/common/lang/io_test.go              | Go       |          9 |          0 |          3 |         12 |
+| /Users/chisato/go/src/bfw/common/lang/num.go                  | Go       |        256 |          8 |         24 |        288 |
+| /Users/chisato/go/src/bfw/common/lang/num_test.go             | Go       |         15 |          1 |          5 |         21 |
+| /Users/chisato/go/src/bfw/common/lang/string.go               | Go       |         82 |          5 |         10 |         97 |
+| /Users/chisato/go/src/bfw/common/reflect/genfunc.json         | JSON     |          7 |          0 |          1 |          8 |
+| /Users/chisato/go/src/bfw/common/reflect/genfunc_by_struct.go | Go       |          1 |          0 |          1 |          2 |
+| /Users/chisato/go/src/bfw/common/reflect/reflect_struct.go    | Go       |          4 |          0 |          2 |          6 |
+| /Users/chisato/go/src/bfw/common/reflect/struct_name.go       | Go       |         94 |          9 |         22 |        125 |
+| /Users/chisato/go/src/bfw/common/sql/phrase_v1.go             | Go       |        212 |          8 |         30 |        250 |
+| /Users/chisato/go/src/bfw/common/sql/phrase_v2.go             | Go       |        193 |         32 |         49 |        274 |
+| /Users/chisato/go/src/bfw/common/type_ref/type_ref.go         | Go       |        182 |          1 |         14 |        197 |
+| /Users/chisato/go/src/bfw/common/utils/db.go                  | Go       |        423 |         46 |         53 |        522 |
+| /Users/chisato/go/src/bfw/common/utils/str.go                 | Go       |         59 |          5 |          7 |         71 |
+| /Users/chisato/go/src/bfw/common/utils/web.go                 | Go       |        141 |         30 |         30 |        201 |
+| /Users/chisato/go/src/bfw/common/workpool/concurrent.go       | Go       |         72 |          0 |         16 |         88 |
+| /Users/chisato/go/src/bfw/common/workpool/workpool.go         | Go       |         91 |          1 |         27 |        119 |
+| Total                                                         |          |      2,589 |        229 |        436 |      3,254 |
++---------------------------------------------------------------+----------+------------+------------+------------+------------+
