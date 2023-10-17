@@ -57,6 +57,14 @@ func DisplayComplex128(realPrecision, imagPrecision int, a ...complex128) {
 	}
 }
 
+func DisplayComplex1281DArray(realPrecision, imagPrecision int, a []complex128) {
+	for idx := 0; idx < len(a); idx++ {
+		DisplayOneComplex128(a[idx], realPrecision, imagPrecision)
+		fmt.Printf(", ")
+	}
+	fmt.Println()
+}
+
 func IsOneComplex128PureReal(a complex128) bool {
 	return EqualFloat64Zero(imag(a))
 }
@@ -85,4 +93,50 @@ func IsComplex128PureImag(a ...complex128) bool {
 		}
 	}
 	return true
+}
+
+func DivideComplex128ArrayEvenOddPart(complex128Array []complex128) ([]complex128, []complex128) {
+	if complex128Array == nil ||
+		len(complex128Array) == 0 {
+		return nil, nil
+	}
+	size := len(complex128Array)
+	evenPart, oddPart := make([]complex128, 0), make([]complex128, 0)
+	for idx := 0; idx < size; idx++ {
+		if Odd(idx) {
+			oddPart = append(oddPart, complex128Array[idx])
+		} else {
+			evenPart = append(evenPart, complex128Array[idx])
+		}
+	}
+	return evenPart, oddPart
+}
+
+// Complex1281DArrayHadamard
+// change self
+func Complex1281DArrayHadamard(p1, p2 []complex128) []complex128 {
+	p1Size, p2Size := len(p1), len(p2)
+	if p1Size != p2Size {
+		return nil
+	}
+	for idx := 0; idx < p1Size; idx++ {
+		p1[idx] *= p2[idx]
+	}
+	return p1
+}
+
+func Complex128ArrayToIntArray(p []complex128) []int {
+	pInt := make([]int, len(p))
+	for idx := 0; idx < len(p); idx++ {
+		pInt[idx] = int(real(p[idx]))
+	}
+	return pInt
+}
+
+func IntArrayToComplex128Array(p []int) []complex128 {
+	pC := make([]complex128, len(p))
+	for idx := 0; idx < len(p); idx++ {
+		pC[idx] = complex(float64(p[idx]), 0.0)
+	}
+	return pC
 }

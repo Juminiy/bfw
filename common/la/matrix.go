@@ -9,23 +9,23 @@ import (
 )
 
 const (
-	matrixNotPhalanx       int     = -1
-	matrixNoSize           int     = 0
-	matrixIndexOutOfBound  int     = -1
-	matrixDeterminantZero  float64 = 0
-	matrixNoRank           int     = -1
-	matrixToVectorRowSize  int     = 1
-	matrixToVectorLineSize int     = 1
-	simplePhalanxSizeOne   int     = 1
-	simplePhalanxSizeTwo   int     = 2
-	simplePhalanxSizeThree int     = 3
+	matrixNotPhalanx         int     = -1
+	matrixNoSize             int     = 0
+	matrixIndexOutOfBound    int     = -1
+	matrixDeterminantZero    float64 = 0
+	matrixNoRank             int     = -1
+	matrixToVectorRowSize    int     = 1
+	matrixToVectorColumnSize int     = 1
+	simplePhalanxSizeOne     int     = 1
+	simplePhalanxSizeTwo     int     = 2
+	simplePhalanxSizeThree   int     = 3
 )
 
 var (
 	matrixNotSameShapeError           = errors.New("two matrices are not same shape")
 	matrixCanNotMultiplyError         = errors.New("two matrices cannot multiply")
 	matrixCanNotHadamardMultiplyError = errors.New("two matrices cannot hadamard multiply")
-	matrixRowLineDiffer               = errors.New("matrix row and line differ")
+	matrixRowColumnDiffer             = errors.New("matrix row and column differ")
 	matrixCanNotBeVectorError         = errors.New("matrix cannot be vector")
 	matrixIndexOutOfBoundError        = errors.New("matrix index is out of bound")
 	matrixNotPhalanxError             = errors.New("matrix is not phalanx")
@@ -34,13 +34,14 @@ var (
 	matrixCanNotBeIdentityError       = errors.New("matrix cannot be identity")
 	matrixCanNotBeReShapedError       = errors.New("matrix cannot be reshaped")
 	matrixInValidError                = errors.New("matrix is invalid")
+	rangeBoundError                   = errors.New("the num range bound is error")
 	NullMatrix                        = &Matrix{}
 )
 
 type Matrix struct {
 	slice       [][]float64
 	rowSize     int
-	lineSize    int
+	columnSize  int
 	coefficient float64
 }
 
@@ -55,30 +56,30 @@ func (matrix *Matrix) Construct(real2DArray [][]float64) *Matrix {
 		return matrix
 	}
 	var (
-		maxLineSize int = 1
-		rowSize     int = len(real2DArray)
+		maxColumnSize int = 1
+		rowSize       int = len(real2DArray)
 	)
-	matrix.setValues(real2DArray, rowSize, maxLineSize)
+	matrix.setValues(real2DArray, rowSize, maxColumnSize)
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
-		maxLineSize = lang.MaxInt(maxLineSize, len(real2DArray[rowIdx]))
+		maxColumnSize = lang.MaxInt(maxColumnSize, len(real2DArray[rowIdx]))
 	}
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
-		matrix.setRowZeroPadding(maxLineSize, rowIdx)
+		matrix.setRowZeroPadding(maxColumnSize, rowIdx)
 	}
-	matrix.setSize(rowSize, maxLineSize)
+	matrix.setSize(rowSize, maxColumnSize)
 	return matrix
 }
 
 func (matrix *Matrix) validate() bool {
 	if matrix.rowSize == matrixNoSize ||
-		matrix.lineSize == matrixNoSize ||
+		matrix.columnSize == matrixNoSize ||
 		matrix.slice == nil ||
 		len(matrix.slice) != matrix.rowSize {
 		return false
 	} else {
 		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 			if idxRow := matrix.getRow(rowIdx); idxRow == nil ||
-				len(idxRow) != matrix.lineSize {
+				len(idxRow) != matrix.columnSize {
 				return false
 			}
 		}
@@ -89,33 +90,27 @@ func (matrix *Matrix) validate() bool {
 func (matrix *Matrix) validateIndex(index ...int) bool {
 	if indexLen := len(index); indexLen > 0 {
 		if indexLen >= 1 {
-			if index[0] < 0 || index[0] >= matrix.rowSize {
+			if !matrix.validateRowIndex(index[0]) {
 				return false
 			}
 		}
 		if indexLen >= 2 {
-			if index[1] < 0 || index[1] >= matrix.lineSize {
+			if !matrix.validateColumnIndex(index[1]) {
 				return false
-			}
-		}
-		if indexLen >= 3 {
-			for indexIdx := 2; indexIdx < indexLen; indexIdx++ {
-				if !matrix.validateOneIndex(index[indexIdx]) {
-					return false
-				}
 			}
 		}
 	}
 	return true
 }
 
-func (matrix *Matrix) validateOneIndex(index int) bool {
-	if index < 0 ||
-		index >= matrix.rowSize ||
-		index >= matrix.lineSize {
-		return false
-	}
-	return true
+func (matrix *Matrix) validateRowIndex(rowIndex int) bool {
+	return rowIndex >= 0 &&
+		rowIndex < matrix.rowSize
+}
+
+func (matrix *Matrix) validateColumnIndex(columnIndex int) bool {
+	return columnIndex >= 0 &&
+		columnIndex < matrix.columnSize
 }
 
 func (matrix *Matrix) null() *Matrix {
@@ -140,9 +135,9 @@ func (matrix *Matrix) remake(m ...*Matrix) {
 
 func (matrix *Matrix) makeCopy() *Matrix {
 	mCopy := &Matrix{}
-	mCopy.setValues(make([][]float64, matrix.rowSize), matrix.rowSize, matrix.lineSize)
+	mCopy.setValues(make([][]float64, matrix.rowSize), matrix.rowSize, matrix.columnSize)
 	for rowIdx := 0; rowIdx < mCopy.rowSize; rowIdx++ {
-		mCopy.setRow(rowIdx, make([]float64, matrix.lineSize))
+		mCopy.setRow(rowIdx, make([]float64, matrix.columnSize))
 		copy(mCopy.slice[rowIdx], matrix.getRow(rowIdx))
 	}
 	return mCopy
@@ -153,10 +148,10 @@ func (matrix *Matrix) makeCopy() *Matrix {
 // change self
 // 2.function
 // initial the location
-func (matrix *Matrix) assign(rowSize, lineSize int) {
-	matrix.setValues(make([][]float64, rowSize), rowSize, lineSize)
+func (matrix *Matrix) assign(rowSize, columnSize int) {
+	matrix.setValues(make([][]float64, rowSize), rowSize, columnSize)
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
-		matrix.setRow(rowIdx, make([]float64, lineSize))
+		matrix.setRow(rowIdx, make([]float64, columnSize))
 	}
 }
 
@@ -165,7 +160,7 @@ func (matrix *Matrix) getSelf() *Matrix {
 }
 
 func (matrix *Matrix) setSelf(m *Matrix) {
-	matrix.setValues(m.slice, m.rowSize, m.lineSize)
+	matrix.setValues(m.slice, m.rowSize, m.columnSize)
 }
 
 func (matrix *Matrix) setValues(slice [][]float64, size ...int) {
@@ -185,10 +180,10 @@ func (matrix *Matrix) setSize(size ...int) {
 	if sizeLen := len(size); sizeLen > 0 {
 		if sizeLen >= 1 {
 			matrix.setRowSize(size[0])
-			matrix.setLineSize(size[0])
+			matrix.setColumnSize(size[0])
 		}
 		if sizeLen >= 2 {
-			matrix.setLineSize(size[1])
+			matrix.setColumnSize(size[1])
 		}
 	}
 }
@@ -197,8 +192,8 @@ func (matrix *Matrix) setRowSize(rowSize int) {
 	matrix.rowSize = rowSize
 }
 
-func (matrix *Matrix) setLineSize(lineSize int) {
-	matrix.lineSize = lineSize
+func (matrix *Matrix) setColumnSize(columnSize int) {
+	matrix.columnSize = columnSize
 }
 
 func (matrix *Matrix) swap(m *Matrix) {
@@ -208,49 +203,49 @@ func (matrix *Matrix) swap(m *Matrix) {
 	m.setSelf(mTemp)
 }
 
-func (matrix *Matrix) get(rowIndex, lineIndex int) float64 {
-	if !matrix.validateIndex(rowIndex, lineIndex) {
+func (matrix *Matrix) get(rowIndex, columnIndex int) float64 {
+	if !matrix.validateIndex(rowIndex, columnIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	return matrix.slice[rowIndex][lineIndex]
+	return matrix.slice[rowIndex][columnIndex]
 }
 
 // set
 // change self
-func (matrix *Matrix) set(rowIndex, lineIndex int, value float64) {
-	matrix.setOpt(rowIndex, lineIndex, value, '=')
+func (matrix *Matrix) set(rowIndex, columnIndex int, value float64) {
+	matrix.setOpt(rowIndex, columnIndex, value, '=')
 }
 
-func (matrix *Matrix) setOpt(rowIndex, lineIndex int, value float64, opt ...rune) {
-	if !matrix.validateIndex(rowIndex, lineIndex) {
+func (matrix *Matrix) setOpt(rowIndex, columnIndex int, value float64, opt ...rune) {
+	if !matrix.validateIndex(rowIndex, columnIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
 	if len(opt) > 0 {
 		switch opt[0] {
 		case '=':
 			{
-				matrix.slice[rowIndex][lineIndex] = value
+				matrix.slice[rowIndex][columnIndex] = value
 			}
 		case '+':
 			{
-				matrix.slice[rowIndex][lineIndex] += value
+				matrix.slice[rowIndex][columnIndex] += value
 			}
 		case '-':
 			{
-				matrix.slice[rowIndex][lineIndex] -= value
+				matrix.slice[rowIndex][columnIndex] -= value
 			}
 		case '*':
 			{
-				matrix.slice[rowIndex][lineIndex] *= value
+				matrix.slice[rowIndex][columnIndex] *= value
 			}
 		case '/':
 			{
-				matrix.slice[rowIndex][lineIndex] /= value
+				matrix.slice[rowIndex][columnIndex] /= value
 			}
 		case '^':
 			{
-				matrix.slice[rowIndex][lineIndex] = math.Pow(
-					matrix.get(rowIndex, lineIndex), value)
+				matrix.slice[rowIndex][columnIndex] = math.Pow(
+					matrix.get(rowIndex, columnIndex), value)
 			}
 		default:
 			{
@@ -281,17 +276,72 @@ func (matrix *Matrix) setRow(rowIndex int, rowSlice []float64) {
 	matrix.slice[rowIndex] = rowSlice
 }
 
-func (matrix *Matrix) getLineCopy(lineIndex int) []float64 {
-	return matrix.getLine(lineIndex)
+func (matrix *Matrix) getColumnCopy(columnIndex int) []float64 {
+	return matrix.getColumn(columnIndex)
 }
 
-func (matrix *Matrix) getLine(lineIndex int) []float64 {
-	return lang.GetReal2DArrayLine(matrix.GetSlice(), lineIndex)
+func (matrix *Matrix) getColumn(columnIndex int) []float64 {
+	if !matrix.validateColumnIndex(columnIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	return lang.GetReal2DArrayColumn(matrix.GetSlice(), columnIndex)
 }
 
-func (matrix *Matrix) setLine(lineIndex int, lineSlice []float64) {
+func (matrix *Matrix) setColumn(columnIndex int, columnSlice []float64) {
+	if !matrix.validateColumnIndex(columnIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-		matrix.set(rowIdx, lineIndex, lineSlice[rowIdx])
+		matrix.set(rowIdx, columnIndex, columnSlice[rowIdx])
+	}
+}
+
+func (matrix *Matrix) setRowSwap(rowIIndex, rowJIndex int) {
+	if !matrix.validateIndex(rowIIndex) ||
+		!matrix.validateIndex(rowJIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	matrix.slice[rowIIndex], matrix.slice[rowJIndex] =
+		matrix.slice[rowJIndex], matrix.slice[rowIIndex]
+}
+
+func (matrix *Matrix) setColumnSwap(columnIIndex, columnJIndex int) {
+	if !matrix.validateColumnIndex(columnIIndex) ||
+		!matrix.validateColumnIndex(columnJIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	columnICopy := matrix.getColumnCopy(columnIIndex)
+	matrix.setColumn(columnIIndex, matrix.getColumn(columnJIndex))
+	matrix.setColumn(columnJIndex, columnICopy)
+}
+
+func (matrix *Matrix) setRowElemOpt(rowIndex int, opt rune, value float64) {
+	if !matrix.validateIndex(rowIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+		matrix.setOpt(rowIndex, columnIdx, value, opt)
+	}
+}
+
+func (matrix *Matrix) setRowElemSwap(rowIndex int) {
+	for columnIdx := 0; columnIdx < (matrix.columnSize >> 1); columnIdx++ {
+		matrix.setElemSwap(rowIndex, columnIdx, rowIndex, matrix.columnSize-1-columnIdx)
+	}
+}
+
+func (matrix *Matrix) setColumnElemOpt(columnIndex int, opt rune, value float64) {
+	if !matrix.validateColumnIndex(columnIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		matrix.setOpt(rowIdx, columnIndex, value, opt)
+	}
+}
+
+func (matrix *Matrix) setColumnElemSwap(columnIndex int) {
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		matrix.setElemSwap(rowIdx, columnIndex, matrix.rowSize-1-rowIdx, columnIndex)
 	}
 }
 
@@ -299,32 +349,37 @@ func (matrix *Matrix) getRowIndexLen(rowIndex int) int {
 	return len(matrix.getRow(rowIndex))
 }
 
-func (matrix *Matrix) rowPadding(rowIndex, lineSize int, value float64) {
-	if lineSize <= matrix.lineSize {
+func (matrix *Matrix) setElemSwap(rowIndexI, columnIndexI, rowIndexJ, columnIndexJ int) {
+	matrix.slice[rowIndexI][columnIndexI], matrix.slice[rowIndexJ][columnIndexJ] =
+		matrix.slice[rowIndexJ][columnIndexJ], matrix.slice[rowIndexI][columnIndexI]
+}
+
+func (matrix *Matrix) rowPadding(rowIndex, columnSize int, value float64) {
+	if columnSize <= matrix.columnSize {
 		return
 	}
 	if !matrix.validateIndex(rowIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	for lineIdx := matrix.getRowIndexLen(rowIndex); lineIdx < lineSize; lineIdx++ {
+	for columnIdx := matrix.getRowIndexLen(rowIndex); columnIdx < columnSize; columnIdx++ {
 		matrix.slice[rowIndex] = append(matrix.slice[rowIndex], value)
 	}
 }
 
-func (matrix *Matrix) rowZeroPadding(rowIndex, lineSize int) {
-	matrix.rowPadding(rowIndex, lineSize, 0.0)
+func (matrix *Matrix) rowZeroPadding(rowIndex, columnSize int) {
+	matrix.rowPadding(rowIndex, columnSize, 0.0)
 }
 
-func (matrix *Matrix) setRowZeroPadding(lineSize int, rowIndex ...int) {
+func (matrix *Matrix) setRowZeroPadding(columnSize int, rowIndex ...int) {
 	for rowIndexIdx := 0; rowIndexIdx < len(rowIndex); rowIndexIdx++ {
-		matrix.rowZeroPadding(rowIndex[rowIndexIdx], lineSize)
+		matrix.rowZeroPadding(rowIndex[rowIndexIdx], columnSize)
 	}
 }
 
 func (matrix *Matrix) sameShape(m *Matrix) bool {
 	if m == nil ||
 		matrix.rowSize != m.rowSize ||
-		matrix.lineSize != m.lineSize {
+		matrix.columnSize != m.columnSize {
 		return false
 	}
 	return true
@@ -333,8 +388,8 @@ func (matrix *Matrix) sameShape(m *Matrix) bool {
 func (matrix *Matrix) Equal(m *Matrix) bool {
 	if matrix.sameShape(m) {
 		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-			for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
-				if !lang.EqualFloat64ByAccuracy(matrix.get(rowIdx, lineIdx), m.get(rowIdx, lineIdx)) {
+			for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+				if !lang.EqualFloat64ByAccuracy(matrix.get(rowIdx, columnIdx), m.get(rowIdx, columnIdx)) {
 					return false
 				}
 			}
@@ -346,14 +401,14 @@ func (matrix *Matrix) Equal(m *Matrix) bool {
 
 func (matrix *Matrix) canMultiply(m *Matrix) bool {
 	if m == nil ||
-		matrix.lineSize != m.rowSize {
+		matrix.columnSize != m.rowSize {
 		return false
 	}
 	return true
 }
 
 func (matrix *Matrix) isPhalanx() bool {
-	return matrix.rowSize == matrix.lineSize
+	return matrix.rowSize == matrix.columnSize
 }
 
 func (matrix *Matrix) getPhalanxSize() int {
@@ -365,19 +420,19 @@ func (matrix *Matrix) getPhalanxSize() int {
 
 // getPhalanxByIgnoreCentral
 // chained option
-func (matrix *Matrix) getPhalanxByIgnoreCentral(rowIndex, lineIndex int) *Matrix {
+func (matrix *Matrix) getPhalanxByIgnoreCentral(rowIndex, columnIndex int) *Matrix {
 	phalanxSize := matrix.getPhalanxSize()
 	remainedPhalanxSize := phalanxSize - 1
-	remainedCnt, remainedRowIdx, remainedLineIdx := -1, 0, 0
+	remainedCnt, remainedRowIdx, remainedColumnIdx := -1, 0, 0
 	remainedPhalanx := &Matrix{}
 	remainedPhalanx.assign(remainedPhalanxSize, remainedPhalanxSize)
 	for rowIdx := 0; rowIdx < phalanxSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < phalanxSize; lineIdx++ {
-			if rowIdx != rowIndex && lineIdx != lineIndex {
+		for columnIdx := 0; columnIdx < phalanxSize; columnIdx++ {
+			if rowIdx != rowIndex && columnIdx != columnIndex {
 				remainedCnt++
 				remainedRowIdx = remainedCnt / remainedPhalanxSize
-				remainedLineIdx = remainedCnt % remainedPhalanxSize
-				remainedPhalanx.set(remainedRowIdx, remainedLineIdx, matrix.get(rowIdx, lineIdx))
+				remainedColumnIdx = remainedCnt % remainedPhalanxSize
+				remainedPhalanx.set(remainedRowIdx, remainedColumnIdx, matrix.get(rowIdx, columnIdx))
 			}
 		}
 	}
@@ -386,13 +441,13 @@ func (matrix *Matrix) getPhalanxByIgnoreCentral(rowIndex, lineIndex int) *Matrix
 
 // getPhalanxByIgnoreKCentral
 // chained option
-func (matrix *Matrix) getPhalanxByIgnoreKCentral(rowIndexMap, lineIndexMap map[int]bool) (*Matrix, *Matrix) {
-	if rowIndexMap == nil || lineIndexMap == nil {
+func (matrix *Matrix) getPhalanxByIgnoreKCentral(rowIndexMap, columnIndexMap map[int]bool) (*Matrix, *Matrix) {
+	if rowIndexMap == nil || columnIndexMap == nil {
 		return &Matrix{}, &Matrix{}
 	}
 	phalanxSize := matrix.getPhalanxSize()
-	rowsK, linesK := len(rowIndexMap), len(lineIndexMap)
-	if rowsK != linesK ||
+	rowsK, columnsK := len(rowIndexMap), len(columnIndexMap)
+	if rowsK != columnsK ||
 		phalanxSize < rowsK {
 		return &Matrix{}, &Matrix{}
 	}
@@ -400,33 +455,33 @@ func (matrix *Matrix) getPhalanxByIgnoreKCentral(rowIndexMap, lineIndexMap map[i
 	selectedSize, remainedSize := rowsK, phalanxSize-rowsK
 	selected.assign(selectedSize, selectedSize)
 	remained.assign(remainedSize, remainedSize)
-	slCnt, slRowIdx, slLineIdx := -1, 0, 0
-	rmCnt, rmRowIdx, rmLineIdx := -1, 0, 0
+	slCnt, slRowIdx, slColumnIdx := -1, 0, 0
+	rmCnt, rmRowIdx, rmColumnIdx := -1, 0, 0
 	for rowIdx := 0; rowIdx < phalanxSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < phalanxSize; lineIdx++ {
-			if !rowIndexMap[rowIdx] && !lineIndexMap[lineIdx] {
+		for columnIdx := 0; columnIdx < phalanxSize; columnIdx++ {
+			if !rowIndexMap[rowIdx] && !columnIndexMap[columnIdx] {
 				rmCnt++
 				rmRowIdx = rmCnt / remainedSize
-				rmLineIdx = rmCnt % remainedSize
-				remained.set(rmRowIdx, rmLineIdx, matrix.get(rowIdx, lineIdx))
-			} else if rowIndexMap[rowIdx] && lineIndexMap[lineIdx] {
+				rmColumnIdx = rmCnt % remainedSize
+				remained.set(rmRowIdx, rmColumnIdx, matrix.get(rowIdx, columnIdx))
+			} else if rowIndexMap[rowIdx] && columnIndexMap[columnIdx] {
 				slCnt++
 				slRowIdx = slCnt / selectedSize
-				slLineIdx = slCnt % selectedSize
-				selected.set(slRowIdx, slLineIdx, matrix.get(rowIdx, lineIdx))
+				slColumnIdx = slCnt % selectedSize
+				selected.set(slRowIdx, slColumnIdx, matrix.get(rowIdx, columnIdx))
 			}
 		}
 	}
 	return selected, remained
 }
 
-func (matrix *Matrix) getPhalanxMinusOnePower(rowIndexMap, lineIndexMap map[int]bool) int {
+func (matrix *Matrix) getPhalanxMinusOnePower(rowIndexMap, columnIndexMap map[int]bool) int {
 	totalPower := 0
 	for row, _ := range rowIndexMap {
 		totalPower += row
 	}
-	for line, _ := range lineIndexMap {
-		totalPower += line
+	for column, _ := range columnIndexMap {
+		totalPower += column
 	}
 	return totalPower
 }
@@ -442,8 +497,12 @@ func (matrix *Matrix) GetRowSize() int {
 	return matrix.rowSize
 }
 
-func (matrix *Matrix) GetLineSize() int {
-	return matrix.lineSize
+func (matrix *Matrix) GetColumnSize() int {
+	return matrix.columnSize
+}
+
+func (matrix *Matrix) GetElemSize() int {
+	return matrix.rowSize * matrix.columnSize
 }
 
 // one2OneOpt
@@ -454,27 +513,27 @@ func (matrix *Matrix) one2OneOpt(opt rune, m *Matrix) *Matrix {
 		panic(matrixNotSameShapeError)
 	}
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
 			switch opt {
 			case '+':
 				{
-					matrix.setOpt(rowIdx, lineIdx, m.get(rowIdx, lineIdx), '+')
+					matrix.setOpt(rowIdx, columnIdx, m.get(rowIdx, columnIdx), '+')
 				}
 			case '-':
 				{
-					matrix.setOpt(rowIdx, lineIdx, m.get(rowIdx, lineIdx), '-')
+					matrix.setOpt(rowIdx, columnIdx, m.get(rowIdx, columnIdx), '-')
 				}
 			case '*':
 				{
-					matrix.setOpt(rowIdx, lineIdx, m.get(rowIdx, lineIdx), '*')
+					matrix.setOpt(rowIdx, columnIdx, m.get(rowIdx, columnIdx), '*')
 				}
 			case '/':
 				{
-					matrix.setOpt(rowIdx, lineIdx, m.get(rowIdx, lineIdx), '/')
+					matrix.setOpt(rowIdx, columnIdx, m.get(rowIdx, columnIdx), '/')
 				}
 			case '^':
 				{
-					matrix.setOpt(rowIdx, lineIdx, m.get(rowIdx, lineIdx), '^')
+					matrix.setOpt(rowIdx, columnIdx, m.get(rowIdx, columnIdx), '^')
 				}
 			default:
 				{
@@ -497,7 +556,7 @@ func (matrix *Matrix) Rank() int {
 
 func (matrix *Matrix) Det() float64 {
 	if !matrix.isPhalanx() {
-		panic(matrixRowLineDiffer)
+		panic(matrixRowColumnDiffer)
 	}
 	return matrix.det()
 }
@@ -534,10 +593,10 @@ func (matrix *Matrix) simpleDet(totalN int) float64 {
 		randomRow      int     = lang.GetRandomIntValue(matrix.getPhalanxSize())
 		sumByRandomRow float64 = 0.0
 	)
-	for lineIdx := 0; lineIdx < totalN; lineIdx++ {
-		sumByRandomRow += matrix.getPhalanxByIgnoreCentral(randomRow, lineIdx).det() *
-			matrix.get(randomRow, lineIdx) *
-			float64(lang.MinusOnePower(randomRow+lineIdx))
+	for columnIdx := 0; columnIdx < totalN; columnIdx++ {
+		sumByRandomRow += matrix.getPhalanxByIgnoreCentral(randomRow, columnIdx).det() *
+			matrix.get(randomRow, columnIdx) *
+			float64(lang.MinusOnePower(randomRow+columnIdx))
 	}
 	return sumByRandomRow
 }
@@ -546,16 +605,18 @@ func (matrix *Matrix) laplaceDet(totalN int) float64 {
 	var (
 		randomKRow      int            = matrix.getPhalanxSize() / 2
 		randomKRows     map[int]bool   = lang.GetRandomMapValue(totalN, randomKRow)
-		kLinesMap       []map[int]bool = lang.GetCombinationSliceMap(totalN, randomKRow)
+		kColumnsMap     []map[int]bool = lang.GetCombinationSliceMap(totalN, randomKRow)
 		sumByRandomKRow float64        = 0.0
 	)
-	for _, linesMap := range kLinesMap {
-		sel, rem := matrix.getPhalanxByIgnoreKCentral(randomKRows, linesMap)
-		power := matrix.getPhalanxMinusOnePower(randomKRows, linesMap)
+	for _, columnsMap := range kColumnsMap {
+		sel, rem := matrix.getPhalanxByIgnoreKCentral(randomKRows, columnsMap)
+		power := matrix.getPhalanxMinusOnePower(randomKRows, columnsMap)
 		sumByRandomKRow += sel.det() * rem.det() * float64(lang.MinusOnePower(power))
 	}
 	return sumByRandomKRow
 }
+
+// Matrix Opt Matrix self
 
 // GetTranspose
 // chained option
@@ -567,16 +628,17 @@ func (matrix *Matrix) GetTranspose() *Matrix {
 // transpose
 // change self
 // chained option
+// update version: the space complexity is: O(1), impossible
 func (matrix *Matrix) transpose() *Matrix {
-	newRowSize, newLineSize := matrix.lineSize, matrix.rowSize
+	newRowSize, newColumnSize := matrix.columnSize, matrix.rowSize
 	newSlice := make([][]float64, newRowSize)
 	for newRowIdx := 0; newRowIdx < newRowSize; newRowIdx++ {
-		newSlice[newRowIdx] = make([]float64, newLineSize)
-		for newLineIdx := 0; newLineIdx < newLineSize; newLineIdx++ {
-			newSlice[newRowIdx][newLineIdx] = matrix.get(newLineIdx, newRowIdx)
+		newSlice[newRowIdx] = make([]float64, newColumnSize)
+		for newColumnIdx := 0; newColumnIdx < newColumnSize; newColumnIdx++ {
+			newSlice[newRowIdx][newColumnIdx] = matrix.get(newColumnIdx, newRowIdx)
 		}
 	}
-	matrix.setValues(newSlice, newRowSize, newLineSize)
+	matrix.setValues(newSlice, newRowSize, newColumnSize)
 	return matrix
 }
 
@@ -593,7 +655,7 @@ func (matrix *Matrix) GetInverse() *Matrix {
 // |M| != 0, M^{-1} = M^{*}/|M|
 func (matrix *Matrix) inverse() *Matrix {
 	if !matrix.isPhalanx() {
-		panic(matrixRowLineDiffer)
+		panic(matrixRowColumnDiffer)
 	}
 	det := matrix.det()
 	if lang.EqualFloat64ByAccuracy(det, matrixDeterminantZero) {
@@ -616,7 +678,7 @@ func (matrix *Matrix) GetAdjoin() *Matrix {
 // chained option
 func (matrix *Matrix) adjoin() *Matrix {
 	if !matrix.isPhalanx() {
-		panic(matrixRowLineDiffer)
+		panic(matrixRowColumnDiffer)
 	}
 	size := matrix.getPhalanxSize()
 	adjoinMatrix := &Matrix{}
@@ -624,10 +686,10 @@ func (matrix *Matrix) adjoin() *Matrix {
 	// 1. each element calculate remainder value by (getPhalanxByIgnoreCentral)
 	// 2. each element calculate algebraic remainder value by (MinusOnePower)
 	for rowIdx := 0; rowIdx < size; rowIdx++ {
-		for lineIdx := 0; lineIdx < size; lineIdx++ {
-			algebraicRemainderValue := matrix.getPhalanxByIgnoreCentral(rowIdx, lineIdx).det() *
-				float64(lang.MinusOnePower(rowIdx+lineIdx))
-			adjoinMatrix.set(rowIdx, lineIdx, algebraicRemainderValue)
+		for columnIdx := 0; columnIdx < size; columnIdx++ {
+			algebraicRemainderValue := matrix.getPhalanxByIgnoreCentral(rowIdx, columnIdx).det() *
+				float64(lang.MinusOnePower(rowIdx+columnIdx))
+			adjoinMatrix.set(rowIdx, columnIdx, algebraicRemainderValue)
 		}
 	}
 	// 3. matrix transpose
@@ -660,6 +722,64 @@ func (matrix *Matrix) Trace() float64 {
 	panic(matrixNotPhalanx)
 }
 
+func (matrix *Matrix) Sum() float64 {
+	return matrix.Accu()
+}
+
+func (matrix *Matrix) Accu() float64 {
+	return matrix.accumulate()
+}
+
+func (matrix *Matrix) accumulate() float64 {
+	var (
+		accuRes float64 = 0.0
+	)
+	matrix.traverse(func(elemValue float64) {
+		accuRes += elemValue
+	})
+	return accuRes
+}
+
+func (matrix *Matrix) All(conditionFunc func(float64) bool) bool {
+	var (
+		allFlag = true
+	)
+	matrix.traverse(func(elemValue float64) {
+		if !conditionFunc(elemValue) {
+			allFlag = false
+		}
+	})
+	return allFlag
+}
+
+func (matrix *Matrix) Any(conditionFunc func(float64) bool) bool {
+	var (
+		anyFlag = false
+	)
+	matrix.traverse(func(elemValue float64) {
+		if conditionFunc(elemValue) {
+			anyFlag = true
+		}
+	})
+	return anyFlag
+}
+
+func (matrix *Matrix) Find(conditionFunc func(float64) bool) []float64 {
+	var (
+		conditionValues []float64 = make([]float64, 0)
+	)
+	matrix.traverse(func(elemValue float64) {
+		if conditionFunc(elemValue) {
+			conditionValues = append(conditionValues, elemValue)
+		}
+	})
+	return conditionValues
+}
+
+func (matrix *Matrix) FindOne(conditionFunc func(float64) bool) float64 {
+	return matrix.Find(conditionFunc)[0]
+}
+
 func (matrix *Matrix) Approx(accBits ...int) *Matrix {
 	mCopy := matrix.makeCopy()
 	return mCopy.approximation(accBits...)
@@ -671,9 +791,9 @@ func (matrix *Matrix) approximation(accAfterDotBits ...int) *Matrix {
 		accBits = accAfterDotBits[0]
 	}
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
 			newVal := 0.0
-			valStr := fmt.Sprintf("%."+strconv.Itoa(accBits)+"f", matrix.get(rowIdx, lineIdx))
+			valStr := fmt.Sprintf("%."+strconv.Itoa(accBits)+"f", matrix.get(rowIdx, columnIdx))
 			valF, err := strconv.ParseFloat(valStr, 64)
 			if err != nil {
 				panic(err)
@@ -683,35 +803,151 @@ func (matrix *Matrix) approximation(accAfterDotBits ...int) *Matrix {
 			} else {
 				newVal = valF
 			}
-			matrix.set(rowIdx, lineIdx, newVal)
+			matrix.set(rowIdx, columnIdx, newVal)
 		}
 	}
 	return matrix
 }
 
-func (matrix *Matrix) ReShape(rowSize, lineSize int) *Matrix {
-	if matrix.rowSize*matrix.lineSize !=
-		rowSize*lineSize {
+func (matrix *Matrix) ReShape(rowSize, columnSize int) *Matrix {
+	if matrix.rowSize*matrix.columnSize !=
+		rowSize*columnSize {
 		panic(matrixCanNotBeReShapedError)
 	}
 	reShapedMatrix := &Matrix{}
-	reShapedMatrix.assign(rowSize, lineSize)
-	mCnt, mRowIdx, mLineIdx := -1, 0, 0
+	reShapedMatrix.assign(rowSize, columnSize)
+	mCnt, mRowIdx, mColumnIdx := -1, 0, 0
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
 			mCnt++
-			mRowIdx = mCnt / lineSize
-			mLineIdx = mCnt % lineSize
-			reShapedMatrix.set(mRowIdx, mLineIdx, matrix.get(rowIdx, lineIdx))
+			mRowIdx = mCnt / columnSize
+			mColumnIdx = mCnt % columnSize
+			reShapedMatrix.set(mRowIdx, mColumnIdx, matrix.get(rowIdx, columnIdx))
 		}
 	}
 	matrix.remake(reShapedMatrix)
 	return matrix
 }
 
-func (matrix *Matrix) GetReShape(rowSize, lineSize int) *Matrix {
+func (matrix *Matrix) GetReShape(rowSize, columnSize int) *Matrix {
 	mCopy := matrix.makeCopy()
-	return mCopy.ReShape(rowSize, lineSize)
+	return mCopy.ReShape(rowSize, columnSize)
+}
+
+func (matrix *Matrix) GetMirror() *Matrix {
+	return matrix
+}
+
+func (matrix *Matrix) mirror() *Matrix {
+	return matrix
+}
+
+func (matrix *Matrix) GetFlip() *Matrix {
+	m := matrix.makeCopy()
+	return m.flip()
+}
+
+func (matrix *Matrix) flip() *Matrix {
+	size := matrix.getPhalanxSize()
+	for rowIdx := 0; rowIdx < (size >> 1); rowIdx++ {
+		for columnIdx := 0; columnIdx < size; columnIdx++ {
+			matrix.setElemSwap(rowIdx, columnIdx, size-1-rowIdx, size-1-columnIdx)
+		}
+	}
+	if lang.Odd(size) {
+		matrix.setRowElemSwap(size >> 1)
+	}
+	return matrix
+}
+
+func (matrix *Matrix) GetRotate(clockWise bool, rotateCount int) *Matrix {
+	return matrix.rotate(clockWise, rotateCount)
+}
+
+func (matrix *Matrix) rotate(clockWise bool, rotateCount int) *Matrix {
+	rotateCount %= 4
+	switch rotateCount {
+	case 1:
+		{
+			matrix.rotate90(clockWise)
+		}
+	case 2:
+		{
+			matrix.flip()
+		}
+	case 3:
+		{
+			matrix.rotate90(!clockWise)
+		}
+	default:
+		{
+			// do nothing
+		}
+	}
+	return matrix
+}
+
+func (matrix *Matrix) rotate90(clockWise bool) *Matrix {
+	matrix.flipByMainDiagonal()
+	if clockWise {
+		matrix.flipByMiddleColumn()
+	} else {
+		matrix.flipByMiddleRow()
+	}
+	return matrix
+}
+
+func (matrix *Matrix) flipByMiddleRow() *Matrix {
+	size := matrix.getPhalanxSize()
+	for rowIdx := 0; rowIdx < (size >> 1); rowIdx++ {
+		matrix.setRowSwap(rowIdx, size-1-rowIdx)
+	}
+	return matrix
+}
+
+func (matrix *Matrix) flipByMiddleColumn() *Matrix {
+	size := matrix.getPhalanxSize()
+	for rowIdx := 0; rowIdx < (size >> 1); rowIdx++ {
+		matrix.setColumnSwap(rowIdx, size-1-rowIdx)
+	}
+	return matrix
+}
+
+func (matrix *Matrix) flipByMainDiagonal() *Matrix {
+	size := matrix.getPhalanxSize()
+	for rowIdx := 0; rowIdx < size; rowIdx++ {
+		for columnIdx := 0; columnIdx < rowIdx; columnIdx++ {
+			matrix.setElemSwap(rowIdx, columnIdx, columnIdx, rowIdx)
+		}
+	}
+	return matrix
+}
+
+func (matrix *Matrix) flipBySubDiagonal() *Matrix {
+	size := matrix.getPhalanxSize()
+	for rowIdx := 0; rowIdx < size; rowIdx++ {
+		for columnIdx := rowIdx; columnIdx < size; columnIdx++ {
+			matrix.setElemSwap(rowIdx, columnIdx, columnIdx, rowIdx)
+		}
+	}
+	return matrix
+}
+
+func (matrix *Matrix) IsX() bool {
+	size := matrix.getPhalanxSize()
+	flag := true
+	matrix.traverseV2(func(rowIdx int, columnIdx int, elemValue ...float64) {
+		if rowIdx == columnIdx || rowIdx+columnIdx == size-1 {
+			if lang.EqualFloat64Zero(elemValue[0]) {
+				flag = false
+			}
+		} else {
+			if !lang.EqualFloat64Zero(elemValue[0]) {
+				flag = false
+			}
+		}
+	})
+	return flag
 }
 
 // Matrix Opt Matrix Res Matrix
@@ -754,12 +990,12 @@ func (matrix *Matrix) Mul(m *Matrix) *Matrix {
 	}
 	newSlice := make([][]float64, matrix.rowSize)
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-		newSlice[rowIdx] = make([]float64, m.lineSize)
-		for lineIdx := 0; lineIdx < m.lineSize; lineIdx++ {
-			newSlice[rowIdx][lineIdx] = matrix.GetRowAsVector(rowIdx).DotMul(m.GetLineAsVector(lineIdx))
+		newSlice[rowIdx] = make([]float64, m.columnSize)
+		for columnIdx := 0; columnIdx < m.columnSize; columnIdx++ {
+			newSlice[rowIdx][columnIdx] = matrix.GetRowAsVector(rowIdx).DotMul(m.GetColumnAsVector(columnIdx))
 		}
 	}
-	matrix.setValues(newSlice, matrix.rowSize, m.lineSize)
+	matrix.setValues(newSlice, matrix.rowSize, m.columnSize)
 	return matrix
 }
 
@@ -799,8 +1035,8 @@ func (matrix *Matrix) Power(n int) *Matrix {
 // chained option
 func (matrix *Matrix) MulLambda(lambda float64) *Matrix {
 	for rowIdx, _ := range matrix.GetSlice() {
-		for lineIdx, _ := range matrix.getRow(rowIdx) {
-			matrix.setOpt(rowIdx, lineIdx, lambda, '*')
+		for columnIdx, _ := range matrix.getRow(rowIdx) {
+			matrix.setOpt(rowIdx, columnIdx, lambda, '*')
 		}
 	}
 	return matrix
@@ -809,12 +1045,12 @@ func (matrix *Matrix) MulLambda(lambda float64) *Matrix {
 func (matrix *Matrix) MulVector(v *Vector) *Vector {
 	if v != nil &&
 		v.shape &&
-		matrix.lineSize == v.size {
+		matrix.columnSize == v.size {
 		vCopy := v.makeCopy()
 		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 			var rowSum float64 = 0.0
-			for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
-				rowSum += vCopy.get(lineIdx, lineIdx) * matrix.get(rowIdx, lineIdx)
+			for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+				rowSum += vCopy.get(columnIdx, columnIdx) * matrix.get(rowIdx, columnIdx)
 			}
 			v.slice[rowIdx] = rowSum
 		}
@@ -857,35 +1093,145 @@ func (matrix *Matrix) DotPower(m *Matrix) *Matrix {
 	return matrix.one2OneOpt('^', m)
 }
 
-// Matrix generate Matrix
-
-func (matrix *Matrix) Gen() {
-
+func (matrix *Matrix) Convolution(m *Matrix) float64 {
+	if !matrix.sameShape(m) {
+		panic(matrixNotSameShapeError)
+	}
+	return matrix.GetTimes(m.GetFlip()).Sum()
 }
 
-func (matrix *Matrix) generateMatrix() {
+func (matrix *Matrix) Rand() *Matrix {
+	return matrix.SetRandom()
+}
 
+func (matrix *Matrix) SetRandom() *Matrix {
+	matrix.setSelf(matrix.generateRandomFloat64(matrix.rowSize, matrix.columnSize, 0.0, 1.0))
+	return matrix
+}
+
+// GenMatrix
+// Matrix generate Matrix
+// len(dataRange) = 0, [0.0,1.0)
+// len(dataRange) = 1, [0.0,dataRange[0])
+// len(dataRange) = 2, [dataRange[0],dataRange[1])
+func GenMatrix(rowSize, columnSize int, dataType string, dataRange ...float64) *Matrix {
+	var (
+		rangeStart   float64 = 0.0
+		rangeEnd     float64 = 1.0
+		puppetMatrix         = &Matrix{}
+	)
+	if rangeLen := len(dataRange); rangeLen > 0 {
+		if rangeLen == 1 {
+			rangeEnd = dataRange[0]
+		} else if rangeLen == 2 {
+			rangeStart = dataRange[0]
+			rangeEnd = dataRange[1]
+		}
+	}
+	switch dataType {
+	case "i", "int":
+		{
+			return puppetMatrix.generateRandomInt(rowSize, columnSize, int(rangeStart), int(rangeEnd))
+		}
+	case "i32", "int32":
+		{
+			return puppetMatrix.generateRandomInt32(rowSize, columnSize, int32(rangeStart), int32(rangeEnd))
+		}
+	case "i64", "int64":
+		{
+			return puppetMatrix.generateRandomInt64(rowSize, columnSize, int64(rangeStart), int64(rangeEnd))
+		}
+	case "f", "f64", "float64":
+		{
+			return puppetMatrix.generateRandomFloat64(rowSize, columnSize, rangeStart, rangeEnd)
+		}
+	default:
+		{
+
+		}
+	}
+	return &Matrix{}
+}
+
+func (matrix *Matrix) generateMatrix() *Matrix {
+	return matrix
+}
+
+func (matrix *Matrix) generateRandomInt(rowSize, columnSize int, a, b int) *Matrix {
+	if a > b {
+		panic(rangeBoundError)
+	}
+	mt := &Matrix{}
+	mt.assign(rowSize, columnSize)
+	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
+		for columnIdx := 0; columnIdx < columnSize; columnIdx++ {
+			mt.set(rowIdx, columnIdx, lang.GetRandFloat64ByIntRange(a, b))
+		}
+	}
+	return mt
+}
+
+func (matrix *Matrix) generateRandomInt32(rowSize, columnSize int, a, b int32) *Matrix {
+	if a > b {
+		panic(rangeBoundError)
+	}
+	mt := &Matrix{}
+	mt.assign(rowSize, columnSize)
+	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
+		for columnIdx := 0; columnIdx < columnSize; columnIdx++ {
+			mt.set(rowIdx, columnIdx, lang.GetRandFloat64ByInt32Range(a, b))
+		}
+	}
+	return mt
+}
+
+func (matrix *Matrix) generateRandomInt64(rowSize, columnSize int, a, b int64) *Matrix {
+	if a > b {
+		panic(rangeBoundError)
+	}
+	mt := &Matrix{}
+	mt.assign(rowSize, columnSize)
+	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
+		for columnIdx := 0; columnIdx < columnSize; columnIdx++ {
+			mt.set(rowIdx, columnIdx, lang.GetRandFloat64ByInt64Range(a, b))
+		}
+	}
+	return mt
+}
+
+func (matrix *Matrix) generateRandomFloat64(rowSize, columnSize int, a, b float64) *Matrix {
+	if a > b {
+		panic(rangeBoundError)
+	}
+	mt := &Matrix{}
+	mt.assign(rowSize, columnSize)
+	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
+		for columnIdx := 0; columnIdx < columnSize; columnIdx++ {
+			mt.set(rowIdx, columnIdx, lang.GetRandFloat64ByFloat64Range(a, b))
+		}
+	}
+	return mt
 }
 
 func (matrix *Matrix) generateSameSizeMatrix(value interface{}, size ...int) *Matrix {
 	generatedMatrix := &Matrix{}
-	gRowSize, gLineSize := matrix.rowSize, matrix.lineSize
+	gRowSize, gColumnSize := matrix.rowSize, matrix.columnSize
 	if sizeLen := len(size); sizeLen > 0 {
 		if sizeLen >= 1 {
 			gRowSize = size[0]
-			gLineSize = gRowSize
+			gColumnSize = gRowSize
 		}
 		if sizeLen >= 2 {
-			gLineSize = size[1]
+			gColumnSize = size[1]
 		}
 	}
 	switch value.(type) {
 	case float32, float64:
 		{
-			generatedMatrix.assign(gRowSize, gLineSize)
+			generatedMatrix.assign(gRowSize, gColumnSize)
 			for rowIdx := 0; rowIdx < gRowSize; rowIdx++ {
-				for lineIdx := 0; lineIdx < gLineSize; lineIdx++ {
-					generatedMatrix.set(rowIdx, lineIdx, value.(float64))
+				for columnIdx := 0; columnIdx < gColumnSize; columnIdx++ {
+					generatedMatrix.set(rowIdx, columnIdx, value.(float64))
 				}
 			}
 		}
@@ -901,6 +1247,10 @@ func (matrix *Matrix) generateSameSizeMatrix(value interface{}, size ...int) *Ma
 	return generatedMatrix
 }
 
+func (matrix *Matrix) Zeros() *Matrix {
+	return matrix.SetZero()
+}
+
 func (matrix *Matrix) SetZero(size ...int) *Matrix {
 	matrix.setSelf(matrix.GetZero(size...))
 	return matrix
@@ -908,6 +1258,10 @@ func (matrix *Matrix) SetZero(size ...int) *Matrix {
 
 func (matrix *Matrix) GetZero(size ...int) *Matrix {
 	return matrix.generateSameSizeMatrix(0.0, size...)
+}
+
+func (matrix *Matrix) Ones() *Matrix {
+	return matrix.SetOne()
 }
 
 func (matrix *Matrix) SetOne(size ...int) *Matrix {
@@ -982,7 +1336,7 @@ func (matrix *Matrix) Unit() *Matrix {
 
 func (matrix *Matrix) EigenValues() *EigenValues {
 	if !matrix.isPhalanx() {
-		panic(matrixRowLineDiffer)
+		panic(matrixRowColumnDiffer)
 	}
 	eigenMatrix := matrix.EigenMatrix()
 	eigenPoly := eigenMatrix.Det()
@@ -993,7 +1347,7 @@ func (matrix *Matrix) EigenValues() *EigenValues {
 // TODO: 1.
 func (matrix *Matrix) EigenVectors() *EigenVectors {
 	if !matrix.isPhalanx() {
-		panic(matrixRowLineDiffer)
+		panic(matrixRowColumnDiffer)
 	}
 	return &EigenVectors{}
 }
@@ -1036,27 +1390,53 @@ func (matrix *Matrix) determinantFactors() []*Poly {
 
 func (matrix *Matrix) ZeroSpace() {}
 
-func (matrix *Matrix) RowSimplest() {}
-
-// ET
+// RowSimplest
 // Matrix ElementaryTransformation
-func (matrix *Matrix) ET() {}
+func (matrix *Matrix) RowSimplest() *Matrix {
+	return matrix
+}
 
-func (matrix *Matrix) RowET() {}
+func (matrix *Matrix) rowExchangeET(rowIIndex, rowJIndex int) *Matrix {
+	matrix.setRowSwap(rowIIndex, rowJIndex)
+	return matrix
+}
 
-func (matrix *Matrix) LineET() {}
+func (matrix *Matrix) columnExchangeET(columnIIndex, columnJIndex int) *Matrix {
+	matrix.setColumnSwap(columnIIndex, columnJIndex)
+	return matrix
+}
 
-func (matrix *Matrix) rowExchangeET() {}
+func (matrix *Matrix) rowMulLambdaET(rowIndex int, lambda float64) *Matrix {
+	matrix.setRowElemOpt(rowIndex, '*', lambda)
+	return matrix
+}
 
-func (matrix *Matrix) lineExchangeET() {}
+func (matrix *Matrix) columnMulLambdaET(columnIndex int, lambda float64) *Matrix {
+	matrix.setColumnElemOpt(columnIndex, '*', lambda)
+	return matrix
+}
 
-func (matrix *Matrix) rowMulLambdaET() {}
+func (matrix *Matrix) rowIMulLambdaAddRowJET(rowIIndex, rowJIndex int, lambda float64) *Matrix {
+	if !matrix.validateIndex(rowIIndex) ||
+		!matrix.validateIndex(rowJIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+		matrix.setOpt(rowJIndex, columnIdx, matrix.get(rowIIndex, columnIdx)*lambda, '+')
+	}
+	return matrix
+}
 
-func (matrix *Matrix) lineMulLambdaET() {}
-
-func (matrix *Matrix) rowIMulLambdaAddRowJET() {}
-
-func (matrix *Matrix) lineIMulLambdaAddLineJET() {}
+func (matrix *Matrix) columnIMulLambdaAddColumnJET(columnIIndex, columnJIndex int, lambda float64) *Matrix {
+	if !matrix.validateColumnIndex(columnIIndex) ||
+		!matrix.validateColumnIndex(columnJIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		matrix.setOpt(rowIdx, columnJIndex, matrix.get(rowIdx, columnIIndex)*lambda, '+')
+	}
+	return matrix
+}
 
 // Matrix Decomposition
 
@@ -1083,8 +1463,26 @@ func (matrix *Matrix) IsNegativeDefine() bool { return false }
 
 // Matrix Symmetric
 
-func (matrix *Matrix) IsSymmetric() bool     { return false }
-func (matrix *Matrix) IsAntiSymmetric() bool { return false }
+func (matrix *Matrix) IsSymmetric() bool {
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		for columnIdx := rowIdx + 1; columnIdx < matrix.columnSize; columnIdx++ {
+			if !lang.EqualFloat64ByAccuracy(matrix.get(rowIdx, columnIdx), matrix.get(columnIdx, rowIdx)) {
+				return false
+			}
+		}
+	}
+	return true
+}
+func (matrix *Matrix) IsAntiSymmetric() bool {
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		for columnIdx := rowIdx + 1; columnIdx < matrix.columnSize; columnIdx++ {
+			if !lang.EqualFloat64Zero(matrix.get(rowIdx, columnIdx) + matrix.get(columnIdx, rowIdx)) {
+				return false
+			}
+		}
+	}
+	return true
+}
 
 // AI algorithm
 
@@ -1152,9 +1550,9 @@ func (matrix *Matrix) isDiagonalMatrix(value ...interface{}) bool {
 			}
 		}
 		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-			for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
-				val := matrix.get(rowIdx, lineIdx)
-				if rowIdx == lineIdx {
+			for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+				val := matrix.get(rowIdx, columnIdx)
+				if rowIdx == columnIdx {
 					if compValue != math.Inf(0) {
 						if !lang.EqualFloat64ByAccuracy(1.0, val) {
 							return false
@@ -1191,7 +1589,7 @@ func (matrix *Matrix) Diagonal() *Diagonal {
 
 func (matrix *Matrix) Vector() *Vector {
 	if matrix.rowSize == matrixToVectorRowSize ||
-		matrix.lineSize == matrixToVectorLineSize {
+		matrix.columnSize == matrixToVectorColumnSize {
 		return matrix.convertToVector()
 	}
 	panic(matrixCanNotBeVectorError)
@@ -1199,12 +1597,12 @@ func (matrix *Matrix) Vector() *Vector {
 
 func (matrix *Matrix) convertToVector() *Vector {
 	if matrix.rowSize != matrixToVectorRowSize &&
-		matrix.lineSize != matrixToVectorLineSize {
+		matrix.columnSize != matrixToVectorColumnSize {
 		panic(matrixCanNotBeVectorError)
 	}
 	if matrix.rowSize == matrixToVectorRowSize {
 		vector := &Vector{}
-		vector.setValues(make([]float64, matrix.lineSize), matrix.lineSize, false)
+		vector.setValues(make([]float64, matrix.columnSize), matrix.columnSize, false)
 		copy(vector.slice, matrix.getRow(0))
 		return vector
 	} else {
@@ -1224,11 +1622,11 @@ func (matrix *Matrix) GetRowAsVector(rowIndex int) *Vector {
 	return ConstructVector(lang.GetReal2DArrayRow(matrix.GetSlice(), rowIndex), false)
 }
 
-func (matrix *Matrix) GetLineAsVector(lineIndex int) *Vector {
-	if !matrix.validateIndex(0, lineIndex) {
+func (matrix *Matrix) GetColumnAsVector(columnIndex int) *Vector {
+	if !matrix.validateIndex(0, columnIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	return ConstructVector(lang.GetReal2DArrayLine(matrix.GetSlice(), lineIndex), true)
+	return ConstructVector(lang.GetReal2DArrayColumn(matrix.GetSlice(), columnIndex), true)
 }
 
 func (matrix *Matrix) VectorGroup(shape bool) *VectorGroup {
@@ -1246,13 +1644,106 @@ func (matrix *Matrix) PolyMatrix() *PolyMatrix {
 
 func (matrix *Matrix) convertToPolyMatrix() *PolyMatrix {
 	pm := &PolyMatrix{}
-	pm.assign(matrix.rowSize, matrix.lineSize)
+	pm.assign(matrix.rowSize, matrix.columnSize)
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
-			pm.set(rowIdx, lineIdx, ConstructPolyNode(matrix.get(rowIdx, lineIdx), 0).Poly('λ'))
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+			pm.set(rowIdx, columnIdx, ConstructPolyNode(matrix.get(rowIdx, columnIdx), 0).Poly(eigenPolyMatrixDefaultAES))
 		}
 	}
 	return pm
+}
+
+func (matrix *Matrix) getSpiralOrder() []float64 {
+	var (
+		elemSize                                  = matrix.GetElemSize()
+		spiralSlice                               = make([]float64, elemSize)
+		cnt, turn, x, y                           = 0, 0, 0, 0
+		rightBound, downBound, leftBound, upBound = matrix.GetColumnSize() - 1, matrix.GetRowSize() - 1, 0, 1
+	)
+	for cnt < elemSize {
+		switch turn {
+		// right
+		case 0:
+			{
+				if y > rightBound {
+					turn = 1
+					y--
+					x++
+					rightBound--
+				} else {
+					spiralSlice[cnt] = matrix.get(x, y)
+					y++
+					cnt++
+				}
+
+			}
+			// down
+		case 1:
+			{
+				if x > downBound {
+					turn = 2
+					x--
+					y--
+					downBound--
+				} else {
+					spiralSlice[cnt] = matrix.get(x, y)
+					x++
+					cnt++
+				}
+			}
+			// left
+		case 2:
+			{
+				if y < leftBound {
+					turn = 3
+					y++
+					x--
+					leftBound++
+				} else {
+					spiralSlice[cnt] = matrix.get(x, y)
+					y--
+					cnt++
+				}
+			}
+			// up
+		case 3:
+			{
+				if x < upBound {
+					turn = 0
+					x++
+					y++
+					upBound++
+				} else {
+					spiralSlice[cnt] = matrix.get(x, y)
+					x--
+					cnt++
+				}
+			}
+		default:
+			{
+
+			}
+		}
+	}
+	return spiralSlice
+}
+
+func (matrix *Matrix) traverse(funcPtr func(float64)) *Matrix {
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+			funcPtr(matrix.get(rowIdx, columnIdx))
+		}
+	}
+	return matrix
+}
+
+func (matrix *Matrix) traverseV2(funcPtr func(int, int, ...float64)) *Matrix {
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+			funcPtr(rowIdx, columnIdx, matrix.get(rowIdx, columnIdx))
+		}
+	}
+	return matrix
 }
 
 // Display
@@ -1263,8 +1754,8 @@ func (matrix *Matrix) Display() *Matrix {
 		return matrix
 	}
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < matrix.lineSize; lineIdx++ {
-			val := matrix.get(rowIdx, lineIdx)
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+			val := matrix.get(rowIdx, columnIdx)
 			if lang.EqualFloat64Zero(val) {
 				val = 0.0
 			}

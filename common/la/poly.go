@@ -7,11 +7,12 @@ import (
 )
 
 const (
-	polyNoSize        int    = 0
-	polyInvalidMaxExp int    = -1
-	polyInvalidAes    rune   = ' '
-	polyDefaultAes    rune   = 'x'
-	undefinedString   string = ""
+	polyNoSize            int    = 0
+	polyInvalidMaxExp     int    = -1
+	polyInvalidAes        rune   = ' '
+	polyDefaultAes        rune   = 'x'
+	polyStringDefaultZero string = "0"
+	undefinedString       string = ""
 )
 
 var (
@@ -45,6 +46,46 @@ func ConstructNullPoly() *Poly {
 	poly := &Poly{}
 	poly.setZero()
 	return poly
+}
+
+func PolyChainedAdd(poly ...*Poly) *Poly {
+	polyRes := ConstructPolyNode(0.0, 0).Poly(eigenPolyMatrixDefaultAES)
+	if polyLen := len(poly); polyLen > 0 {
+		for polyIdx := 0; polyIdx < polyLen; polyIdx++ {
+			if poly[polyIdx] != nil {
+				polyRes.Add(poly[polyIdx])
+			}
+		}
+	}
+	return polyRes
+}
+
+func PolyChainedSub(destPoly *Poly, poly ...*Poly) *Poly {
+	polyRes := destPoly.makeCopy()
+	if polyLen := len(poly); polyLen > 0 {
+		for polyIdx := 0; polyIdx < polyLen; polyIdx++ {
+			if poly[polyIdx] != nil {
+				polyRes.Sub(poly[polyIdx])
+			}
+		}
+	}
+	return polyRes
+}
+
+func PolyChainedMulV2(poly ...*Poly) *Poly {
+	if polyLen := len(poly); polyLen > 0 {
+		polyRes := ConstructPolyNode(1.0, 0).Poly(eigenPolyMatrixDefaultAES)
+		for polyIdx := 0; polyIdx < polyLen; polyIdx++ {
+			if poly[polyIdx] == nil ||
+				!poly[polyIdx].validate() ||
+				!poly[polyIdx].validateSlice() {
+				return nil
+			}
+			polyRes = polyRes.Mul(poly[polyIdx])
+		}
+		return polyRes
+	}
+	return nil
 }
 
 func (poly *Poly) Construct(real2DArray [][]float64, aes ...rune) *Poly {
@@ -87,10 +128,20 @@ func (poly *Poly) setNodeByOrder(node ...*PolyNode) {
 	}
 }
 
+// Poly validate should be redefined
 func (poly *Poly) validate() bool {
 	if poly.getSize() == polyNoSize ||
 		poly.nodes == nil {
 		return false
+	}
+	return true
+}
+
+func (poly *Poly) validateSlice() bool {
+	for exp := poly.maxExp; exp >= polyNodeExponentZero; exp-- {
+		if !poly.getElem(exp).validate() {
+			return false
+		}
 	}
 	return true
 }
@@ -476,19 +527,21 @@ func debugSimpleMul(polyPNode *PolyNode, polyCopy *Poly) {
 }
 
 // use heap to accelerate the polynomial multiply
+// has not changed poly itself
 func (poly *Poly) simpleMulV2(p *Poly) *Poly {
-	if !poly.validate() ||
+	if p == nil ||
+		!poly.validate() ||
 		!p.validate() {
-		panic(polyInvalidError)
+		return nil
 	}
 	var (
-		pSize             int   = p.getSize()
-		polyResult        *Poly = &Poly{}
+		pSize int = p.getSize()
+		//polyResult        *Poly = &Poly{}
 		polyCopy          *Poly
 		polyPNode         *PolyNode
 		polyMiddleResults []*Poly
 	)
-	polyResult.assign(poly.maxExp + p.maxExp)
+	//polyResult.assign(poly.maxExp + p.maxExp)
 	polyMiddleResults = make([]*Poly, pSize)
 
 	// get polyMiddleResults
@@ -528,7 +581,7 @@ func (poly *Poly) fftMul(p *Poly) *Poly {
 
 // judgeSparse
 // if sparse
-func (poly *Poly) judgeSparse(funcPtr func(params ...interface{}) bool) bool {
+func (poly *Poly) judgeSparse(funcPtr func(...interface{}) bool) bool {
 	return funcPtr()
 }
 
@@ -758,14 +811,18 @@ func (poly *Poly) PolyNode() *PolyNode {
 	return &PolyNode{}
 }
 
-func (poly *Poly) Display(isPrintln bool, precisionBit ...int) *Poly {
+func (poly *Poly) ToString(precisionBit ...int) string {
+	if !poly.validate() {
+		return lang.Float64ToString(0, precisionBit...)
+	}
 	var (
+		polyString   string    = undefinedString
 		polySize     int       = poly.getSize()
 		preDisplayed bool      = false
 		node         *PolyNode = poly.getElem(0)
 	)
 	if nodeStr := node.ToString(poly.aes, precisionBit...); !lang.StringIsNull(nodeStr) {
-		fmt.Print(nodeStr)
+		polyString += nodeStr
 		preDisplayed = true
 	}
 	for idx := 1; idx < polySize; idx++ {
@@ -773,29 +830,42 @@ func (poly *Poly) Display(isPrintln bool, precisionBit ...int) *Poly {
 		if nodeStr := node.ToString(poly.aes, precisionBit...); !lang.StringIsNull(nodeStr) {
 			if !lang.Float64StringIsMinus(nodeStr) &&
 				preDisplayed {
-				fmt.Print("+")
+				polyString += "+"
 			}
-			fmt.Print(nodeStr)
+			polyString += nodeStr
 			preDisplayed = true
 		}
 	}
+	return polyString
+}
+
+func (poly *Poly) Display(isPrintln bool, precisionBit ...int) *Poly {
+	polyString := poly.ToString(precisionBit...)
+	if polyString == undefinedString {
+		polyString = lang.Float64ToString(0, precisionBit...)
+	}
+	fmt.Printf(polyString)
 	if isPrintln {
 		fmt.Println()
 	}
 	return poly
 }
 
-func (poly *Poly) DisplayV2(isPrintln bool, reverse bool, precisionBit ...int) *Poly {
+func (poly *Poly) ToStringV2(reverse bool, precisionBit ...int) string {
 	if !reverse {
-		poly.Display(isPrintln, precisionBit...)
-		return poly
+		return poly.ToString(precisionBit...)
+	}
+	if !poly.validate() {
+		return lang.Float64ToString(0, precisionBit...)
 	}
 	var (
+		polyString   string    = undefinedString
 		preDisplayed bool      = false
 		node         *PolyNode = poly.getElem(poly.maxExp)
 	)
+
 	if nodeStr := node.ToString(poly.aes, precisionBit...); !lang.StringIsNull(nodeStr) {
-		fmt.Print(nodeStr)
+		polyString += nodeStr
 		preDisplayed = true
 	}
 	for idx := poly.maxExp - 1; idx >= polyNodeExponentZero; idx-- {
@@ -803,12 +873,21 @@ func (poly *Poly) DisplayV2(isPrintln bool, reverse bool, precisionBit ...int) *
 		if nodeStr := node.ToString(poly.aes, precisionBit...); !lang.StringIsNull(nodeStr) {
 			if !lang.Float64StringIsMinus(nodeStr) &&
 				preDisplayed {
-				fmt.Print("+")
+				polyString += "+"
 			}
-			fmt.Print(nodeStr)
+			polyString += nodeStr
 			preDisplayed = true
 		}
 	}
+	return polyString
+}
+
+func (poly *Poly) DisplayV2(isPrintln bool, reverse bool, precisionBit ...int) *Poly {
+	polyString := poly.ToStringV2(reverse, precisionBit...)
+	if polyString == undefinedString {
+		polyString = lang.Float64ToString(0, precisionBit...)
+	}
+	fmt.Printf(polyString)
 	if isPrintln {
 		fmt.Println()
 	}

@@ -7,6 +7,8 @@
   "pointerReceiverStructName": "sn",
   "otherShortForStructName": [
     "snt",
+    "snCopy",
+    "snTemp",
     "snt1",
     "snt2",
     "snt3"

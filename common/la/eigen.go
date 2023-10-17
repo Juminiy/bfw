@@ -4,6 +4,7 @@ import (
 	"bfw/common/lang"
 	"errors"
 	"fmt"
+	"log"
 )
 
 const (
@@ -86,7 +87,33 @@ func (evs *EigenValues) setEigenValue(lambda complex128) {
 	}
 }
 
-func (evs *EigenValues) Display() {
+func (evs *EigenValues) ValidateMultipleRoots() bool {
+	return evs.traverseToGetBool(func(ev *EigenValue) bool {
+		return ev.algebraicMultiplicity > 1
+	}, true, true, false)
+}
+
+func (evs *EigenValues) ValidateAllRealRoots() bool {
+	return evs.traverseToGetBool(func(ev *EigenValue) bool {
+		return lang.IsComplex128PureReal(ev.lambda)
+	}, false, false, true)
+}
+
+func (evs *EigenValues) traverseToGetBool(funcPtr func(*EigenValue) bool, predictResult, orResult, andResult bool) bool {
+	for _, ev := range evs.values {
+		if funcPtr(ev) == predictResult {
+			if orResult {
+				return predictResult
+			}
+			if andResult {
+				return predictResult
+			}
+		}
+	}
+	return !predictResult
+}
+
+func (evs *EigenValues) Display(logger ...*log.Logger) {
 	valueCnt := 1
 	for _, ev := range evs.values {
 		ev.Display(valueCnt)
@@ -158,7 +185,7 @@ func (ev *EigenValue) Display(startIndex int) {
 	for cnt := startIndex; cnt < startIndex+ev.algebraicMultiplicity; cnt++ {
 		fmt.Printf(string(eigenPolyMatrixDefaultAES)+"%d = ", cnt)
 	}
-	lang.DisplayComplex128(2, 2, ev.lambda)
+	lang.DisplayComplex128(5, 5, ev.lambda)
 }
 
 type EigenVectors struct {

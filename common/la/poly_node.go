@@ -324,15 +324,19 @@ func (pn *PolyNode) getAESStr(aes rune) string {
 	return aesStr
 }
 
+// displayExponent
+// should refer to numpy print method
 func (pn *PolyNode) displayExponent() *PolyNode {
 	if pn.displayValidate() {
 		if pn.exp >= 2 {
-			fmt.Printf("^%d", pn.exp)
+			fmt.Printf("^%v", pn.exp)
 		}
 	}
 	return pn
 }
 
+// getExponentStr
+// should refer to numpy print method
 func (pn *PolyNode) getExponentStr() string {
 	expStr := undefinedString
 	if pn.displayValidate() {

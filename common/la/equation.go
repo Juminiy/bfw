@@ -128,12 +128,12 @@ func (s *Solution) DisplayV2(realPrecision, imagPrecision int) *Solution {
 	return s
 }
 
-type PolyEquation struct {
-	poly     *Poly
-	value    complex128
-	solution *Solution
+type MultipleEquationsOfOneVariable struct {
+	exp Poly
+	val float64
 }
 
-func (pe *PolyEquation) Solve() *Solution {
-	return pe.solution
+type LinearEquationMultipleVariable struct {
+	coe *Matrix
+	val *Vector
 }

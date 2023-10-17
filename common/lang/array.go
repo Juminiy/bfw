@@ -41,30 +41,30 @@ func GetReal2DArrayRow(real2DArray [][]float64, rowIndex int) []float64 {
 	return real2DArray[rowIndex]
 }
 
-func GetReal2DArrayLine(real2DArray [][]float64, lineIndex int) []float64 {
+func GetReal2DArrayColumn(real2DArray [][]float64, columnIndex int) []float64 {
 	if real2DArray == nil ||
 		len(real2DArray) == 0 {
 		panic(realArrayInValidError)
 	}
-	lineSlice := make([]float64, 0)
+	columnSlice := make([]float64, 0)
 	for rowIdx := 0; rowIdx < len(real2DArray); rowIdx++ {
-		if lineIndex < 0 ||
-			lineIndex >= len(real2DArray[rowIdx]) {
+		if columnIndex < 0 ||
+			columnIndex >= len(real2DArray[rowIdx]) {
 			panic(realArrayIndexOutOfBoundError)
 		}
-		lineSlice = append(lineSlice, real2DArray[rowIdx][lineIndex])
+		columnSlice = append(columnSlice, real2DArray[rowIdx][columnIndex])
 	}
-	return lineSlice
+	return columnSlice
 }
 
-func GetInitialReal2DArray(rowSize, lineSize int) [][]float64 {
+func GetInitialReal2DArray(rowSize, columnSize int) [][]float64 {
 	if rowSize == realArrayNoSize ||
-		lineSize == realArrayNoSize {
+		columnSize == realArrayNoSize {
 		return nil
 	}
 	slice := make([][]float64, rowSize)
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
-		slice[rowIdx] = make([]float64, lineSize)
+		slice[rowIdx] = make([]float64, columnSize)
 	}
 	return slice
 }
@@ -79,4 +79,75 @@ func GetInitialReal1DArray(size int) []float64 {
 func SortReal2DArrayBySecondFactor(real2DArray [][]float64) {
 	r2da := ConstructReal2DArray(real2DArray)
 	sort.Sort(r2da)
+}
+
+func ConvertReal2DArrayToInt2DArray(real2DArray [][]float64) [][]int {
+	int2DArray := make([][]int, len(real2DArray))
+	for rowIdx := 0; rowIdx < len(real2DArray); rowIdx++ {
+		int2DArray[rowIdx] = make([]int, len(real2DArray[rowIdx]))
+		for columnIdx := 0; columnIdx < len(real2DArray[rowIdx]); columnIdx++ {
+			int2DArray[rowIdx][columnIdx] = int(real2DArray[rowIdx][columnIdx])
+		}
+	}
+	return int2DArray
+}
+
+func ConvertInt2DArrayToReal2DArray(int2DArray [][]int) [][]float64 {
+	real2DArray := make([][]float64, len(int2DArray))
+	for rowIdx := 0; rowIdx < len(int2DArray); rowIdx++ {
+		real2DArray[rowIdx] = make([]float64, len(int2DArray[rowIdx]))
+		for columnIdx := 0; columnIdx < len(int2DArray[rowIdx]); columnIdx++ {
+			real2DArray[rowIdx][columnIdx] = float64(int2DArray[rowIdx][columnIdx])
+		}
+	}
+	return real2DArray
+}
+func Int1DArrayZeroPadding(int1DArray []int, zeroCnt int) []int {
+	return append(int1DArray, make([]int, zeroCnt)...)
+}
+
+func Divide1DArrayEvenOddPart(int1DArray []int) ([]int, []int) {
+	if int1DArray == nil ||
+		len(int1DArray) == 0 {
+		return nil, nil
+	}
+	size := len(int1DArray)
+	evenPart, oddPart := make([]int, 0), make([]int, 0)
+	for idx := 0; idx < size; idx++ {
+		if Odd(idx) {
+			oddPart = append(oddPart, int1DArray[idx])
+		} else {
+			evenPart = append(evenPart, int1DArray[idx])
+		}
+	}
+	return evenPart, oddPart
+}
+
+func Int1DArrayContribute(a []int, inverse bool) []int {
+	if inverse {
+		for idx := len(a) - 1; idx > 0; idx-- {
+			a[idx-1] += a[idx] / 10
+			a[idx] %= 10
+		}
+	} else {
+		for idx := 0; idx < len(a)-1; idx++ {
+			a[idx+1] += a[idx] / 10
+			a[idx] %= 10
+		}
+	}
+	return a
+}
+
+func Int1DArrayMulLambda(a []int, lambda int) []int {
+	for idx := 0; idx < len(a); idx++ {
+		a[idx] *= lambda
+	}
+	return a
+}
+
+func Int1DArrayDivLambda(a []int, lambda int) []int {
+	for idx := 0; idx < len(a); idx++ {
+		a[idx] /= lambda
+	}
+	return a
 }

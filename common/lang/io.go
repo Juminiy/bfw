@@ -3,6 +3,7 @@ package lang
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -103,4 +104,14 @@ func WriteFile(fileName string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func LogFile(fileName string) *log.Logger {
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return log.New(file, "", log.LstdFlags)
+
 }

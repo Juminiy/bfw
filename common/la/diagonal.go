@@ -178,9 +178,9 @@ func (diagonal *Diagonal) Matrix() *Matrix {
 	matrix := &Matrix{}
 	matrix.assign(size, size)
 	for rowIdx := 0; rowIdx < size; rowIdx++ {
-		for lineIdx := 0; lineIdx < size; lineIdx++ {
-			if rowIdx == lineIdx {
-				matrix.set(rowIdx, lineIdx, diagonal.slice[rowIdx])
+		for columnIdx := 0; columnIdx < size; columnIdx++ {
+			if rowIdx == columnIdx {
+				matrix.set(rowIdx, columnIdx, diagonal.slice[rowIdx])
 			}
 		}
 	}

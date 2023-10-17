@@ -285,3 +285,22 @@ func Float64PowerPositivePower(real float64, power float64) float64 {
 		return -math.Pow(math.Abs(real), power)
 	}
 }
+
+// GetRandFloat64ByIntRange
+// [0,n)
+// [0,b-a)+a -> [a,b)
+func GetRandFloat64ByIntRange(a, b int) float64 {
+	return float64(rand.Intn(b-a) + a)
+}
+
+func GetRandFloat64ByInt32Range(a, b int32) float64 {
+	return float64(rand.Int31n(b-a) + a)
+}
+
+func GetRandFloat64ByInt64Range(a, b int64) float64 {
+	return float64(rand.Int63n(b-a) + a)
+}
+
+func GetRandFloat64ByFloat64Range(a, b float64) float64 {
+	return rand.Float64()*(b-a) + a
+}

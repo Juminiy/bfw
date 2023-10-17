@@ -21,10 +21,10 @@ var (
 )
 
 type SparseMatrix struct {
-	tripleMap map[string]float64
-	size      int
-	rowSize   int
-	lineSize  int
+	tripleMap  map[string]float64
+	size       int
+	rowSize    int
+	columnSize int
 }
 
 func (sm *SparseMatrix) validate() bool {
@@ -39,7 +39,7 @@ func (sm *SparseMatrix) validate() bool {
 func (sm *SparseMatrix) validateOneIndex(index int) bool {
 	if index < 0 ||
 		index >= sm.rowSize ||
-		index >= sm.lineSize {
+		index >= sm.columnSize {
 		return false
 	}
 	return true
@@ -53,7 +53,7 @@ func (sm *SparseMatrix) validateIndex(index ...int) bool {
 			}
 		}
 		if indexLen >= 2 {
-			if index[1] < 0 || index[1] >= sm.lineSize {
+			if index[1] < 0 || index[1] >= sm.columnSize {
 				return false
 			}
 		}
@@ -68,73 +68,73 @@ func (sm *SparseMatrix) validateIndex(index ...int) bool {
 	return true
 }
 
-func (sm *SparseMatrix) assign(size, rowSize, lineSize int) {
-	sm.setSize(size, rowSize, lineSize)
+func (sm *SparseMatrix) assign(size, rowSize, columnSize int) {
+	sm.setSize(size, rowSize, columnSize)
 	sm.tripleMap = make(map[string]float64, size)
 }
 
 func (sm *SparseMatrix) setSelf(smt *SparseMatrix) {
-	sm.setValues(smt.tripleMap, smt.size, smt.rowSize, smt.lineSize)
+	sm.setValues(smt.tripleMap, smt.size, smt.rowSize, smt.columnSize)
 }
 
-func (sm *SparseMatrix) setValues(tm map[string]float64, size, rowSize, lineSize int) {
-	sm.setSize(size, rowSize, lineSize)
+func (sm *SparseMatrix) setValues(tm map[string]float64, size, rowSize, columnSize int) {
+	sm.setSize(size, rowSize, columnSize)
 	sm.setTripleMap(tm)
 }
 
-func (sm *SparseMatrix) setSize(size, rowSize, lineSize int) {
+func (sm *SparseMatrix) setSize(size, rowSize, columnSize int) {
 	sm.size = size
 	sm.rowSize = rowSize
-	sm.lineSize = lineSize
+	sm.columnSize = columnSize
 }
 
 func (sm *SparseMatrix) setTripleMap(tm map[string]float64) {
 	sm.tripleMap = tm
 }
 
-func (sm *SparseMatrix) getKey(rowIndex, lineIndex int) string {
-	if !sm.validateIndex(rowIndex, lineIndex) {
+func (sm *SparseMatrix) getKey(rowIndex, columnIndex int) string {
+	if !sm.validateIndex(rowIndex, columnIndex) {
 		panic(sparseMatrixIndexOutOfBoundError)
 	}
-	return lang.ConcatIntToString("_", rowIndex, lineIndex)
+	return lang.ConcatIntToString("_", rowIndex, columnIndex)
 }
 
 func (sm *SparseMatrix) makeCopy() *SparseMatrix {
 	smCopy := &SparseMatrix{}
-	smCopy.assign(sm.size, sm.rowSize, sm.lineSize)
+	smCopy.assign(sm.size, sm.rowSize, sm.columnSize)
 	for key, value := range sm.tripleMap {
 		smCopy.setKV(key, value)
 	}
 	return smCopy
 }
 
-func (sm *SparseMatrix) set(rowIndex, lineIndex int, value float64) {
-	if !sm.validateIndex(rowIndex, lineIndex) {
+func (sm *SparseMatrix) set(rowIndex, columnIndex int, value float64) {
+	if !sm.validateIndex(rowIndex, columnIndex) {
 		panic(sparseMatrixIndexOutOfBoundError)
 	}
-	sm.setKV(sm.getKey(rowIndex, lineIndex), value)
+	sm.setKV(sm.getKey(rowIndex, columnIndex), value)
 }
 
 func (sm *SparseMatrix) setKV(key string, value float64) {
 	sm.tripleMap[key] = value
 }
 
-func (sm *SparseMatrix) get(rowIndex, lineIndex int) float64 {
-	if !sm.validateIndex(rowIndex, lineIndex) {
+func (sm *SparseMatrix) get(rowIndex, columnIndex int) float64 {
+	if !sm.validateIndex(rowIndex, columnIndex) {
 		panic(sparseMatrixIndexOutOfBoundError)
 	}
-	return sm.getValue(sm.getKey(rowIndex, lineIndex))
+	return sm.getValue(sm.getKey(rowIndex, columnIndex))
 }
 
 func (sm *SparseMatrix) getValue(key string) float64 {
 	return sm.tripleMap[key]
 }
 
-func (sm *SparseMatrix) del(rowIndex, lineIndex int) {
-	if !sm.validateIndex(rowIndex, lineIndex) {
+func (sm *SparseMatrix) del(rowIndex, columnIndex int) {
+	if !sm.validateIndex(rowIndex, columnIndex) {
 		panic(sparseMatrixIndexOutOfBoundError)
 	}
-	sm.delKV(sm.getKey(rowIndex, lineIndex))
+	sm.delKV(sm.getKey(rowIndex, columnIndex))
 }
 
 func (sm *SparseMatrix) delKV(key string) {
@@ -151,19 +151,19 @@ func (sm *SparseMatrix) validateKey(key string) (int, int) {
 	if rowIndexErr != nil {
 		panic(rowIndexErr)
 	}
-	lineIndex, lineIndexErr := strconv.Atoi(indexStrArr[1])
-	if lineIndexErr != nil {
-		panic(lineIndexErr)
+	columnIndex, columnIndexErr := strconv.Atoi(indexStrArr[1])
+	if columnIndexErr != nil {
+		panic(columnIndexErr)
 	}
-	return rowIndex, lineIndex
+	return rowIndex, columnIndex
 }
 
-func (sm *SparseMatrix) swapKeyRowLineIndex(key string) string {
-	rowIndex, lineIndex := sm.validateKey(key)
-	if !sm.validateIndex(rowIndex, lineIndex) {
+func (sm *SparseMatrix) swapKeyRowColumnIndex(key string) string {
+	rowIndex, columnIndex := sm.validateKey(key)
+	if !sm.validateIndex(rowIndex, columnIndex) {
 		panic(sparseMatrixIndexOutOfBound)
 	}
-	return sm.getKey(lineIndex, rowIndex)
+	return sm.getKey(columnIndex, rowIndex)
 }
 
 func (sm *SparseMatrix) convertToMatrix() *Matrix {
@@ -177,7 +177,7 @@ func (sm *SparseMatrix) Matrix() *Matrix {
 func (sm *SparseMatrix) transpose() *SparseMatrix {
 	for key, value := range sm.tripleMap {
 		sm.delKV(key)
-		key = sm.swapKeyRowLineIndex(key)
+		key = sm.swapKeyRowColumnIndex(key)
 		sm.setKV(key, value)
 	}
 	return &SparseMatrix{}

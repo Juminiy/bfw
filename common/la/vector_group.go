@@ -19,7 +19,7 @@ var (
 )
 
 // VectorGroup
-// shape = true -> line vector group
+// shape = true -> column vector group
 // shape = false -> row vector group
 type VectorGroup struct {
 	group []*Vector
@@ -134,8 +134,8 @@ func (vg *VectorGroup) setValues(group []*Vector, size int, shape bool) {
 
 func (vg *VectorGroup) setSlice(slice [][]float64) {
 	for rowIdx, row := range slice {
-		for lineIdx, ele := range row {
-			vg.setElem(rowIdx, lineIdx, ele)
+		for columnIdx, ele := range row {
+			vg.setElem(rowIdx, columnIdx, ele)
 		}
 	}
 }
@@ -169,8 +169,8 @@ func (vg *VectorGroup) convertToMatrix() *Matrix {
 	matrix := &Matrix{}
 	if vg.shape {
 		matrix.assign(vSize, vg.size)
-		for lineIdx := 0; lineIdx < vSize; lineIdx++ {
-			matrix.setLine(lineIdx, vg.get(lineIdx).slice)
+		for columnIdx := 0; columnIdx < vSize; columnIdx++ {
+			matrix.setColumn(columnIdx, vg.get(columnIdx).slice)
 		}
 	} else {
 		matrix.setValues(make([][]float64, vg.size), vg.size, vSize)
@@ -209,7 +209,7 @@ func (vg *VectorGroup) Construct(real2DArray [][]float64, shape ...bool) *Vector
 	// 2. set each vector
 	vg.setGroup(make([]*Vector, size))
 	for idx := 0; idx < size; idx++ {
-		vg.set(idx, ConstructVector(lang.GetReal2DArrayLine(real2DArray, idx), vShape))
+		vg.set(idx, ConstructVector(lang.GetReal2DArrayColumn(real2DArray, idx), vShape))
 	}
 	return vg
 }
@@ -311,6 +311,6 @@ func (vg *VectorGroup) IsBasis() bool {
 	return false
 }
 
-func (vg *VectorGroup) IsLinearCorrelation() bool {
+func (vg *VectorGroup) IsColumnarCorrelation() bool {
 	return false
 }

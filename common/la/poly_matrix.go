@@ -16,20 +16,20 @@ var (
 type PolyMatrix struct {
 	slice       [][]*Poly
 	rowSize     int
-	lineSize    int
+	columnSize  int
 	coefficient float64
 }
 
 func (pm *PolyMatrix) validate() bool {
 	if pm.rowSize == matrixNoSize ||
-		pm.lineSize == matrixNoSize ||
+		pm.columnSize == matrixNoSize ||
 		pm.slice == nil ||
 		len(pm.slice) != pm.rowSize {
 		return false
 	} else {
 		for rowIdx := 0; rowIdx < pm.rowSize; rowIdx++ {
 			if idxRow := pm.getRow(rowIdx); idxRow == nil ||
-				len(idxRow) != pm.lineSize {
+				len(idxRow) != pm.columnSize {
 				return false
 			}
 		}
@@ -40,7 +40,7 @@ func (pm *PolyMatrix) validate() bool {
 func (pm *PolyMatrix) validateOneIndex(index int) bool {
 	if index < 0 ||
 		index >= pm.rowSize ||
-		index >= pm.lineSize {
+		index >= pm.columnSize {
 		return false
 	}
 	return true
@@ -54,7 +54,7 @@ func (pm *PolyMatrix) validateIndex(index ...int) bool {
 			}
 		}
 		if indexLen >= 2 {
-			if index[1] < 0 || index[1] >= pm.lineSize {
+			if index[1] < 0 || index[1] >= pm.columnSize {
 				return false
 			}
 		}
@@ -77,10 +77,10 @@ func (pm *PolyMatrix) null() *PolyMatrix {
 	return &PolyMatrix{}
 }
 
-func (pm *PolyMatrix) assign(rowSize, lineSize int) {
-	pm.setValues(make([][]*Poly, rowSize), rowSize, lineSize)
+func (pm *PolyMatrix) assign(rowSize, columnSize int) {
+	pm.setValues(make([][]*Poly, rowSize), rowSize, columnSize)
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
-		pm.setRow(rowIdx, make([]*Poly, lineSize))
+		pm.setRow(rowIdx, make([]*Poly, columnSize))
 	}
 }
 
@@ -96,13 +96,13 @@ func (pm *PolyMatrix) getSelf() *PolyMatrix {
 }
 
 func (pm *PolyMatrix) setSelf(pmt *PolyMatrix) {
-	pm.setValues(pmt.slice, pmt.rowSize, pmt.lineSize)
+	pm.setValues(pmt.slice, pmt.rowSize, pmt.columnSize)
 }
 
-func (pm *PolyMatrix) setValues(slice [][]*Poly, rowSize, lineSize int) {
+func (pm *PolyMatrix) setValues(slice [][]*Poly, rowSize, columnSize int) {
 	pm.setSlice(slice)
 	pm.setRowSize(rowSize)
-	pm.setLineSize(lineSize)
+	pm.setColumnSize(columnSize)
 }
 
 func (pm *PolyMatrix) setSlice(slice [][]*Poly) {
@@ -113,33 +113,33 @@ func (pm *PolyMatrix) setRowSize(rowSize int) {
 	pm.rowSize = rowSize
 }
 
-func (pm *PolyMatrix) setLineSize(lineSize int) {
-	pm.lineSize = lineSize
+func (pm *PolyMatrix) setColumnSize(columnSize int) {
+	pm.columnSize = columnSize
 }
 
-func (pm *PolyMatrix) setElemByOne2OneOpt(rowIndex, lineIndex int, opt rune, pmt *PolyMatrix) {
-	if !pm.validateIndex(rowIndex, lineIndex) {
+func (pm *PolyMatrix) setElemByOne2OneOpt(rowIndex, columnIndex int, opt rune, pmt *PolyMatrix) {
+	if !pm.validateIndex(rowIndex, columnIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	pm.get(rowIndex, lineIndex).one2OneOpt(opt, pmt.get(rowIndex, lineIndex))
+	pm.get(rowIndex, columnIndex).one2OneOpt(opt, pmt.get(rowIndex, columnIndex))
 }
 
-func (pm *PolyMatrix) setElemByOptElem(rowIndex, lineIndex int, opt rune, p *Poly) {
-	if !pm.validateIndex(rowIndex, lineIndex) {
+func (pm *PolyMatrix) setElemByOptElem(rowIndex, columnIndex int, opt rune, p *Poly) {
+	if !pm.validateIndex(rowIndex, columnIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	pm.get(rowIndex, lineIndex).one2OneOpt(opt, p)
+	pm.get(rowIndex, columnIndex).one2OneOpt(opt, p)
 }
 
-func (pm *PolyMatrix) get(rowIndex, lineIndex int) *Poly {
-	if !pm.validateIndex(rowIndex, lineIndex) {
+func (pm *PolyMatrix) get(rowIndex, columnIndex int) *Poly {
+	if !pm.validateIndex(rowIndex, columnIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
-	return pm.slice[rowIndex][lineIndex]
+	return pm.slice[rowIndex][columnIndex]
 }
 
-func (pm *PolyMatrix) set(rowIndex, lineIndex int, value *Poly) {
-	pm.slice[rowIndex][lineIndex] = value
+func (pm *PolyMatrix) set(rowIndex, columnIndex int, value *Poly) {
+	pm.slice[rowIndex][columnIndex] = value
 }
 
 func (pm *PolyMatrix) getRow(rowIndex int) []*Poly {
@@ -159,8 +159,8 @@ func (pm *PolyMatrix) setRow(rowIndex int, rowSlice []*Poly) {
 func (pm *PolyMatrix) Equal(pmt *PolyMatrix) bool {
 	if pm.sameShape(pmt) {
 		for rowIdx := 0; rowIdx < pm.rowSize; rowIdx++ {
-			for lineIdx := 0; lineIdx < pm.lineSize; lineIdx++ {
-				if !pm.get(rowIdx, lineIdx).Equal(pmt.get(rowIdx, lineIdx)) {
+			for columnIdx := 0; columnIdx < pm.columnSize; columnIdx++ {
+				if !pm.get(rowIdx, columnIdx).Equal(pmt.get(rowIdx, columnIdx)) {
 					return false
 				}
 			}
@@ -173,14 +173,14 @@ func (pm *PolyMatrix) Equal(pmt *PolyMatrix) bool {
 func (pm *PolyMatrix) sameShape(pmt *PolyMatrix) bool {
 	if pmt == nil ||
 		pm.rowSize != pmt.rowSize ||
-		pm.lineSize != pmt.lineSize {
+		pm.columnSize != pmt.columnSize {
 		return false
 	}
 	return true
 }
 
 func (pm *PolyMatrix) isPhalanx() bool {
-	return pm.rowSize == pm.lineSize
+	return pm.rowSize == pm.columnSize
 }
 
 func (pm *PolyMatrix) getPhalanxSize() int {
@@ -192,7 +192,7 @@ func (pm *PolyMatrix) getPhalanxSize() int {
 
 func (pm *PolyMatrix) Det() *Poly {
 	if !pm.isPhalanx() {
-		panic(matrixRowLineDiffer)
+		panic(matrixRowColumnDiffer)
 	}
 	return pm.det()
 }
@@ -205,16 +205,18 @@ func (pm *PolyMatrix) det() *Poly {
 	if n := pm.getPhalanxSize(); n == simplePhalanxSizeOne {
 		return pm.get(0, 0)
 	} else if n == simplePhalanxSizeTwo {
-		return pm.get(0, 0).GetTimes(pm.get(1, 1)).
-			GetMinus(pm.get(0, 1).GetTimes(pm.get(1, 0)))
+		res1 := PolyChainedMulV2(pm.get(0, 0), pm.get(1, 1))
+		res2 := PolyChainedMulV2(pm.get(0, 1), pm.get(1, 1))
+		return PolyChainedSub(res1, res2)
 	} else if n == simplePhalanxSizeThree {
-		res1 := pm.get(0, 0).GetTimes(pm.get(1, 1)).GetTimes(pm.get(2, 2))
-		res2 := pm.get(1, 0).GetTimes(pm.get(2, 1)).GetTimes(pm.get(0, 2))
-		res3 := pm.get(0, 1).GetTimes(pm.get(1, 2)).GetTimes(pm.get(2, 0))
-		res4 := pm.get(0, 2).GetTimes(pm.get(1, 1)).GetTimes(pm.get(2, 0))
-		res5 := pm.get(0, 1).GetTimes(pm.get(1, 0)).GetTimes(pm.get(2, 2))
-		res6 := pm.get(1, 2).GetTimes(pm.get(2, 1)).GetTimes(pm.get(0, 0))
-		return res1.GetPlus(res2).GetPlus(res3).GetMinus(res4).GetMinus(res5).GetMinus(res6)
+		res1 := PolyChainedMulV2(pm.get(0, 0), pm.get(1, 1), pm.get(2, 2))
+		res2 := PolyChainedMulV2(pm.get(1, 0), pm.get(2, 1), pm.get(0, 2))
+		res3 := PolyChainedMulV2(pm.get(0, 1), pm.get(1, 2), pm.get(2, 0))
+		res4 := PolyChainedMulV2(pm.get(0, 2), pm.get(1, 1), pm.get(2, 0))
+		res5 := PolyChainedMulV2(pm.get(0, 1), pm.get(1, 0), pm.get(2, 2))
+		res6 := PolyChainedMulV2(pm.get(1, 2), pm.get(2, 1), pm.get(0, 0))
+		res1 = PolyChainedAdd(res1, res2, res3)
+		return PolyChainedSub(res1, res4, res5, res6)
 	} else {
 		// 1. simple calculation
 		//return pm.simpleDet(n)
@@ -257,7 +259,7 @@ func (pm *PolyMatrix) eigenMatrixRowExchangeET() {
 
 }
 
-func (pm *PolyMatrix) eigenMatrixLineExchangeET() {
+func (pm *PolyMatrix) eigenMatrixColumnExchangeET() {
 
 }
 
@@ -265,7 +267,7 @@ func (pm *PolyMatrix) eigenMatrixRowMulLambdaET() {
 
 }
 
-func (pm *PolyMatrix) eigenMatrixLineMulLambdaET() {
+func (pm *PolyMatrix) eigenMatrixColumnMulLambdaET() {
 
 }
 
@@ -273,7 +275,7 @@ func (pm *PolyMatrix) eigenMatrixRow1MulPolyAddRow2ET() {
 
 }
 
-func (pm *PolyMatrix) eigenMatrixLine1MulPolyAddLine2ET() {
+func (pm *PolyMatrix) eigenMatrixColumn1MulPolyAddColumn2ET() {
 
 }
 
@@ -287,8 +289,8 @@ func (pm *PolyMatrix) Display(precisionBits ...int) *PolyMatrix {
 		return pm
 	}
 	for rowIdx := 0; rowIdx < pm.rowSize; rowIdx++ {
-		for lineIdx := 0; lineIdx < pm.lineSize; lineIdx++ {
-			poly := pm.get(rowIdx, lineIdx)
+		for columnIdx := 0; columnIdx < pm.columnSize; columnIdx++ {
+			poly := pm.get(rowIdx, columnIdx)
 			poly.Display(false, precisionBits...)
 			fmt.Printf(" ")
 		}

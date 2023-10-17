@@ -311,7 +311,7 @@ func (list *GenericList[T]) PopBack() {
 
 // ForwardTraverse
 // O(N)
-func (list *GenericList[T]) ForwardTraverse(funcPtr func(params ...any) (int, error)) {
+func (list *GenericList[T]) ForwardTraverse(funcPtr func(...any) (int, error)) {
 	err := list.validate()
 	if err != nil {
 		panic(err)
@@ -330,7 +330,7 @@ func (list *GenericList[T]) ForwardTraverse(funcPtr func(params ...any) (int, er
 
 // ReverseTraverse
 // O(N)
-func (list *GenericList[T]) ReverseTraverse(funcPtr func(params ...any) (int, error)) {
+func (list *GenericList[T]) ReverseTraverse(funcPtr func(...any) (int, error)) {
 	err := list.validate()
 	if err != nil {
 		panic(err)

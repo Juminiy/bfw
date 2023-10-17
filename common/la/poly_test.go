@@ -133,6 +133,8 @@ func TestPoly_Mul(t *testing.T) {
 }
 
 func Test_Math(t *testing.T) {
+	// 1
+	fmt.Println(math.Pow(27.0, 1/3))
 	// 2.9999999999999996
 	fmt.Println(math.Pow(27.0, 1.0/3))
 	// 3
@@ -182,5 +184,9 @@ func TestPoly_Factoring(t *testing.T) {
 	//poly1.setNodeByOrder(polyNode70, polyNode71, polyNode72, polyNode73)
 	////[3, 2+i, 2-i]
 	//poly1.Factoring().Display(1)
-	fmt.Println()
+	//fmt.Println()
+}
+
+func TestPoly_DisplayV2(t *testing.T) {
+	poly1.Display(false, 1)
 }

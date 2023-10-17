@@ -35,9 +35,23 @@ func TestMath_Pow(t *testing.T) {
 // 0800000
 // 0884000
 func TestBigNum_Construct(t *testing.T) {
-	num1 := ConstructBigNum("2000")
-	num2 := ConstructBigNum("442")
+	num1 := ConstructBigNum("-1234567877")
+	num2 := ConstructBigNum("123456")
 	//num1.Add(num2).Display(false, false)
 	//num1.Sub(num2).Display(false, false)
 	num1.Mul(num2).Display(false, false)
+}
+
+func TestGetRandFloat64ByFloat64Range(t *testing.T) {
+	fmt.Println(GetRandFloat64ByInt32Range(10, 20))
+	fmt.Println(GetRandFloat64ByInt32Range(10, 20))
+	fmt.Println(GetRandFloat64ByInt32Range(10, 20))
+	fmt.Println(GetRandFloat64ByInt32Range(10, 20))
+	fmt.Println(GetRandFloat64ByInt32Range(10, 20))
+	fmt.Println(GetRandFloat64ByFloat64Range(10, 20))
+	fmt.Println(GetRandFloat64ByFloat64Range(10, 20))
+	fmt.Println(GetRandFloat64ByFloat64Range(10, 20))
+	fmt.Println(GetRandFloat64ByFloat64Range(10, 20))
+	fmt.Println(GetRandFloat64ByFloat64Range(10, 20))
+	fmt.Println(GetRandFloat64ByFloat64Range(10, 20))
 }

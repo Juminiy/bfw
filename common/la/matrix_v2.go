@@ -5,9 +5,9 @@ var (
 )
 
 type GenericMatrix struct {
-	slice    [][]complex128
-	rowSize  int64
-	lineSize int64
+	slice      [][]complex128
+	rowSize    int64
+	columnSize int64
 }
 
 func (gm *GenericMatrix) makeCopy() *GenericMatrix {
@@ -35,6 +35,14 @@ func (gm *GenericMatrix) GetConjugate() *GenericMatrix {
 func (gm *GenericMatrix) GetConjugateTranspose() *GenericMatrix {
 	gmCopy := gm.makeCopy()
 	return gmCopy.conjugate().transpose()
+}
+
+func (gm *GenericMatrix) GetPhaseAngle() *Matrix {
+	return gm.phaseAngle()
+}
+
+func (gm *GenericMatrix) phaseAngle() *Matrix {
+	return &Matrix{}
 }
 
 func (gm *GenericMatrix) null() *GenericMatrix {

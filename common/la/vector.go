@@ -200,7 +200,7 @@ func (vector *Vector) setShape(shape bool) {
 	vector.shape = shape
 }
 
-func (vector *Vector) setSwap(indexI, indexJ int) {
+func (vector *Vector) setElemSwap(indexI, indexJ int) {
 	if !vector.validateIndex(indexI, indexJ) {
 		panic(vectorIndexOutOfBound)
 	}
@@ -215,6 +215,10 @@ func (vector *Vector) sameShape(v *Vector) bool {
 		return false
 	}
 	return true
+}
+
+func (vector *Vector) GetSlice() []float64 {
+	return vector.slice
 }
 
 // Vector Opt Vector Res Vector
@@ -382,12 +386,12 @@ func (vector *Vector) MulMatrix(m *Matrix) *Vector {
 		!vector.shape &&
 		vector.size == m.rowSize {
 		vCopy := vector.makeCopy()
-		for lineIdx := 0; lineIdx < m.lineSize; lineIdx++ {
-			var lineSum float64 = 0.0
+		for columnIdx := 0; columnIdx < m.columnSize; columnIdx++ {
+			var columnSum float64 = 0.0
 			for rowIdx := 0; rowIdx < m.rowSize; rowIdx++ {
-				lineSum += vCopy.slice[rowIdx] * m.get(rowIdx, lineIdx)
+				columnSum += vCopy.slice[rowIdx] * m.get(rowIdx, columnIdx)
 			}
-			vector.set(lineIdx, lineIdx, lineSum)
+			vector.set(columnIdx, columnIdx, columnSum)
 		}
 		return vector
 	}
@@ -444,7 +448,7 @@ func (vector *Vector) validateOrthogonal(v *Vector) bool {
 func (vector *Vector) Reverse() *Vector {
 	vSize := vector.size
 	for idx := 0; idx < vSize>>1; idx++ {
-		vector.setSwap(idx, vSize-idx-1)
+		vector.setElemSwap(idx, vSize-idx-1)
 	}
 	return vector
 }

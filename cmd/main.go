@@ -20,9 +20,9 @@ func runRTest() {
 		panic(err)
 	}
 	str1BigNum, str2BigNum := lang.ConstructBigNum(str1), lang.ConstructBigNum(str2)
-	str1BigNum.Sub(str2BigNum).Display(false, false)
+	str1BigNum.Mul(str2BigNum).Display(false, false)
 }
 
 func main() {
-	runRTest()
+
 }

@@ -38,11 +38,11 @@ func (identity *Identity) Matrix() *Matrix {
 	matrix := &Matrix{}
 	matrix.assign(identity.size, identity.size)
 	for rowIdx := 0; rowIdx < matrix.GetRowSize(); rowIdx++ {
-		for lineIdx := 0; lineIdx < matrix.GetLineSize(); lineIdx++ {
-			if rowIdx == lineIdx {
-				matrix.set(rowIdx, lineIdx, 1)
+		for columnIdx := 0; columnIdx < matrix.GetColumnSize(); columnIdx++ {
+			if rowIdx == columnIdx {
+				matrix.set(rowIdx, columnIdx, 1)
 			} else {
-				matrix.set(rowIdx, lineIdx, 0)
+				matrix.set(rowIdx, columnIdx, 0)
 			}
 		}
 	}

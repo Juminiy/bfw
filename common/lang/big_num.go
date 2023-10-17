@@ -376,6 +376,15 @@ func (bn *BigNum) prefixZeroPadding(destSize int) {
 	bn.prefixPadding(destSize, numByteZero)
 }
 
+// the num grow larger, the function will be used
+func (bn *BigNum) setBitContribute(index int, num byte) {
+	for index >= 0 &&
+		bn.getSetElem(index)+num > 57 {
+		bn.setElem(index, bn.getSetElem(index)+num)
+		index--
+	}
+}
+
 func (bn *BigNum) setElemOpt(index int, opt rune, char ...byte) {
 	switch opt {
 	case '+':
@@ -400,13 +409,15 @@ func (bn *BigNum) setElemOpt(index int, opt rune, char ...byte) {
 		}
 	case '*':
 		{
-			//c[i+j] += a[i]*b[j]
-			//c[i+j+1] += c[i+j]/10
-			//c[i+j] %=10;
+			// must 48 <= byteNum1 <= 57
 			byteNum1, byteNum2, byteNum3 := bn.getSetElem(index), char[0], char[1]
 			num1, num2, num3 := byteNum1-numByteZero, byteNum2-numByteZero, byteNum3-numByteZero
+			// has made sure: num1 <= 90
 			num1 += num2 * num3
-			bn.setElem(index-1, bn.getSetElem(index-1)+num1/10)
+			contributeNum := num1 / 10
+			// contribute must < 255
+			contributeIdx := index - 1
+			bn.setElem(contributeIdx, bn.getSetElem(contributeIdx)+contributeNum)
 			bn.setElem(index, num1%10+numByteZero)
 		}
 	case '/':
@@ -523,7 +534,7 @@ func (bn *BigNum) simpleMul(bnt *BigNum) *BigNum {
 	bnResult.setValues(make([]byte, bnRSize), bnRSize, bnRSign, baseByteDec)
 	for idx1 := bn.size - 1; idx1 >= 0; idx1-- {
 		for idx2 := bnt.size - 1; idx2 >= 0; idx2-- {
-			bnResult.setElemOpt(idx1+idx2, '*', bn.getElem(idx1), bnt.getElem(idx2))
+			bnResult.setElemOpt(idx1+idx2+1, '*', bn.getElem(idx1), bnt.getElem(idx2))
 		}
 	}
 	return bnResult
