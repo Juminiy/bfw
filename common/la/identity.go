@@ -4,9 +4,7 @@ const (
 	identityMatrixValue float64 = 1.0
 )
 
-var (
-	NullIdentity = &Identity{}
-)
+var ()
 
 type Identity struct {
 	size int

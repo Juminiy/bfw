@@ -1,6 +1,7 @@
-package la
+package cal
 
 import (
+	"bfw/common/la"
 	"bfw/common/lang"
 	"fmt"
 )
@@ -21,8 +22,8 @@ type PolyMatrix struct {
 }
 
 func (pm *PolyMatrix) validate() bool {
-	if pm.rowSize == matrixNoSize ||
-		pm.columnSize == matrixNoSize ||
+	if pm.rowSize == la.matrixNoSize ||
+		pm.columnSize == la.matrixNoSize ||
 		pm.slice == nil ||
 		len(pm.slice) != pm.rowSize {
 		return false
@@ -119,21 +120,21 @@ func (pm *PolyMatrix) setColumnSize(columnSize int) {
 
 func (pm *PolyMatrix) setElemByOne2OneOpt(rowIndex, columnIndex int, opt rune, pmt *PolyMatrix) {
 	if !pm.validateIndex(rowIndex, columnIndex) {
-		panic(matrixIndexOutOfBoundError)
+		panic(la.matrixIndexOutOfBoundError)
 	}
 	pm.get(rowIndex, columnIndex).one2OneOpt(opt, pmt.get(rowIndex, columnIndex))
 }
 
 func (pm *PolyMatrix) setElemByOptElem(rowIndex, columnIndex int, opt rune, p *Poly) {
 	if !pm.validateIndex(rowIndex, columnIndex) {
-		panic(matrixIndexOutOfBoundError)
+		panic(la.matrixIndexOutOfBoundError)
 	}
 	pm.get(rowIndex, columnIndex).one2OneOpt(opt, p)
 }
 
 func (pm *PolyMatrix) get(rowIndex, columnIndex int) *Poly {
 	if !pm.validateIndex(rowIndex, columnIndex) {
-		panic(matrixIndexOutOfBoundError)
+		panic(la.matrixIndexOutOfBoundError)
 	}
 	return pm.slice[rowIndex][columnIndex]
 }
@@ -144,14 +145,14 @@ func (pm *PolyMatrix) set(rowIndex, columnIndex int, value *Poly) {
 
 func (pm *PolyMatrix) getRow(rowIndex int) []*Poly {
 	if !pm.validateIndex(rowIndex) {
-		panic(matrixIndexOutOfBoundError)
+		panic(la.matrixIndexOutOfBoundError)
 	}
 	return pm.slice[rowIndex]
 }
 
 func (pm *PolyMatrix) setRow(rowIndex int, rowSlice []*Poly) {
 	if !pm.validateIndex(rowIndex) {
-		panic(matrixIndexOutOfBoundError)
+		panic(la.matrixIndexOutOfBoundError)
 	}
 	pm.slice[rowIndex] = rowSlice
 }
@@ -187,12 +188,12 @@ func (pm *PolyMatrix) getPhalanxSize() int {
 	if pm.isPhalanx() {
 		return pm.rowSize
 	}
-	return matrixNotPhalanx
+	return la.matrixNotPhalanx
 }
 
 func (pm *PolyMatrix) Det() *Poly {
 	if !pm.isPhalanx() {
-		panic(matrixRowColumnDiffer)
+		panic(la.matrixRowColumnDiffer)
 	}
 	return pm.det()
 }
@@ -202,13 +203,13 @@ func (pm *PolyMatrix) Det() *Poly {
 // simpleDet
 // laplaceDet
 func (pm *PolyMatrix) det() *Poly {
-	if n := pm.getPhalanxSize(); n == simplePhalanxSizeOne {
+	if n := pm.getPhalanxSize(); n == la.simplePhalanxSizeOne {
 		return pm.get(0, 0)
-	} else if n == simplePhalanxSizeTwo {
+	} else if n == la.simplePhalanxSizeTwo {
 		res1 := PolyChainedMulV2(pm.get(0, 0), pm.get(1, 1))
 		res2 := PolyChainedMulV2(pm.get(0, 1), pm.get(1, 1))
 		return PolyChainedSub(res1, res2)
-	} else if n == simplePhalanxSizeThree {
+	} else if n == la.simplePhalanxSizeThree {
 		res1 := PolyChainedMulV2(pm.get(0, 0), pm.get(1, 1), pm.get(2, 2))
 		res2 := PolyChainedMulV2(pm.get(1, 0), pm.get(2, 1), pm.get(0, 2))
 		res3 := PolyChainedMulV2(pm.get(0, 1), pm.get(1, 2), pm.get(2, 0))

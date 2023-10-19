@@ -1,6 +1,7 @@
 package la
 
 import (
+	"bfw/common/cal"
 	"bfw/common/lang"
 	"errors"
 	"fmt"
@@ -897,6 +898,10 @@ func (matrix *Matrix) rotate90(clockWise bool) *Matrix {
 	return matrix
 }
 
+func (matrix *Matrix) rotate180() *Matrix {
+	return matrix
+}
+
 func (matrix *Matrix) flipByMiddleRow() *Matrix {
 	size := matrix.getPhalanxSize()
 	for rowIdx := 0; rowIdx < (size >> 1); rowIdx++ {
@@ -1354,37 +1359,37 @@ func (matrix *Matrix) EigenVectors() *EigenVectors {
 
 // EigenMatrix
 // λI-A <-> A-λI
-func (matrix *Matrix) EigenMatrix() *PolyMatrix {
+func (matrix *Matrix) EigenMatrix() *cal.PolyMatrix {
 	phalanxSize := matrix.getPhalanxSize()
 	polyMatrix := matrix.PolyMatrix()
 	for phaIdx := 0; phaIdx < phalanxSize; phaIdx++ {
-		lambdaPoly := ConstructPolyNode(1.0, 1).Poly(eigenPolyMatrixDefaultAES)
+		lambdaPoly := cal.ConstructPolyNode(1.0, 1).Poly(cal.eigenPolyMatrixDefaultAES)
 		polyMatrix.setElemByOptElem(phaIdx, phaIdx, '-', lambdaPoly)
 	}
 	return polyMatrix
 }
 
-func (matrix *Matrix) SmithStandard() *PolyDiagonal {
-	return &PolyDiagonal{}
+func (matrix *Matrix) SmithStandard() *cal.PolyDiagonal {
+	return &cal.PolyDiagonal{}
 }
 
 func (matrix *Matrix) JordanStandard() *JordanMatrix {
 	return &JordanMatrix{}
 }
 
-func (matrix *Matrix) DdLambda(k int) *Poly {
+func (matrix *Matrix) DdLambda(k int) *cal.Poly {
 	return matrix.constantFactors()[k]
 }
 
-func (matrix *Matrix) constantFactors() []*Poly {
+func (matrix *Matrix) constantFactors() []*cal.Poly {
 	return nil
 }
 
-func (matrix *Matrix) DDLambda(k int) *Poly {
+func (matrix *Matrix) DDLambda(k int) *cal.Poly {
 	return matrix.determinantFactors()[k]
 }
 
-func (matrix *Matrix) determinantFactors() []*Poly {
+func (matrix *Matrix) determinantFactors() []*cal.Poly {
 	return nil
 }
 
@@ -1393,6 +1398,10 @@ func (matrix *Matrix) ZeroSpace() {}
 // RowSimplest
 // Matrix ElementaryTransformation
 func (matrix *Matrix) RowSimplest() *Matrix {
+	return matrix
+}
+
+func (matrix *Matrix) rowET() *Matrix {
 	return matrix
 }
 
@@ -1440,7 +1449,33 @@ func (matrix *Matrix) columnIMulLambdaAddColumnJET(columnIIndex, columnJIndex in
 
 // Matrix Decomposition
 
-func (matrix *Matrix) LU()         {}
+func (matrix *Matrix) LR() (*Matrix, *Matrix) {
+	return matrix.triangleDecomposition()
+}
+func (matrix *Matrix) triangleDecomposition() (*Matrix, *Matrix) {
+	return &Matrix{}, &Matrix{}
+}
+
+func (matrix *Matrix) CanLR() bool {
+	return false
+}
+
+func (matrix *Matrix) Doolitte() {
+
+}
+
+func (matrix *Matrix) Crout() {
+
+}
+
+func (matrix *Matrix) LDR() {
+
+}
+
+func (matrix *Matrix) LU()  {}
+func (matrix *Matrix) PLU() {}
+func (matrix *Matrix) LDU() {}
+
 func (matrix *Matrix) QR()         {}
 func (matrix *Matrix) Cholesky()   {}
 func (matrix *Matrix) SVD()        {}
@@ -1638,20 +1673,22 @@ func (matrix *Matrix) convertToVectorGroup(shape bool) *VectorGroup {
 	return vg.Construct(matrix.GetSlice())
 }
 
-func (matrix *Matrix) PolyMatrix() *PolyMatrix {
+func (matrix *Matrix) PolyMatrix() *cal.PolyMatrix {
 	return matrix.convertToPolyMatrix()
 }
 
-func (matrix *Matrix) convertToPolyMatrix() *PolyMatrix {
-	pm := &PolyMatrix{}
+func (matrix *Matrix) convertToPolyMatrix() *cal.PolyMatrix {
+	pm := &cal.PolyMatrix{}
 	pm.assign(matrix.rowSize, matrix.columnSize)
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
-			pm.set(rowIdx, columnIdx, ConstructPolyNode(matrix.get(rowIdx, columnIdx), 0).Poly(eigenPolyMatrixDefaultAES))
+			pm.set(rowIdx, columnIdx, cal.ConstructPolyNode(matrix.get(rowIdx, columnIdx), 0).Poly(cal.eigenPolyMatrixDefaultAES))
 		}
 	}
 	return pm
 }
+
+// please explain the code function:
 
 func (matrix *Matrix) getSpiralOrder() []float64 {
 	var (

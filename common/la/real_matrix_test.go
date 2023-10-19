@@ -283,7 +283,7 @@ func TestMatrix_Vandermonde(t *testing.T) {
 }
 
 func TestMatrix_Convolution(t *testing.T) {
-	//matrix1 := ConstructMatrix([][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})
+	matrix1 := ConstructMatrix([][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})
 	//matrix2 := ConstructMatrix([][]float64{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}})
 	//matrix3 := ConstructMatrix([][]float64{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}, {11, 12, 13, 14, 15}, {16, 17, 18, 19, 20}, {21, 22, 23, 24, 25}})
 
@@ -324,6 +324,10 @@ func TestMatrix_Convolution(t *testing.T) {
 
 	//matrix1.flipByMainDiagonal().Display()
 	//matrix1.flipBySubDiagonal().Display()
+
+	//9+16+21+24+25+24+21+16+9=165
+	fmt.Printf("%.5f\n", matrix1.Convolution(matrix1))
+	matrix1.Display()
 }
 
 // 3 6 9
@@ -339,4 +343,14 @@ func TestMatrix_Union(t *testing.T) {
 	matrix := ConstructMatrix([][]float64{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}, {11, 12, 13, 14, 15}, {16, 17, 18, 19, 20}, {21, 22, 23, 24, 25}})
 	//[1 2 3 4 5 10 15 20 25 24 23 22 21 16 11 6 7 8 9 14 19 18 17 12 13]
 	fmt.Println(matrix.getSpiralOrder())
+}
+
+func TestMatrix_Adjoins(t *testing.T) {
+	matrix := ConstructMatrix([][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})
+	matrix.adjoin().Display()
+}
+
+// to make 500 turns test for matrix eigenvalues
+func TestMatrix_EigenValues3(t *testing.T) {
+
 }

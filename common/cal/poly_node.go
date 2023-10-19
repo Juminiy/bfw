@@ -1,4 +1,4 @@
-package la
+package cal
 
 import (
 	"bfw/common/lang"
@@ -20,7 +20,6 @@ const (
 var (
 	polyNodeCanNotOptError = errors.New("two poly nodes cannot be operated")
 	polyNodeInvalidError   = errors.New("poly nodes is invalid")
-	NullPolyNode           = &PolyNode{}
 )
 
 type PolyNode struct {

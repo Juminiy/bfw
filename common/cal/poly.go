@@ -1,4 +1,4 @@
-package la
+package cal
 
 import (
 	lang "bfw/common/lang"
@@ -20,7 +20,6 @@ var (
 	polyInvalidError               = errors.New("poly is invalid")
 	polyEquationNoSolution         = errors.New("poly equation has no solution")
 	polyEquationSolutionNotDevelop = errors.New("poly equation solution has not developed")
-	NullPoly                       = &Poly{}
 )
 
 // Poly

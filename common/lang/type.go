@@ -1,59 +1,5 @@
 package lang
 
-import (
-	"errors"
-)
-
-func GetDataSourceBackendColumnType(backend string) ([]string, error) {
-	switch backend {
-	case "mysql":
-		{
-			return []string{"tinyint", "smallint", "integer", "bigint",
-					"tinyint unsigned", "smallint unsigned", "integer unsigned", "bigint unsigned",
-					"decimal", "bool", "varchar", "longtext", "date", "datetime"},
-				nil
-		}
-	case "excel":
-		{
-			return []string{"varchar"}, nil
-		}
-	default:
-		{
-			return nil, errors.New("unsupported backend common " + backend)
-		}
-	}
-}
-
-func ConvertColumnTypesToGoTypes(backend string, dataSourceColumnTypes []string) ([]string, error) {
-	goColumnTypes := make([]string, len(dataSourceColumnTypes))
-	var err error = nil
-	switch backend {
-	case "mysql":
-		{
-			break
-		}
-	case "sqlite":
-		{
-			break
-		}
-	case "excel":
-		{
-			break
-		}
-	case "restapi":
-		{
-			break
-		}
-	default:
-		{
-			err = errors.New("Unsupported backend " + backend)
-			return nil, err
-		}
-	}
-
-	return goColumnTypes, nil
-}
-
 // common assertion
 
 func ValidateStringArrayOrSlice(arrayOrSlice []string) bool {

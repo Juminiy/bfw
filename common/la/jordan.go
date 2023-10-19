@@ -1,8 +1,6 @@
 package la
 
-var (
-	NullJordanMatrix = &JordanMatrix{}
-)
+var ()
 
 type JordanMatrix struct {
 	block     []*JordanBlock

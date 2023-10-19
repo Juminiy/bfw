@@ -1,6 +1,9 @@
-package la
+package cal
 
-import "math"
+import (
+	"bfw/common/la"
+	"math"
+)
 
 // CoePoly
 // if exp coe is 0, set 0
@@ -45,8 +48,8 @@ func (cp *CoePoly) TrailingZeroPaddingPower2() *CoePoly {
 // a = b*X^{-1}
 // X[1] = [x1, x2, x3, ..., xn] must distinct
 type PointValuePoly struct {
-	x *Vandermonde
-	b *Vector
+	x *la.Vandermonde
+	b *la.Vector
 }
 
 func (pvp *PointValuePoly) CoePoly() *CoePoly {

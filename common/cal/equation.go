@@ -1,6 +1,7 @@
-package la
+package cal
 
 import (
+	"bfw/common/la"
 	"bfw/common/lang"
 	"errors"
 	"fmt"
@@ -101,8 +102,8 @@ func (s *Solution) setElem(index int, value complex128) {
 	s.slice[index] = value
 }
 
-func (s *Solution) EigenValues() *EigenValues {
-	return ConstructEigenValues(s.slice)
+func (s *Solution) EigenValues() *la.EigenValues {
+	return la.ConstructEigenValues(s.slice)
 }
 
 func (s *Solution) PolyFactors() *PolyFactors {
@@ -134,6 +135,6 @@ type MultipleEquationsOfOneVariable struct {
 }
 
 type LinearEquationMultipleVariable struct {
-	coe *Matrix
-	val *Vector
+	coe *la.Matrix
+	val *la.Vector
 }

@@ -1,6 +1,7 @@
 package la
 
 import (
+	"bfw/common/cal"
 	"bfw/common/lang"
 	"errors"
 	"fmt"
@@ -183,7 +184,7 @@ func (ev *EigenValue) decAlgebraicMultiplicity() {
 // display: λ2 = λ3 = lambda
 func (ev *EigenValue) Display(startIndex int) {
 	for cnt := startIndex; cnt < startIndex+ev.algebraicMultiplicity; cnt++ {
-		fmt.Printf(string(eigenPolyMatrixDefaultAES)+"%d = ", cnt)
+		fmt.Printf(string(cal.eigenPolyMatrixDefaultAES)+"%d = ", cnt)
 	}
 	lang.DisplayComplex128(5, 5, ev.lambda)
 }

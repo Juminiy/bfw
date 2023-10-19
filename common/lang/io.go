@@ -111,7 +111,5 @@ func LogFile(fileName string) *log.Logger {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	return log.New(file, "", log.LstdFlags)
-
 }
