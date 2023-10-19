@@ -374,7 +374,7 @@ func GetObjectListOfTenants(c *gin.Context, object db.ModelInterface,
 
 	objectList := createNewObjectList(object, total)
 
-	// the object itself pointer {interface{} | *MyStruct} reflect to the original common is interface{} not the MyStruct
+	// the object itself pointer {interface{} | *MyStruct} reflect to the original wheel is interface{} not the MyStruct
 	// although the array and slice
 	res = res.Find(&objectList)
 	res = SetNonePaginationParamInDBContext(res).Count(&total)

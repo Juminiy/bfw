@@ -253,7 +253,7 @@ func connectDatabaseAndInitOrm(instId int) error {
 		}
 	default:
 		{
-			return errors.New("unsupported database inst common")
+			return errors.New("unsupported database inst wheel")
 		}
 	}
 

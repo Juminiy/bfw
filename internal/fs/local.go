@@ -36,8 +36,8 @@ func FileSanityCheck(file *File) error {
 	case *os.File:
 		break
 	default:
-		logger.Errorf("incorrect file common")
-		return errors.New("Incorrect file common")
+		logger.Errorf("incorrect file wheel")
+		return errors.New("Incorrect file wheel")
 	}
 
 	return nil

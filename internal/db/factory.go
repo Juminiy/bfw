@@ -61,5 +61,5 @@ func InstantiateDatabase(_backend BackendType) (DBInterface, error) {
 		logger.Errorf("unimplemented database: %d", _backend)
 		break
 	}
-	return nil, errors.New("unimplemented database common ")
+	return nil, errors.New("unimplemented database wheel ")
 }

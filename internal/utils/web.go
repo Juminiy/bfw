@@ -81,7 +81,7 @@ func UnmarshalFormDataExcelFile(c *gin.Context) (*excelize.File, error) {
 	//	return nil, err
 	//}
 	////convert file format
-	//if common.GetFileNameSuffix(fileHeader.Filename) == "csv" {
+	//if wheel.GetFileNameSuffix(fileHeader.Filename) == "csv" {
 	//	byteData = make([]byte, fileHeader.Size)
 	//	byteData, err = CsvToXlsx(byteData)
 	//	if err != nil {
