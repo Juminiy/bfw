@@ -140,3 +140,11 @@ func IntArrayToComplex128Array(p []int) []complex128 {
 	}
 	return pC
 }
+
+func RealArrayToComplex128Array(p []float64) []complex128 {
+	pC := make([]complex128, len(p))
+	for idx := 0; idx < len(p); idx++ {
+		pC[idx] = complex(p[idx], 0.0)
+	}
+	return pC
+}

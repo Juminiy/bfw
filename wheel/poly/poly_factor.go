@@ -73,6 +73,7 @@ func (f *Factors) setValues(slice []*Poly, size int) {
 }
 
 func (f *Factors) setSlice(slice []*Poly) {
+	f.slice = nil
 	f.slice = slice
 }
 

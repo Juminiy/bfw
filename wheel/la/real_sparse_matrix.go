@@ -88,6 +88,7 @@ func (sm *SparseMatrix) setSize(size, rowSize, columnSize int) {
 }
 
 func (sm *SparseMatrix) setTripleMap(tm map[string]float64) {
+	sm.tripleMap = nil
 	sm.tripleMap = tm
 }
 

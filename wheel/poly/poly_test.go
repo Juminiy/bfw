@@ -8,13 +8,13 @@ import (
 
 var (
 	polyNode0 = ConstructPolyNode(1, 0)
-	polyNode1 = ConstructPolyNode(2, 1)
-	polyNode4 = ConstructPolyNode(5, 4)
-	polyNode9 = ConstructPolyNode(10, 9)
+	polyNode1 = ConstructPolyNode(-2, 1)
+	polyNode4 = ConstructPolyNode(-5, 4)
+	polyNode9 = ConstructPolyNode(-10, 9)
 
-	polyNode20  = ConstructPolyNode(1, 0)
+	polyNode20  = ConstructPolyNode(-1, 0)
 	polyNode22  = ConstructPolyNode(3, 2)
-	polyNode26  = ConstructPolyNode(7, 6)
+	polyNode26  = ConstructPolyNode(-7, 6)
 	polyNode215 = ConstructPolyNode(16, 15)
 
 	// (5x-89)(4x-33) = 20x^2-521x+2937 = 0, x1 = 17.8, x2 = 8.25
@@ -127,10 +127,15 @@ func TestPoly_Mul(t *testing.T) {
 
 	//simpleMul
 	//1+2x+3x^2+6x^3+5x^4+22x^6+14x^7+10x^9+35x^10+30x^11+86x^15+32x^16+80x^19+160x^24
+	//-1+2x+3x^2-6x^3+5x^4-22x^6+14x^7+10x^9+35x^10-30x^11+86x^15-32x^16-80x^19-160x^24
 	//simpleMulV2
-	//TODO: Error
 	//1+2x+3x^2+6x^3+5x^4+22x^6+14x^7+10x^9+35x^10+30x^11+86x^15+32x^16+80x^19+160x^24
+	//-1+2x+3x^2-6x^3+5x^4-22x^6+14x^7+10x^9+35x^10-30x^11+86x^15-32x^16-80x^19-160x^24
 	poly1.Mul(poly2).Display(true, 0)
+	//CoePoly.FFTMul
+	//1x+2x+3x²+6x³+5x⁴+22x⁶+14x⁷+10x⁹+35x¹⁰+30x¹¹+86x¹⁵+32x¹⁶+80x¹⁹+160x²⁴
+	//-1x+2x+3x²-6x³+5x⁴-22x⁶+14x⁷+10x⁹+35x¹⁰-30x¹¹+86x¹⁵-32x¹⁶-80x¹⁹-160x²⁴
+	poly1.FFTMul(poly2).Display(0)
 }
 
 func Test_Math(t *testing.T) {
@@ -190,4 +195,14 @@ func TestPoly_Factoring(t *testing.T) {
 
 func TestPoly_DisplayV2(t *testing.T) {
 	poly1.Display(false, 1)
+}
+
+func TestCoePoly_Mul(t *testing.T) {
+	cp1 := ConstructCoePoly([]float64{7, 8, 9, 8, 5, 4, 3, 2, 1})
+	cp2 := ConstructCoePoly([]float64{0, 9, 8, 7, 6})
+	// after hadamard and div (1 << bitCnt)
+	//[0 45 76 94 100 70 40 19 6.000000000000002 0 0 0 0 0 0 0]
+	// destValue
+	// 8381630627430
+	fmt.Println(cp1.Mul(cp2).Value(10))
 }

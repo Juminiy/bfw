@@ -60,6 +60,7 @@ func (evs *EigenValues) setValues(values map[complex128]*EigenValue, multiplicit
 }
 
 func (evs *EigenValues) setValuesValues(values map[complex128]*EigenValue) {
+	evs.values = nil
 	evs.values = values
 }
 
@@ -165,6 +166,7 @@ func (ev *EigenValue) setGM(gm int) {
 }
 
 func (ev *EigenValue) setVectors(vectors *EigenVectors) {
+	ev.vectors = nil
 	ev.vectors = vectors
 }
 

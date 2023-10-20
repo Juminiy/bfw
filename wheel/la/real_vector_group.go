@@ -114,6 +114,7 @@ func (vg *VectorGroup) getValue(index, vIndex int) float64 {
 	return vg.group[index].get(vIndex, vIndex)
 }
 func (vg *VectorGroup) setGroup(group []*Vector) {
+	vg.group = nil
 	vg.group = group
 }
 

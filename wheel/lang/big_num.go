@@ -192,6 +192,7 @@ func (bn *BigNum) setValues(slice []byte, size int, sign, base byte) {
 }
 
 func (bn *BigNum) setSlice(slice []byte) {
+	bn.slice = nil
 	bn.slice = slice
 }
 

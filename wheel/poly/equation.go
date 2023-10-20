@@ -80,6 +80,7 @@ func (s *Solution) setValues(slice []complex128, size int) {
 }
 
 func (s *Solution) setSlice(slice []complex128) {
+	s.slice = nil
 	s.slice = slice
 }
 

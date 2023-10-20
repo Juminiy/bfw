@@ -34,15 +34,15 @@ var (
 	matrixCanNotBeInverseError        = errors.New("matrix cannot be inverse")
 	matrixCanNotBeIdentityError       = errors.New("matrix cannot be identity")
 	matrixCanNotBeReShapedError       = errors.New("matrix cannot be reshaped")
+	matrixCanNotCrossError            = errors.New("matrix cannot cross")
 	matrixInValidError                = errors.New("matrix is invalid")
 	rangeBoundError                   = errors.New("the num range bound is error")
 )
 
 type Matrix struct {
-	slice       [][]float64
-	rowSize     int
-	columnSize  int
-	coefficient float64
+	slice      [][]float64
+	rowSize    int
+	columnSize int
 }
 
 func ConstructMatrix(real2DArray [][]float64) *Matrix {
@@ -70,21 +70,12 @@ func (matrix *Matrix) Construct(real2DArray [][]float64) *Matrix {
 	return matrix
 }
 
+// redefine validate
 func (matrix *Matrix) validate() bool {
-	if matrix.rowSize == matrixNoSize ||
-		matrix.columnSize == matrixNoSize ||
-		matrix.slice == nil ||
-		len(matrix.slice) != matrix.rowSize {
-		return false
-	} else {
-		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
-			if idxRow := matrix.getRow(rowIdx); idxRow == nil ||
-				len(idxRow) != matrix.columnSize {
-				return false
-			}
-		}
-	}
-	return true
+	return matrix.rowSize != matrixNoSize &&
+		matrix.columnSize != matrixNoSize &&
+		matrix.slice != nil &&
+		len(matrix.slice) == matrix.rowSize
 }
 
 func (matrix *Matrix) validateIndex(index ...int) bool {
@@ -127,6 +118,7 @@ func (matrix *Matrix) setNull() {
 
 func (matrix *Matrix) remake(m ...*Matrix) {
 	if len(m) > 0 {
+		matrix.setNull()
 		matrix.setSelf(m[0])
 	} else {
 		matrix.setValues(nil, matrixNoSize)
@@ -160,6 +152,7 @@ func (matrix *Matrix) getSelf() *Matrix {
 }
 
 func (matrix *Matrix) setSelf(m *Matrix) {
+	matrix.setNull()
 	matrix.setValues(m.slice, m.rowSize, m.columnSize)
 }
 
@@ -171,6 +164,7 @@ func (matrix *Matrix) setValues(slice [][]float64, size ...int) {
 // setSlice
 // change self
 func (matrix *Matrix) setSlice(slice [][]float64) {
+	matrix.slice = nil
 	matrix.slice = slice
 }
 
@@ -273,6 +267,7 @@ func (matrix *Matrix) setRow(rowIndex int, rowSlice []float64) {
 	if !matrix.validateIndex(rowIndex) {
 		panic(matrixIndexOutOfBoundError)
 	}
+	matrix.slice[rowIndex] = nil
 	matrix.slice[rowIndex] = rowSlice
 }
 
@@ -389,7 +384,7 @@ func (matrix *Matrix) Equal(m *Matrix) bool {
 	if matrix.sameShape(m) {
 		for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 			for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
-				if !lang.EqualFloat64ByAccuracy(matrix.get(rowIdx, columnIdx), m.get(rowIdx, columnIdx)) {
+				if !lang.EqualFloat64Zero(matrix.get(rowIdx, columnIdx) - m.get(rowIdx, columnIdx)) {
 					return false
 				}
 			}
@@ -545,6 +540,8 @@ func (matrix *Matrix) one2OneOpt(opt rune, m *Matrix) *Matrix {
 	return matrix
 }
 
+// Matrix Self Property Or Operate Self Result Matrix Or Real
+
 // Rank
 // uncompleted
 func (matrix *Matrix) Rank() int {
@@ -618,6 +615,11 @@ func (matrix *Matrix) laplaceDet(totalN int) float64 {
 
 // Matrix Opt Matrix self
 
+func (matrix *Matrix) Transpose() *Matrix {
+	// need to complete after block matrix
+	return matrix.transposeV2()
+}
+
 // GetTranspose
 // chained option
 func (matrix *Matrix) GetTranspose() *Matrix {
@@ -626,20 +628,27 @@ func (matrix *Matrix) GetTranspose() *Matrix {
 }
 
 // transpose
-// change self
+// none change self
 // chained option
 // update version: the space complexity is: O(1), impossible
 func (matrix *Matrix) transpose() *Matrix {
+	if matrix.isPhalanx() {
+		return matrix.phalanxTranspose()
+	}
 	newRowSize, newColumnSize := matrix.columnSize, matrix.rowSize
-	newSlice := make([][]float64, newRowSize)
+	tMatrix := &Matrix{}
+	tMatrix.assign(newRowSize, newColumnSize)
 	for newRowIdx := 0; newRowIdx < newRowSize; newRowIdx++ {
-		newSlice[newRowIdx] = make([]float64, newColumnSize)
 		for newColumnIdx := 0; newColumnIdx < newColumnSize; newColumnIdx++ {
-			newSlice[newRowIdx][newColumnIdx] = matrix.get(newColumnIdx, newRowIdx)
+			tMatrix.set(newRowIdx, newColumnIdx, matrix.get(newColumnIdx, newRowIdx))
 		}
 	}
-	matrix.setValues(newSlice, newRowSize, newColumnSize)
 	return matrix
+}
+
+func (matrix *Matrix) Inv() *Matrix {
+	// after realize LU
+	return matrix.inverseV2()
 }
 
 // GetInverse
@@ -692,7 +701,7 @@ func (matrix *Matrix) adjoin() *Matrix {
 			adjoinMatrix.set(rowIdx, columnIdx, algebraicRemainderValue)
 		}
 	}
-	// 3. matrix transpose
+	// 3. matrix elemTranspose
 	adjoinMatrix.transpose()
 	matrix.setSlice(adjoinMatrix.slice)
 	return matrix
@@ -720,6 +729,24 @@ func (matrix *Matrix) Trace() float64 {
 		return trace
 	}
 	panic(matrixNotPhalanx)
+}
+
+// Cond
+// the condition num of Matrix
+func (matrix *Matrix) Cond() {
+
+}
+
+// Norm
+// the norm num of Matrix
+func (matrix *Matrix) Norm() {
+
+}
+
+// PInv
+// the pinv of Matrix
+func (matrix *Matrix) PInv() {
+
 }
 
 func (matrix *Matrix) Sum() float64 {
@@ -842,6 +869,15 @@ func (matrix *Matrix) mirror() *Matrix {
 	return matrix
 }
 
+func (matrix *Matrix) phalanxTranspose() *Matrix {
+	for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+		for rowIdx := columnIdx + 1; rowIdx < matrix.rowSize; rowIdx++ {
+			matrix.setElemSwap(rowIdx, columnIdx, columnIdx, rowIdx)
+		}
+	}
+	return matrix
+}
+
 func (matrix *Matrix) GetFlip() *Matrix {
 	m := matrix.makeCopy()
 	return m.flip()
@@ -954,41 +990,110 @@ func (matrix *Matrix) IsX() bool {
 	return flag
 }
 
-// Matrix Opt Matrix Res Matrix
+// Matrix Operate Matrix Result Matrix
+
+// Plus
+// each elem +
+func (matrix *Matrix) Plus(m *Matrix) *Matrix {
+	return matrix.GetPlus(m)
+}
 
 func (matrix *Matrix) GetPlus(m *Matrix) *Matrix {
 	mCopy := matrix.makeCopy()
-	return mCopy.Add(m)
+	return mCopy.add(m)
 }
 
-// Add
+// add
 // change self
 // chained option
-func (matrix *Matrix) Add(m *Matrix) *Matrix {
+func (matrix *Matrix) add(m *Matrix) *Matrix {
 	return matrix.one2OneOpt('+', m)
+}
+
+// Minus
+// each elem -
+func (matrix *Matrix) Minus(m *Matrix) *Matrix {
+	return matrix.GetMinus(m)
 }
 
 func (matrix *Matrix) GetMinus(m *Matrix) *Matrix {
 	mCopy := matrix.makeCopy()
-	return mCopy.Sub(m)
+	return mCopy.sub(m)
 }
 
-// Sub
+// sub
 // change self
 // chained option
-func (matrix *Matrix) Sub(m *Matrix) *Matrix {
+func (matrix *Matrix) sub(m *Matrix) *Matrix {
 	return matrix.one2OneOpt('-', m)
 }
 
-func (matrix *Matrix) GetMTimes(m *Matrix) *Matrix {
-	mCopy := matrix.makeCopy()
-	return mCopy.Mul(m)
+// Times
+// each elem *
+func (matrix *Matrix) Times(m *Matrix) *Matrix {
+	return matrix.GetTimes(m)
 }
 
-// Mul
+func (matrix *Matrix) GetTimes(m *Matrix) *Matrix {
+	mCopy := matrix.makeCopy()
+	return mCopy.DotMul(m)
+}
+
+func (matrix *Matrix) Dot(m *Matrix) *Matrix {
+	return matrix.hadamardMul(m)
+}
+
+func (matrix *Matrix) DotMul(m *Matrix) *Matrix {
+	return matrix.hadamardMul(m)
+}
+
+// HadamardMul
 // change self
 // chained option
-func (matrix *Matrix) Mul(m *Matrix) *Matrix {
+func (matrix *Matrix) hadamardMul(m *Matrix) *Matrix {
+	return matrix.one2OneOpt('*', m)
+}
+
+// RDivide
+// each elem /
+func (matrix *Matrix) RDivide(m *Matrix) *Matrix {
+	return matrix.GetRDivide(m)
+}
+
+func (matrix *Matrix) GetRDivide(m *Matrix) *Matrix {
+	mCopy := matrix.makeCopy()
+	return mCopy.DotDivide(m)
+}
+
+func (matrix *Matrix) DotDivide(m *Matrix) *Matrix {
+	return matrix.one2OneOpt('/', m)
+}
+
+// Power
+// each elem ^
+func (matrix *Matrix) Power(m *Matrix) *Matrix {
+	return matrix.GetPower(m)
+}
+
+func (matrix *Matrix) GetPower(m *Matrix) *Matrix {
+	mCopy := matrix.makeCopy()
+	return mCopy.DotPower(m)
+}
+
+func (matrix *Matrix) DotPower(m *Matrix) *Matrix {
+	return matrix.one2OneOpt('^', m)
+}
+
+// MTimes
+// Matrix Product
+func (matrix *Matrix) MTimes(m *Matrix) *Matrix {
+	return matrix.mulV2(m)
+}
+
+// mul
+// change self
+// chained option
+func (matrix *Matrix) mul(m *Matrix) *Matrix {
 	if !matrix.canMultiply(m) {
 		panic(matrixCanNotMultiplyError)
 	}
@@ -1003,6 +1108,12 @@ func (matrix *Matrix) Mul(m *Matrix) *Matrix {
 	return matrix
 }
 
+// MRDivide
+// Matrix Quotient
+func (matrix *Matrix) MRDivide(m *Matrix) *Matrix {
+	return matrix.GetMRDivide(m)
+}
+
 func (matrix *Matrix) GetMRDivide(m *Matrix) *Matrix {
 	mCopy := matrix.makeCopy()
 	return mCopy.Div(m)
@@ -1013,26 +1124,32 @@ func (matrix *Matrix) GetMRDivide(m *Matrix) *Matrix {
 // chained option
 func (matrix *Matrix) Div(m *Matrix) *Matrix {
 	inverseM := m.GetInverse()
-	return matrix.Mul(inverseM)
+	return matrix.mulV2(inverseM)
+}
+
+// MPower
+// Matrix Exponent
+func (matrix *Matrix) MPower(n int) *Matrix {
+	return matrix.mPowerV2(n)
 }
 
 func (matrix *Matrix) GetMPower(n int) *Matrix {
 	mCopy := matrix.makeCopy()
-	return mCopy.Power(n)
+	return mCopy.mPowerV2(n)
 }
 
-// Power
+// mPower
 // change self
 // chained option
-func (matrix *Matrix) Power(n int) *Matrix {
+func (matrix *Matrix) mPower(n int) *Matrix {
 	mCopy := matrix.makeCopy()
 	for t := 0; t < n; t++ {
-		matrix.Mul(mCopy)
+		matrix.mulV2(mCopy)
 	}
 	return matrix
 }
 
-// Matrix Opt Matrix Res Matrix
+// Matrix Operate Matrix Result Matrix
 
 // MulLambda
 // change self
@@ -1063,38 +1180,19 @@ func (matrix *Matrix) MulVector(v *Vector) *Vector {
 	return &Vector{}
 }
 
-func (matrix *Matrix) GetTimes(m *Matrix) *Matrix {
-	mCopy := matrix.makeCopy()
-	return mCopy.DotMul(m)
-}
-
-func (matrix *Matrix) DotMul(m *Matrix) *Matrix {
-	return matrix.hadamardMul(m)
-}
-
-// HadamardMul
-// change self
-// chained option
-func (matrix *Matrix) hadamardMul(m *Matrix) *Matrix {
-	return matrix.one2OneOpt('*', m)
-}
-
-func (matrix *Matrix) GetRDivide(m *Matrix) *Matrix {
-	mCopy := matrix.makeCopy()
-	return mCopy.DotDivide(m)
-}
-
-func (matrix *Matrix) DotDivide(m *Matrix) *Matrix {
-	return matrix.one2OneOpt('/', m)
-}
-
-func (matrix *Matrix) GetPower(m *Matrix) *Matrix {
-	mCopy := matrix.makeCopy()
-	return mCopy.DotPower(m)
-}
-
-func (matrix *Matrix) DotPower(m *Matrix) *Matrix {
-	return matrix.one2OneOpt('^', m)
+func (matrix *Matrix) Cross(m *Matrix) *Matrix {
+	if matrix.rowSize != vectorSizeThree ||
+		m.rowSize != vectorSizeThree {
+		panic(matrixCanNotCrossError)
+	}
+	vg1 := matrix.VectorGroup(true)
+	vg2 := matrix.VectorGroup(true)
+	newVg := &VectorGroup{}
+	newVg.assign(matrix.columnSize, vectorSizeThree)
+	for idx := 0; idx < vg1.size; idx++ {
+		newVg.set(idx, vg1.get(idx).Cross(vg2.get(idx)))
+	}
+	return newVg.Matrix()
 }
 
 func (matrix *Matrix) Convolution(m *Matrix) float64 {
@@ -1104,12 +1202,31 @@ func (matrix *Matrix) Convolution(m *Matrix) float64 {
 	return matrix.GetTimes(m.GetFlip()).Sum()
 }
 
-func (matrix *Matrix) Rand() *Matrix {
-	return matrix.SetRandom()
+// Matrix Generate Matrix
+
+func (matrix *Matrix) RandN(size ...int) *Matrix {
+	return matrix
 }
 
-func (matrix *Matrix) SetRandom() *Matrix {
-	matrix.setSelf(matrix.generateRandomFloat64(matrix.rowSize, matrix.columnSize, 0.0, 1.0))
+func (matrix *Matrix) Rand(size ...int) *Matrix {
+	return matrix.SetRandom(size...)
+}
+
+func (matrix *Matrix) SetRandom(size ...int) *Matrix {
+	var (
+		destRowSize    = matrix.rowSize
+		destColumnSize = matrix.columnSize
+	)
+	if sizeLen := len(size); sizeLen > 0 {
+		if sizeLen >= 1 {
+			destRowSize = size[0]
+			destColumnSize = size[0]
+		}
+		if sizeLen >= 2 {
+			destColumnSize = size[1]
+		}
+	}
+	matrix.setSelf(matrix.generateRandomFloat64(destRowSize, destColumnSize, 0.0, 1.0))
 	return matrix
 }
 
@@ -1277,6 +1394,10 @@ func (matrix *Matrix) GetOne(size ...int) *Matrix {
 	return matrix.generateSameSizeMatrix(1.0, size...)
 }
 
+func (matrix *Matrix) Eye(size ...int) *Matrix {
+	return matrix.GetEye(size...)
+}
+
 func (matrix *Matrix) SetEye(size ...int) *Matrix {
 	matrix.setSelf(matrix.GetEye(size...))
 	return matrix
@@ -1288,6 +1409,42 @@ func (matrix *Matrix) GetEye(size ...int) *Matrix {
 		return eyeIdentity.Matrix()
 	}
 	return &Matrix{}
+}
+
+func (matrix *Matrix) TriL() *Matrix {
+	return matrix.getLowerTriangular()
+}
+
+// triL use (elemSize >> 1) memory space
+func (matrix *Matrix) getLowerTriangular() *Matrix {
+	size := matrix.getPhalanxSize()
+	triL := &Matrix{}
+	triL.setValues(make([][]float64, size), size, size)
+	for rowIdx := 0; rowIdx < size; rowIdx++ {
+		triL.setRow(rowIdx, make([]float64, rowIdx+1))
+		for columnIdx := 0; columnIdx <= rowIdx; columnIdx++ {
+			triL.set(rowIdx, columnIdx, matrix.get(rowIdx, columnIdx))
+		}
+	}
+	return triL
+}
+
+func (matrix *Matrix) TriU() *Matrix {
+	return matrix.getUpperTriangular()
+}
+
+// triU use (elemSize >> 1) memory space
+func (matrix *Matrix) getUpperTriangular() *Matrix {
+	size := matrix.getPhalanxSize()
+	triU := &Matrix{}
+	triU.setValues(make([][]float64, size), size, size)
+	for rowIdx := 0; rowIdx < size; rowIdx++ {
+		triU.setRow(rowIdx, make([]float64, size-rowIdx))
+		for columnIdx := rowIdx; columnIdx < size; columnIdx++ {
+			triU.set(rowIdx, columnIdx, matrix.get(rowIdx, columnIdx))
+		}
+	}
+	return triU
 }
 
 // Matrix Similarity Theory
@@ -1305,7 +1462,11 @@ func (matrix *Matrix) IsSimilar(m *Matrix) bool {
 }
 
 func (matrix *Matrix) SimilarityTransformation(m *Matrix) *Matrix {
-	return m.GetInverse().GetMTimes(matrix).GetMTimes(m)
+	return m.GetInverse().MTimes(matrix).MTimes(m)
+}
+
+func (matrix *Matrix) Orth() *Matrix {
+	return matrix.OrthonormalBasis()
 }
 
 func (matrix *Matrix) OrthonormalBasis() *Matrix {
@@ -1336,6 +1497,10 @@ func (matrix *Matrix) unitization() *Matrix {
 func (matrix *Matrix) Unit() *Matrix {
 	mCopy := matrix.makeCopy()
 	return mCopy.unitization()
+}
+
+func (matrix *Matrix) Eig() (*EigenValues, *EigenVectors) {
+	return matrix.EigenValues(), matrix.EigenVectors()
 }
 
 func (matrix *Matrix) EigenValues() *EigenValues {
@@ -1392,11 +1557,20 @@ func (matrix *Matrix) determinantFactors() []*poly.Poly {
 	return nil
 }
 
-func (matrix *Matrix) ZeroSpace() {}
+func (matrix *Matrix) Null() {
+	matrix.nullSpace()
+}
+func (matrix *Matrix) nullSpace() {
 
-// RowSimplest
+}
+
+func (matrix *Matrix) RRef() *Matrix {
+	return matrix.rowSimplest()
+}
+
+// rowSimplest
 // Matrix ElementaryTransformation
-func (matrix *Matrix) RowSimplest() *Matrix {
+func (matrix *Matrix) rowSimplest() *Matrix {
 	return matrix
 }
 
@@ -1529,7 +1703,7 @@ func (matrix *Matrix) Convergence() (*Matrix, int) {
 	for {
 		prev := convergenceMatrix.makeCopy()
 		convergenceIteratorTime++
-		convergenceMatrix.Power(1)
+		convergenceMatrix.mPowerV2(1)
 		if convergenceMatrix.Equal(prev) {
 			break
 		}
@@ -1537,7 +1711,7 @@ func (matrix *Matrix) Convergence() (*Matrix, int) {
 	return convergenceMatrix, convergenceIteratorTime
 }
 
-// Matrix to other shape
+// Matrix shape to other Algebra Container
 
 func (matrix *Matrix) IsIdentity() bool {
 	return matrix.isDiagonalMatrix(1.0)
@@ -1550,7 +1724,7 @@ func (matrix *Matrix) Identity() *Identity {
 	panic(matrixCanNotBeIdentityError)
 }
 
-func (matrix *Matrix) GetSameSizeIdentity() *Identity {
+func (matrix *Matrix) GetIdentity() *Identity {
 	if size := matrix.getPhalanxSize(); size != matrixNoSize {
 		return ConstructIdentity(size)
 	}

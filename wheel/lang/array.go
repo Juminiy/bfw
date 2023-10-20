@@ -152,3 +152,17 @@ func Int1DArrayDivLambda(a []int, lambda int) []int {
 	}
 	return a
 }
+
+func Int1DArrayReverse(a []int) []int {
+	for idx := 0; idx < (len(a) >> 1); idx++ {
+		a[idx], a[len(a)-1-idx] = a[len(a)-1-idx], a[idx]
+	}
+	return a
+}
+
+func Int1DArrayTruncateLeadingZero(a []int) []int {
+	sIndex := 0
+	for ; sIndex < len(a) && a[sIndex] == 0; sIndex++ {
+	}
+	return a[sIndex:]
+}

@@ -304,3 +304,7 @@ func GetRandFloat64ByInt64Range(a, b int64) float64 {
 func GetRandFloat64ByFloat64Range(a, b float64) float64 {
 	return rand.Float64()*(b-a) + a
 }
+
+func Float64Mod(a float64, m int) float64 {
+	return float64(int(a) % m)
+}

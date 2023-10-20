@@ -103,6 +103,7 @@ func (pm *PolyMatrix) setValues(slice [][]*poly.Poly, rowSize, columnSize int) {
 }
 
 func (pm *PolyMatrix) setSlice(slice [][]*poly.Poly) {
+	pm.slice = nil
 	pm.slice = slice
 }
 

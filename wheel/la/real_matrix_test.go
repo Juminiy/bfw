@@ -62,10 +62,10 @@ func MatrixTestEigenValuesByRoundNToWriteFile(n int, fileName string) {
 }
 
 func TestMatrix_Calculate1(t *testing.T) {
-	m1 := &Matrix{rowSize: 2, columnSize: 3, slice: [][]float64{{1, 2, 3}, {4, 5, 6}}}
+	//m1 := &Matrix{rowSize: 2, columnSize: 3, slice: [][]float64{{1, 2, 3}, {4, 5, 6}}}
 	m2 := &Matrix{rowSize: 2, columnSize: 3, slice: [][]float64{{1, 2, 3}, {4, 5, 6}}}
-	m2.transpose().Sub(m2.transpose()).Display().transpose()
-	m1.MulLambda(2).Display().Mul(m2).Display()
+	m2.transpose().sub(m2.transpose()).Display().transpose()
+	//m1.MulLambda(2).Display().mul(m2).Display()
 	v1 := &Vector{size: 5, slice: []float64{1, 2, 3, 4, 5}, shape: true}
 	v1.Display()
 }
@@ -98,7 +98,7 @@ func TestMatrix_Adjoin(t *testing.T) {
 		{11, 12, 9, 14, 15},
 		{16, 23, 19, 19, 20},
 		{21, 43, 21, 1, 25}})
-	m.Mul(m.GetInverse()).Display()
+	m.mul(m.GetInverse()).Display()
 }
 
 func TestGetCombinationSliceMap(t *testing.T) {
@@ -113,7 +113,7 @@ func TestMatrix_GetInverse(t *testing.T) {
 		{3, 1, 2},
 		{2, 9, 4},
 	})
-	m.Mul(m.GetInverse()).Identity().Display()
+	m.mul(m.GetInverse()).Identity().Display()
 }
 
 func TestMatrix_ReShape(t *testing.T) {
@@ -135,16 +135,16 @@ func TestMatrix_Matlab(t *testing.T) {
 		{1, 5, 1},
 		{7, 2, 2},
 	})
-	m.GetPlus(m).Display()
-	m.GetMinus(m).Display()
-	m.GetTimes(m).Display()
-	m.GetRDivide(m).Display()
-	m.GetPower(m).Display()
-	m.GetMTimes(m).Display()
-	m.GetMRDivide(m).Approx().Display()
-	m.GetMPower(10).Display()
-	m.GetTranspose().Display()
-	m.GetInverse().Display()
+	//m.GetPlus(m).Display()
+	//m.GetMinus(m).Display()
+	//m.GetTimes(m).Display()
+	//m.GetRDivide(m).Display()
+	//m.GetPower(m).Display()
+	//m.MTimes(m).Display()
+	//m.GetMRDivide(m).Approx().Display()
+	//m.GetMPower(10).Display()
+	//m.GetTranspose().Display()
+	//m.GetInverse().Display()
 }
 
 // [ 1  4 10 20 35 44 46 40 25]
@@ -267,7 +267,7 @@ func TestMatrix_ET(t *testing.T) {
 }
 
 func TestMatrix_Gen(t *testing.T) {
-	MatrixTestEigenValuesByRoundN(100)
+	MatrixTestEigenValuesByRoundN(1000000)
 }
 
 func TestMatrix_Accu(t *testing.T) {
@@ -288,7 +288,7 @@ func TestMatrix_Convolution(t *testing.T) {
 	//matrix3 := ConstructMatrix([][]float64{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}, {11, 12, 13, 14, 15}, {16, 17, 18, 19, 20}, {21, 22, 23, 24, 25}})
 
 	//fmt.Println(matrix1.Convolution(matrix2))
-	//matrix1.GetFlip().Display()
+	matrix1.GetFlip().Display()
 	//matrix2.GetFlip().Display()
 
 	//matrix1.flipByMiddleRow().Display()
@@ -326,8 +326,8 @@ func TestMatrix_Convolution(t *testing.T) {
 	//matrix1.flipBySubDiagonal().Display()
 
 	//9+16+21+24+25+24+21+16+9=165
-	fmt.Printf("%.5f\n", matrix1.Convolution(matrix1))
-	matrix1.Display()
+	//fmt.Printf("%.5f\n", matrix1.Convolution(matrix1))
+	//matrix1.Display()
 }
 
 // 3 6 9
@@ -353,4 +353,9 @@ func TestMatrix_Adjoins(t *testing.T) {
 // to make 500 turns test for matrix eigenvalues
 func TestMatrix_EigenValues3(t *testing.T) {
 
+}
+
+func TestMatrix_PhalanxTranspose(t *testing.T) {
+	matrix := GenMatrix(3, 3, "int", 100)
+	matrix.Display().phalanxTranspose().Display()
 }

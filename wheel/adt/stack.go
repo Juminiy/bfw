@@ -14,6 +14,7 @@ func (stack *GenericStack[T]) GetSlice() []T {
 }
 
 func (stack *GenericStack[T]) SetSlice(ts []T) {
+	stack.slice = nil
 	stack.slice = ts
 }
 

@@ -11,6 +11,7 @@ const (
 	vectorNoSize          int = 0
 	vectorIndexOutOfBound int = -1
 	vectorSizeOne         int = 1
+	vectorSizeThree       int = 3
 )
 
 var (
@@ -18,6 +19,7 @@ var (
 	vectorCanNotMultiplyError    = errors.New("two vectors cannot cross multiply")
 	vectorCanNotDotMultiplyError = errors.New("two vectors cannot dot multiply")
 	vectorCanNotBeMatrixError    = errors.New("vector cannot be matrix")
+	vectorCanNotCross            = errors.New("vector cannot cross")
 	vectorIndexOutOfBoundError   = errors.New("vector index is out of bound")
 	vectorInValidError           = errors.New("vector is invalid")
 )
@@ -25,10 +27,9 @@ var (
 // Vector
 // shape: 1*m -> false, m*1 -> true
 type Vector struct {
-	slice       []float64
-	size        int
-	shape       bool
-	coefficient float64
+	slice []float64
+	size  int
+	shape bool
 }
 
 func ConstructVector(real1DArray []float64, shape ...bool) *Vector {
@@ -188,6 +189,7 @@ func (vector *Vector) setValues(slice []float64, size int, shape bool) {
 }
 
 func (vector *Vector) setSlice(slice []float64) {
+	vector.slice = nil
 	vector.slice = slice
 }
 
@@ -208,12 +210,9 @@ func (vector *Vector) setElemSwap(indexI, indexJ int) {
 }
 
 func (vector *Vector) sameShape(v *Vector) bool {
-	if v == nil ||
-		vector.shape != v.shape ||
-		vector.size != v.size {
-		return false
-	}
-	return true
+	return v != nil &&
+		vector.shape == v.shape &&
+		vector.size == v.size
 }
 
 func (vector *Vector) GetSlice() []float64 {
@@ -311,6 +310,10 @@ func (vector *Vector) Sub(v *Vector) *Vector {
 	return vector.one2OneOpt('-', v)
 }
 
+func (vector *Vector) MTimes(v *Vector) *Matrix {
+	return vector.GetMTimes(v)
+}
+
 func (vector *Vector) GetMTimes(v *Vector) *Matrix {
 	vCopy := vector.makeCopy()
 	return vCopy.Mul(v)
@@ -323,7 +326,7 @@ func (vector *Vector) Mul(v *Vector) *Matrix {
 	if !vector.canMultiply(v) {
 		panic(vectorCanNotMultiplyError)
 	} else {
-		return vector.convertToMatrix().Mul(v.convertToMatrix())
+		return vector.convertToMatrix().mulV2(v.convertToMatrix())
 	}
 }
 
@@ -365,8 +368,14 @@ func (vector *Vector) DotMul(v *Vector) float64 {
 	return vector.dotMulByRange(v, 0, vector.size-1)
 }
 
-func (vector *Vector) CrossMul(v *Vector) *Matrix {
-	return vector.Mul(v)
+func (vector *Vector) Cross(v *Vector) *Vector {
+	if vector.size != vectorSizeThree ||
+		v.size != vectorSizeThree {
+		panic(vectorCanNotCross)
+	}
+	// the resVector is perpendicular to vector and v
+	// in fact is to solve the multiple variables equation
+	return &Vector{}
 }
 
 func (vector *Vector) InnerMul() float64 {
@@ -374,7 +383,7 @@ func (vector *Vector) InnerMul() float64 {
 }
 
 func (vector *Vector) OuterMul(v *Vector) *Matrix {
-	return vector.CrossMul(v)
+	return vector.Mul(v)
 }
 
 // MulMatrix
@@ -590,8 +599,44 @@ func (vector *Vector) projection(v *Vector) *Vector {
 	return vector
 }
 
+func (vector *Vector) IsZeroVector() bool {
+	if !vector.validate() {
+		panic(vectorInValidError)
+	}
+	for idx := 0; idx < vector.size; idx++ {
+		if !lang.EqualFloat64Zero(vector.get(idx, idx)) {
+			return false
+		}
+	}
+	return true
+}
+
 func (vector *Vector) IsLinearCorrelation(v *Vector) bool {
+	if vector.sameShape(v) {
+		firstRate := 0.0
+		for idx := 0; idx < vector.size; idx++ {
+			v1EqZero := lang.EqualFloat64Zero(vector.get(idx, idx))
+			v2EqZero := lang.EqualFloat64Zero(v.get(idx, idx))
+			if v1EqZero && v2EqZero {
+
+			} else if !v1EqZero && !v2EqZero {
+				if lang.EqualFloat64Zero(firstRate) {
+					firstRate = vector.get(idx, idx) / v.get(idx, idx)
+				} else {
+					if !lang.EqualFloat64ByAccuracy(vector.get(idx, idx)/v.get(idx, idx), firstRate) {
+						return false
+					}
+				}
+			} else {
+				return false
+			}
+		}
+	}
 	return false
+}
+
+func (vector *Vector) IsVertical(v *Vector) bool {
+	return lang.EqualFloat64Zero(vector.DotMul(v))
 }
 
 func (vector *Vector) IsUnitary() bool {

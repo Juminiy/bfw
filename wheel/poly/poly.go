@@ -7,12 +7,14 @@ import (
 )
 
 const (
-	polyNoSize        int    = 0
-	polyInvalidMaxExp int    = -1
-	polyInvalidAes    rune   = ' '
-	polyDefaultAes    rune   = 'x'
-	polyLambdaAes     rune   = 'λ'
-	undefinedString   string = ""
+	polyNoSize           int    = 0
+	polyInvalidMaxExp    int    = -1
+	polyInvalidAes       rune   = ' '
+	polyDefaultAes       rune   = 'x'
+	polyLambdaAes        rune   = 'λ'
+	polyDefaultAesString string = "x"
+	polyLambdaAesString  string = "λ"
+	undefinedString      string = ""
 )
 
 var (
@@ -567,8 +569,12 @@ func binaryMergePoly(polys []*Poly) *Poly {
 	}
 }
 
-func (p *Poly) fftMul(pt *Poly) *Poly {
-	return p
+func (p *Poly) FFTMul(pt *Poly) *CoePoly {
+	return p.fftMul(pt)
+}
+
+func (p *Poly) fftMul(pt *Poly) *CoePoly {
+	return p.CoePoly().Mul(pt.CoePoly())
 }
 
 // judgeSparse
@@ -803,6 +809,18 @@ func (p *Poly) PolyNode() *Node {
 	return &Node{}
 }
 
+func (p *Poly) getCoeSlice() []float64 {
+	coeSlice := make([]float64, p.getSize())
+	for idx := 0; idx < p.getSize(); idx++ {
+		coeSlice[idx] = p.getElem(idx).coe
+	}
+	return coeSlice
+}
+
+func (p *Poly) CoePoly() *CoePoly {
+	return ConstructCoePoly(p.getCoeSlice())
+}
+
 func (p *Poly) ToString(precisionBit ...int) string {
 	if !p.validate() {
 		return lang.Float64ToString(0, precisionBit...)
@@ -884,4 +902,8 @@ func (p *Poly) DisplayV2(isPrintln bool, reverse bool, precisionBit ...int) *Pol
 		fmt.Println()
 	}
 	return p
+}
+
+func (p *Poly) DisplayV3() *CoePoly {
+	return p.CoePoly().Display()
 }

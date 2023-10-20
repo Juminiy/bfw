@@ -37,6 +37,7 @@ func (v *Vandermonde) setValues(values []float64) {
 }
 
 func (v *Vandermonde) setValuesValues(values []float64) {
+	v.values = nil
 	v.values = values
 }
 

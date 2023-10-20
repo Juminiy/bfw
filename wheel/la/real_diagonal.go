@@ -67,6 +67,7 @@ func (diagonal *Diagonal) get(index int) float64 {
 }
 
 func (diagonal *Diagonal) setSlice(slice []float64) {
+	diagonal.slice = nil
 	diagonal.slice = slice
 }
 

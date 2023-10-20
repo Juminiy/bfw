@@ -14,6 +14,7 @@ func (queue *GenericQueue[T]) GetSlice() []T {
 }
 
 func (queue *GenericQueue[T]) SetSlice(ts []T) {
+	queue.slice = nil
 	queue.slice = ts
 }
 

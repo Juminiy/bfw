@@ -6,49 +6,53 @@ type ComplexMatrix struct {
 	columnSize int64
 }
 
-func (gm *ComplexMatrix) makeCopy() *ComplexMatrix {
-	return gm
+func (cm *ComplexMatrix) makeCopy() *ComplexMatrix {
+	return cm
 }
 
-func (gm *ComplexMatrix) transpose() *ComplexMatrix {
-	return gm
+func (cm *ComplexMatrix) transpose() *ComplexMatrix {
+	return cm
 }
 
-func (gm *ComplexMatrix) GetTranspose() *ComplexMatrix {
-	gmCopy := gm.makeCopy()
+func (cm *ComplexMatrix) GetTranspose() *ComplexMatrix {
+	gmCopy := cm.makeCopy()
 	return gmCopy.transpose()
 }
 
-func (gm *ComplexMatrix) conjugate() *ComplexMatrix {
-	return gm
+func (cm *ComplexMatrix) conjugate() *ComplexMatrix {
+	return cm
 }
 
-func (gm *ComplexMatrix) GetConjugate() *ComplexMatrix {
-	gmCopy := gm.makeCopy()
+func (cm *ComplexMatrix) GetConjugate() *ComplexMatrix {
+	gmCopy := cm.makeCopy()
 	return gmCopy.conjugate()
 }
 
-func (gm *ComplexMatrix) GetConjugateTranspose() *ComplexMatrix {
-	gmCopy := gm.makeCopy()
+func (cm *ComplexMatrix) CTranspose() *ComplexMatrix {
+	return cm
+}
+
+func (cm *ComplexMatrix) GetConjugateTranspose() *ComplexMatrix {
+	gmCopy := cm.makeCopy()
 	return gmCopy.conjugate().transpose()
 }
 
-func (gm *ComplexMatrix) GetPhaseAngle() *Matrix {
-	return gm.phaseAngle()
+func (cm *ComplexMatrix) GetPhaseAngle() *Matrix {
+	return cm.phaseAngle()
 }
 
-func (gm *ComplexMatrix) phaseAngle() *Matrix {
+func (cm *ComplexMatrix) phaseAngle() *Matrix {
 	return &Matrix{}
 }
 
-func (gm *ComplexMatrix) null() *ComplexMatrix {
+func (cm *ComplexMatrix) null() *ComplexMatrix {
 	return &ComplexMatrix{}
 }
 
-func (gm *ComplexMatrix) convertToMatrix() *Matrix {
+func (cm *ComplexMatrix) convertToMatrix() *Matrix {
 	return &Matrix{}
 }
 
-func (gm *ComplexMatrix) Matrix() *Matrix {
-	return gm.convertToMatrix()
+func (cm *ComplexMatrix) Matrix() *Matrix {
+	return cm.convertToMatrix()
 }

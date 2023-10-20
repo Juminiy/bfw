@@ -14,7 +14,7 @@ import (
 //  2. polynomial multiply
 //     (1). coefficient polynomial stands
 //     (2). trailing zero padding, 2^k - len(p1)+len(p2)
-func polyMul(p1, p2 []int) []int {
+func polyIntMul(p1, p2 []int) []int {
 	p1Len, p2Len := len(p1), len(p2)
 	bitCnt := int(math.Ceil(math.Log2(float64(p1Len + p2Len))))
 	p1 = lang.Int1DArrayZeroPadding(p1, 1<<(bitCnt)-p1Len)
@@ -24,7 +24,10 @@ func polyMul(p1, p2 []int) []int {
 	p1DFT = lang.Complex1281DArrayHadamard(p1DFT, p2DFT)
 	destIntArray := lang.Complex128ArrayToIntArray(polyIDFT(p1DFT))
 	destIntArray = lang.Int1DArrayDivLambda(destIntArray, 1<<bitCnt)
-	return lang.Int1DArrayContribute(destIntArray, false)
+	destIntArray = lang.Int1DArrayContribute(destIntArray, false)
+	destIntArray = lang.Int1DArrayReverse(destIntArray)
+	destIntArray = lang.Int1DArrayTruncateLeadingZero(destIntArray)
+	return destIntArray
 }
 
 func polyDFT(p []complex128) []complex128 {
@@ -44,15 +47,19 @@ func polyFT(p []complex128, inverse bool) []complex128 {
 	evenRes := polyFT(evenPart, inverse)
 	oddRes := polyFT(oddPart, inverse)
 	polyRes := make([]complex128, size)
-	pi2dn := math.Pi / float64(size>>1)
+	pi2Dn := math.Pi / float64(size>>1)
 	inverseSign := 1.0
 	if inverse {
 		inverseSign = -1.0
 	}
 	for j := 0; j < (size >> 1); j++ {
-		omegaPowerJ := complex(math.Cos(pi2dn*float64(j)), inverseSign*math.Sin(pi2dn*float64(j)))
+		omegaPowerJ := complex(math.Cos(pi2Dn*float64(j)), inverseSign*math.Sin(pi2Dn*float64(j)))
 		polyRes[j] = evenRes[j] + omegaPowerJ*oddRes[j]
 		polyRes[j+(size>>1)] = evenRes[j] - omegaPowerJ*oddRes[j]
 	}
 	return polyRes
+}
+
+func FTComplex128Array(p *[]complex128, inverse bool) {
+	*p = polyFT(*p, inverse)
 }
