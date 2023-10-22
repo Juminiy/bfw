@@ -370,7 +370,7 @@ func TestBlockMatrix_Transpose(t *testing.T) {
 }
 
 func TestBlockMatrix_Mul(t *testing.T) {
-	genBTSize, genBSize := 100, 10
+	genBTSize, genBSize := 32, 32
 	time0 := time.Now()
 	bm1 := GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
 	bm2 := GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
@@ -397,5 +397,48 @@ func TestBlockMatrix_Mul(t *testing.T) {
 
 func TestMatrix_Intercept(t *testing.T) {
 	matrix := GenMatrix(4, 4, "i", 100)
-	matrix.zeroPadding(5, 5).Display().getBlock(2, 2, 4, 4).Display()
+	//matrix.zeroPadding(5, 5).Display().getBlock(2, 2, 4, 4).Display()
+	matrix.Display().zeroPadding(5, 5).Display().zeroTruncate(3, 3).Display()
+}
+
+func TestMatrix_MTimes(t *testing.T) {
+	destSize, dataType, dataRange := 4, "i", []float64{10}
+	matrix1 := GenMatrix(destSize, destSize, dataType, dataRange...)
+	matrix2 := GenMatrix(destSize, destSize, dataType, dataRange...)
+	correctRes1 := matrix1.mulV1(matrix2)
+	correctRes2 := matrix1.mulV2(matrix2)
+	correctRes2Dot5 := matrix1.mulV2Dot5(matrix2)
+	res3 := matrix1.mulV3(matrix2)
+	res4 := matrix1.mulV4(matrix2)
+	res5 := matrix1.mulV5(matrix2)
+	correctRes2.displayDiff(res5)
+	fmt.Println(correctRes1.Equal(correctRes2), correctRes1.Equal(correctRes2Dot5), correctRes1.Equal(res3), correctRes1.Equal(res4), correctRes1.Equal(res5))
+}
+
+func TestMatrix_All(t *testing.T) {
+	mArr := GenMatrixArray(4, 2, 2, "i", 100)
+	mArr[0].Display()
+	mArr[1].Display()
+	mArr[2].Display()
+	mArr[3].Display()
+	phalanxBlock22Patch(mArr[0], mArr[1], mArr[2], mArr[3]).Display()
+}
+
+func TestMatrix_Mul2(t *testing.T) {
+	size, dType, dRange := 1000, "f", 1e+5
+	ma := GenMatrix(size, size, dType, dRange)
+	mb := GenMatrix(size, size, dType, dRange)
+
+	time1 := time.Now()
+	ma.mulV1(mb)
+	fmt.Printf("%d*%d Matrix Multiply None Speed time: %v\n", size, size, time.Since(time1))
+
+	time2 := time.Now()
+	ma.mulV2(mb)
+	fmt.Printf("%d*%d Matrix Multiply After Speed time: %v\n", size, size, time.Since(time2))
+
+	time3 := time.Now()
+	ma.mulV3(mb)
+	fmt.Printf("%d*%d Matrix Multiply After DivBlock time: %v\n", size, size, time.Since(time3))
+
 }

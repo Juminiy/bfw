@@ -1,6 +1,7 @@
 package la
 
 import (
+	"bfw/wheel/adt"
 	"bfw/wheel/lang"
 	"bfw/wheel/poly"
 	"errors"
@@ -190,6 +191,11 @@ func (matrix *Matrix) setSize(size ...int) {
 	}
 }
 
+func (matrix *Matrix) chainedSetSize(size ...int) *Matrix {
+	matrix.setSize(size...)
+	return matrix
+}
+
 func (matrix *Matrix) setRowSize(rowSize int) {
 	matrix.rowSize = rowSize
 }
@@ -279,6 +285,16 @@ func (matrix *Matrix) setRow(rowIndex int, rowSlice []float64) {
 	matrix.slice[rowIndex] = rowSlice
 }
 
+func (matrix *Matrix) setRowSizeInc(rowInc int) *Matrix {
+	matrix.setRowSize(matrix.rowSize + rowInc)
+	return matrix
+}
+
+func (matrix *Matrix) setColumnSizeInc(columnInc int) *Matrix {
+	matrix.setColumnSize(matrix.columnSize + columnInc)
+	return matrix
+}
+
 func (matrix *Matrix) setRowAppend(rowSlice [][]float64) {
 	matrix.slice = append(matrix.slice, rowSlice...)
 }
@@ -291,6 +307,22 @@ func (matrix *Matrix) setRowElemAppend(rowIndex int, rowSlice []float64) {
 		matrix.setRow(rowIndex, rowSlice)
 	} else {
 		matrix.slice[rowIndex] = append(matrix.slice[rowIndex], rowSlice...)
+	}
+}
+
+func (matrix *Matrix) setRowTruncate(rowSize int) {
+	if rowSize < matrix.rowSize {
+		matrix.slice = matrix.slice[:rowSize]
+		matrix.setRowSize(rowSize)
+	}
+}
+
+func (matrix *Matrix) setRowElemTruncate(rowIndex int, columnSize int) {
+	if !matrix.validateIndex(rowIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	if columnSize < matrix.columnSize {
+		matrix.slice[rowIndex] = matrix.slice[rowIndex][:columnSize]
 	}
 }
 
@@ -417,6 +449,31 @@ func (matrix *Matrix) Equal(m *Matrix) bool {
 	return false
 }
 
+func (matrix *Matrix) Diff(m *Matrix) (bool, adt.IntPairSlice) {
+	if !matrix.sameShape(m) {
+		return false, nil
+	}
+	pairs := adt.MakeIntPairSlice()
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+			if !lang.EqualFloat64Zero(matrix.get(rowIdx, columnIdx) - m.get(rowIdx, columnIdx)) {
+				pairs = append(pairs, adt.MakeIntPair(rowIdx, columnIdx))
+			}
+		}
+	}
+	return true, pairs
+}
+
+func (matrix *Matrix) displayDiff(m *Matrix) {
+	shape, pairs := matrix.Diff(m)
+	if !shape {
+		fmt.Println("matrix shape differ")
+	} else {
+		fmt.Printf("total = %d, index = ", len(pairs))
+		pairs.Display()
+	}
+}
+
 func (matrix *Matrix) canMultiply(m *Matrix) bool {
 	if m == nil ||
 		matrix.columnSize != m.rowSize {
@@ -515,6 +572,10 @@ func (matrix *Matrix) GetSlice() [][]float64 {
 	if !matrix.validate() {
 		panic(matrixInValidError)
 	}
+	return matrix.getSlice()
+}
+
+func (matrix *Matrix) getSlice() [][]float64 {
 	return matrix.slice
 }
 
@@ -647,14 +708,14 @@ func (matrix *Matrix) laplaceDet(totalN int) float64 {
 
 func (matrix *Matrix) Transpose() *Matrix {
 	// need to complete after block matrix
-	return matrix.transpose()
+	return matrix.transposeV2()
 }
 
 // GetTranspose
 // chained option
 func (matrix *Matrix) GetTranspose() *Matrix {
 	mCopy := matrix.makeCopy()
-	return mCopy.transpose()
+	return mCopy.transposeV2()
 }
 
 // transpose
@@ -678,14 +739,14 @@ func (matrix *Matrix) transpose() *Matrix {
 
 func (matrix *Matrix) Inv() *Matrix {
 	// after realize LU
-	return matrix.inverse()
+	return matrix.inverseV2()
 }
 
 // GetInverse
 // chained option
 func (matrix *Matrix) GetInverse() *Matrix {
 	mCopy := matrix.makeCopy()
-	return mCopy.inverse()
+	return mCopy.inverseV2()
 }
 
 // Inverse Matrix by Adjoin Matrix
@@ -964,7 +1025,11 @@ func (matrix *Matrix) rotate90(clockWise bool) *Matrix {
 }
 
 func (matrix *Matrix) rotate180() *Matrix {
-	return matrix
+	return matrix.rotate(true, 2)
+}
+
+func (matrix *Matrix) rotate270() *Matrix {
+	return matrix.rotate(false, 1)
 }
 
 func (matrix *Matrix) flipByMiddleRow() *Matrix {
@@ -1117,11 +1182,17 @@ func (matrix *Matrix) DotPower(m *Matrix) *Matrix {
 // MTimes
 // Matrix Product
 func (matrix *Matrix) MTimes(m *Matrix) *Matrix {
+	// first issue is to calculate algorithm cost to evaluate which path to choose
+	//return matrix.mul(m)
+	//return matrix.mulV2(m)
+	//return matrix.mulV3(m)
+	//return matrix.mulV4(m)
 	return matrix.mulV2(m)
 }
 
-func (matrix *Matrix) MulV1(m *Matrix) *Matrix {
-	return matrix.mul(m)
+func (matrix *Matrix) Mul(m *Matrix) *Matrix {
+	mCopy := matrix.makeCopy()
+	return mCopy.mul(m)
 }
 
 // mul
@@ -1262,6 +1333,14 @@ func (matrix *Matrix) SetRandom(size ...int) *Matrix {
 	}
 	matrix.setSelf(matrix.generateRandomFloat64(destRowSize, destColumnSize, 0.0, 1.0))
 	return matrix
+}
+
+func GenMatrixArray(size int, rowSize, columnSize int, dataType string, dataRange ...float64) []*Matrix {
+	matrixArr := make([]*Matrix, size)
+	for idx := 0; idx < size; idx++ {
+		matrixArr[idx] = GenMatrix(rowSize, columnSize, dataType, dataRange...)
+	}
+	return matrixArr
 }
 
 // GenMatrix

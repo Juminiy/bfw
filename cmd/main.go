@@ -27,7 +27,7 @@ func runMatrixTest() {
 	fmt.Printf("%d*%d Matrix Multiply After speed time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time2))
 
 	time2dot5 := time.Now()
-	bm1.Matrix().MulV1(bm2.Matrix())
+	bm1.Matrix().Mul(bm2.Matrix())
 	fmt.Printf("%d*%d Matrix Multiply None speed time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time2dot5))
 
 	time3 := time.Now()
