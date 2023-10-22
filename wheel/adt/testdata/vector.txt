@@ -1,0 +1,79 @@
+特性: 严格的线性序列, 动态数组, 虚拟内存连续, 重新分配的开销是对数增长的size间隔
+lib: lib中不同的增长策略实现以平衡内存使用的空间和重新分配的时间, 使用STL的分配器来控制存储需求, 实现的分配器根据泛型T的特性对重新分配的容器进行元素移动而不是复制
+优点: 随机访问, 尾部增删高效
+缺点: 除尾部外增删差于(list, deque, forward_list), 迭代器和引用的一致性差于其他三者
+
+初始化
+vector::assign
+首尾迭代器初始化
+assign(first, last)
+n个val元素初始化 
+assign(n, val)
+拷贝同类型泛型的容器的副本初始化
+assign(il)
+
+初始化, 重置容器
+vector::operator=
+
+两个容器元素相互交换
+vector::swap
+
+删除所有元素, size置0
+vector::clear
+
+返回存储内存数组的直接指针, 可以使用offset访问任意元素
+vector::data
+
+判断容器空
+vector::empty
+
+元素个数
+vector::size
+
+实际容量 >=size
+vector::capacity
+
+当前capacity >=n无影响, <n 会导致容器重新分配容量增大到n
+vector::reserve
+
+当前size >=n 减少到n个, <n 插入初始化值或者val的副本
+vector::resize
+
+将capacity = size 
+vector::shrink_to_fit
+
+下标访问
+vector::at
+vector::operator[]
+
+尾部元素 
+vector::back
+首部元素
+vector::front
+
+指定位置原地构造(低效)
+vector::emplace
+最后位置原地构造
+vector::emplace_back
+
+指定位置插入元素(低效)
+vector::insert
+指定位置移除元素(低效)
+vector::erase
+
+尾部增加元素, 平摊的时间复杂度为常数级O(1)
+vector::push_back
+尾部删除元素
+vector::pop_back
+
+返回随机访问迭代器
+vector::begin
+vector::end
+vector::rbegin
+vector::rend
+
+返回常量迭代器
+vector::cbegin
+vector::cend
+vector::crbegin
+vector::crend

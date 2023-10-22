@@ -1,0 +1,9 @@
+容器适配器, 只要一个容器底层有 empty, size, back, push_back, pop_back 方法就可以作为stack的低层容器
+
+stack::emplace
+stack::empty
+stack::pop
+stack::push
+stack::size
+stack::swap
+stack::top
