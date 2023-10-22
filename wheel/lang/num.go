@@ -1,6 +1,7 @@
 package lang
 
 import (
+	"errors"
 	"math"
 	"math/rand"
 	"strconv"
@@ -13,6 +14,10 @@ const (
 	defaultFloat64Accuracy          = 1e-7
 	defaultFloat32Precision int     = 5
 	defaultFloat64Precision int     = 5
+)
+
+var (
+	int64BitOutOfBoundError = errors.New("int64 bit is out of bound")
 )
 
 func EqualFloat32Zero(a float32) bool {
@@ -47,6 +52,10 @@ func EqualFloat64ByAccuracy(a, b float64, acc ...float64) bool {
 		return true
 	}
 	return false
+}
+
+func GetTwoRandomIntValue(n int) (int, int) {
+	return rand.Intn(n), rand.Intn(n)
 }
 
 // GetRandomIntValue -> [0,n)
@@ -307,4 +316,29 @@ func GetRandFloat64ByFloat64Range(a, b float64) float64 {
 
 func Float64Mod(a float64, m int) float64 {
 	return float64(int(a) % m)
+}
+
+func AbsInt(a int) int {
+	if a < 0 {
+		a = -a
+	}
+	return a
+}
+
+func CeilBin(a int) int {
+	binCnt := int(math.Ceil(math.Log2(float64(a))))
+	if binCnt >= 64 {
+		panic(int64BitOutOfBoundError)
+	}
+	return 1 << binCnt
+}
+
+func MaxIntCeilBin(a ...int) int {
+	destLen := 0
+	if aLen := len(a); aLen > 0 {
+		for aIdx := 0; aIdx < aLen; aIdx++ {
+			destLen = MaxInt(destLen, a[aIdx])
+		}
+	}
+	return CeilBin(destLen)
 }

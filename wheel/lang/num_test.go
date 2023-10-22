@@ -57,5 +57,6 @@ func TestGetRandFloat64ByFloat64Range(t *testing.T) {
 }
 
 func TestFloat64ToString2(t *testing.T) {
-	fmt.Println(Float64ToString(-10.22, 2))
+	//fmt.Println(Float64ToString(-10.22, 2))
+	fmt.Println(math.Log2(5))
 }

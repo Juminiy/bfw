@@ -2,6 +2,8 @@ package cal
 
 const (
 	undefinedString = ""
+	defaultAes      = "x"
+	lambdaAes       = "λ"
 )
 
 var (
@@ -49,4 +51,27 @@ func getSubScript(ss string) string {
 
 func GetExponent(exp string) string {
 	return getSuperScript(exp)
+}
+
+func GetEquationAes(ss string, charType ...string) string {
+	destAes := defaultAes
+	if len(charType) > 0 {
+		switch charType[0] {
+		case undefinedString:
+			{
+
+			}
+		case "lambda":
+			{
+				destAes = lambdaAes
+			}
+		default:
+			{
+				if charType[0] != undefinedString {
+					destAes = charType[0]
+				}
+			}
+		}
+	}
+	return destAes + getSubScript(ss)
 }

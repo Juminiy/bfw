@@ -10,11 +10,9 @@ import (
 )
 
 const (
-	matrixNotPhalanx         int     = -1
 	matrixNoSize             int     = 0
-	matrixIndexOutOfBound    int     = -1
+	matrixNoRank             int     = 0
 	matrixDeterminantZero    float64 = 0
-	matrixNoRank             int     = -1
 	matrixToVectorRowSize    int     = 1
 	matrixToVectorColumnSize int     = 1
 	simplePhalanxSizeOne     int     = 1
@@ -48,6 +46,12 @@ type Matrix struct {
 func ConstructMatrix(real2DArray [][]float64) *Matrix {
 	matrix := &Matrix{}
 	return matrix.Construct(real2DArray)
+}
+
+func MakeZeroMatrix(rowSize, columnSize int) *Matrix {
+	matrix := &Matrix{}
+	matrix.assign(rowSize, columnSize)
+	return matrix
 }
 
 func (matrix *Matrix) Construct(real2DArray [][]float64) *Matrix {
@@ -145,6 +149,10 @@ func (matrix *Matrix) assign(rowSize, columnSize int) {
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
 		matrix.setRow(rowIdx, make([]float64, columnSize))
 	}
+}
+
+func (matrix *Matrix) assignRow(rowSize, columnSize int) {
+	matrix.setValues(make([][]float64, rowSize), rowSize, columnSize)
 }
 
 func (matrix *Matrix) getSelf() *Matrix {
@@ -269,6 +277,21 @@ func (matrix *Matrix) setRow(rowIndex int, rowSlice []float64) {
 	}
 	matrix.slice[rowIndex] = nil
 	matrix.slice[rowIndex] = rowSlice
+}
+
+func (matrix *Matrix) setRowAppend(rowSlice [][]float64) {
+	matrix.slice = append(matrix.slice, rowSlice...)
+}
+
+func (matrix *Matrix) setRowElemAppend(rowIndex int, rowSlice []float64) {
+	if !matrix.validateIndex(rowIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	if matrix.slice[rowIndex] == nil {
+		matrix.setRow(rowIndex, rowSlice)
+	} else {
+		matrix.slice[rowIndex] = append(matrix.slice[rowIndex], rowSlice...)
+	}
 }
 
 func (matrix *Matrix) getColumnCopy(columnIndex int) []float64 {
@@ -410,7 +433,14 @@ func (matrix *Matrix) getPhalanxSize() int {
 	if matrix.isPhalanx() {
 		return matrix.rowSize
 	}
-	return matrixNotPhalanx
+	return matrixNoSize
+}
+
+func (matrix *Matrix) getPhalanxSizePanic() int {
+	if !matrix.isPhalanx() {
+		panic(matrixNotPhalanxError)
+	}
+	return matrix.rowSize
 }
 
 // getPhalanxByIgnoreCentral
@@ -617,7 +647,7 @@ func (matrix *Matrix) laplaceDet(totalN int) float64 {
 
 func (matrix *Matrix) Transpose() *Matrix {
 	// need to complete after block matrix
-	return matrix.transposeV2()
+	return matrix.transpose()
 }
 
 // GetTranspose
@@ -648,7 +678,7 @@ func (matrix *Matrix) transpose() *Matrix {
 
 func (matrix *Matrix) Inv() *Matrix {
 	// after realize LU
-	return matrix.inverseV2()
+	return matrix.inverse()
 }
 
 // GetInverse
@@ -728,7 +758,7 @@ func (matrix *Matrix) Trace() float64 {
 		}
 		return trace
 	}
-	panic(matrixNotPhalanx)
+	panic(matrixNoSize)
 }
 
 // Cond
@@ -1088,6 +1118,10 @@ func (matrix *Matrix) DotPower(m *Matrix) *Matrix {
 // Matrix Product
 func (matrix *Matrix) MTimes(m *Matrix) *Matrix {
 	return matrix.mulV2(m)
+}
+
+func (matrix *Matrix) MulV1(m *Matrix) *Matrix {
+	return matrix.mul(m)
 }
 
 // mul
@@ -1513,7 +1547,10 @@ func (matrix *Matrix) EigenValues() *EigenValues {
 	return ConstructEigenValues(solution.GetSlice())
 }
 
-// TODO: 1.
+// EigenVectors
+// TODO:
+// 1. linear equation
+// 2. solve
 func (matrix *Matrix) EigenVectors() *EigenVectors {
 	if !matrix.isPhalanx() {
 		panic(matrixRowColumnDiffer)
@@ -1958,10 +1995,14 @@ func (matrix *Matrix) traverseV2(funcPtr func(int, int, ...float64)) *Matrix {
 
 // Display
 // chained option
-func (matrix *Matrix) Display() *Matrix {
+func (matrix *Matrix) Display(isPrintln ...bool) *Matrix {
 	if matrix.isNull() {
 		fmt.Println("[null]")
 		return matrix
+	}
+	destPrintln := true
+	if len(isPrintln) > 0 && !isPrintln[0] {
+		destPrintln = false
 	}
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 		for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
@@ -1969,9 +2010,11 @@ func (matrix *Matrix) Display() *Matrix {
 			if lang.EqualFloat64Zero(val) {
 				val = 0.0
 			}
-			fmt.Printf(" %.5v", val)
+			fmt.Printf(" %.05v", val)
 		}
-		fmt.Println()
+		if destPrintln {
+			fmt.Println()
+		}
 	}
 	return matrix
 }

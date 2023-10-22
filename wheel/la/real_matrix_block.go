@@ -1,5 +1,15 @@
 package la
 
+import (
+	"bfw/wheel/lang"
+	"errors"
+)
+
+var (
+	notSupportedBlockMatrixError = errors.New("not supported block matrix shape")
+	canNotGetMatrixBlockError    = errors.New("cannot get the matrix block")
+)
+
 // BlockMatrix
 // r*c [r*c][r*c]
 // we need to divide the whole matrix into regular phalanx if possible and spare no effort
@@ -7,6 +17,23 @@ type BlockMatrix struct {
 	block      [][]*Matrix
 	rowSize    int
 	columnSize int
+}
+
+func GenBlockMatrixBlocks(rowSize, columnSize int, dataType string, bRowSize, bColumnSize int, dataRange ...float64) [][]*Matrix {
+	bMatrix := make([][]*Matrix, rowSize)
+	for bRowIdx := 0; bRowIdx < rowSize; bRowIdx++ {
+		bMatrix[bRowIdx] = make([]*Matrix, columnSize)
+		for bColumnIdx := 0; bColumnIdx < columnSize; bColumnIdx++ {
+			bMatrix[bRowIdx][bColumnIdx] = GenMatrix(bRowSize, bColumnSize, dataType, dataRange...)
+		}
+	}
+	return bMatrix
+}
+
+func GenBlockMatrix(rowSize, columnSize int, dataType string, bRowSize, bColumnSize int, dataRange ...float64) *BlockMatrix {
+	bm := &BlockMatrix{}
+	bm.setValues(GenBlockMatrixBlocks(rowSize, columnSize, dataType, bRowSize, bColumnSize, dataRange...), rowSize, columnSize)
+	return bm
 }
 
 func ValidateBlockMatrix(bm ...*BlockMatrix) bool {
@@ -46,6 +73,18 @@ func (bm *BlockMatrix) setNull() {
 	bm.columnSize = matrixNoSize
 }
 
+func (bm *BlockMatrix) assign(rowSize, columnSize int, blockRowSize, blockColumnSize int) {
+	bm.setValues(make([][]*Matrix, rowSize), rowSize, columnSize)
+	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
+		bm.block[rowIdx] = make([]*Matrix, columnSize)
+		for columnIdx := 0; columnIdx < columnSize; columnIdx++ {
+			matrix := &Matrix{}
+			matrix.assign(blockRowSize, blockColumnSize)
+			bm.block[rowIdx][columnIdx] = matrix
+		}
+	}
+}
+
 func (bm *BlockMatrix) setSelf(bmt *BlockMatrix) {
 	if !validateBM(bmt) {
 		return
@@ -54,13 +93,23 @@ func (bm *BlockMatrix) setSelf(bmt *BlockMatrix) {
 }
 
 func (bm *BlockMatrix) setValues(block [][]*Matrix, size ...int) {
-	bm.setBlock(block)
 	bm.setSize(size...)
+	bm.setBlock(block)
 }
 
 func (bm *BlockMatrix) setBlock(block [][]*Matrix) {
 	bm.block = nil
 	bm.block = block
+	// assume the size
+	//var (
+	//	destRowSize    = bm.rowSize
+	//	destColumnSize = bm.columnSize
+	//)
+	//destRowSize = lang.MinInt(destRowSize, len(block))
+	//if len(block) > 0 {
+	//	destColumnSize = lang.MinInt(destColumnSize, len(block[0]))
+	//}
+	//bm.setSize(destRowSize, destColumnSize)
 }
 
 func (bm *BlockMatrix) setSize(size ...int) {
@@ -121,6 +170,10 @@ func (bm *BlockMatrix) setElemSwap(rowIndexI, columnIndexI, rowIndexJ, columnInd
 		bm.block[rowIndexJ][columnIndexJ], bm.block[rowIndexI][columnIndexI]
 }
 
+func (bm *BlockMatrix) Transpose() *BlockMatrix {
+	return bm.transpose()
+}
+
 func (bm *BlockMatrix) transpose() *BlockMatrix {
 	if bm.isPhalanx() {
 		bm.phalanxTranspose()
@@ -161,6 +214,20 @@ func (bm *BlockMatrix) blocksTranspose() *BlockMatrix {
 	return bm
 }
 
+func (bm *BlockMatrix) getPhalanxSize() int {
+	if bm.isPhalanx() {
+		return bm.rowSize
+	}
+	return matrixNoSize
+}
+
+func (bm *BlockMatrix) getPhalanxSizePanic() int {
+	if !bm.isPhalanx() {
+		panic(matrixNotPhalanxError)
+	}
+	return bm.rowSize
+}
+
 // need to be reconsidered
 func (bm *BlockMatrix) isPhalanx() bool {
 	return bm.rowSize == bm.columnSize
@@ -172,5 +239,83 @@ func (bm *BlockMatrix) phalanxTranspose() *BlockMatrix {
 			bm.setElemSwap(rowIdx, columnIdx, columnIdx, rowIdx)
 		}
 	}
+	return bm
+}
+
+func (bm *BlockMatrix) getElemPhalanxSize() int {
+	return bm.get(lang.GetTwoRandomIntValue(bm.rowSize)).getPhalanxSize()
+}
+
+func (bm *BlockMatrix) isElemPhalanx() bool {
+	return bm.get(lang.GetTwoRandomIntValue(bm.rowSize)).isPhalanx()
+}
+
+func (bm *BlockMatrix) Mul(bmt *BlockMatrix) *BlockMatrix {
+	return bm.mul(bmt)
+}
+
+func (bm *BlockMatrix) mul(bmt *BlockMatrix) *BlockMatrix {
+	if !bm.canMul(bmt) {
+		panic(matrixCanNotMultiplyError)
+	}
+	btSize, bSize := bm.getPhalanxSize(), bmt.getElemPhalanxSize()
+	resMatrix := &BlockMatrix{}
+	resMatrix.assign(bSize, bSize, btSize, btSize)
+	for kIdx := 0; kIdx < bm.columnSize; kIdx++ {
+		for iIdx := 0; iIdx < bm.rowSize; iIdx++ {
+			valIK := bm.block[iIdx][kIdx]
+			for jIdx := 0; jIdx < bmt.columnSize; jIdx++ {
+				resMatrix.block[iIdx][jIdx].add(valIK.MTimes(bmt.block[kIdx][jIdx]))
+			}
+		}
+	}
+	return resMatrix
+}
+
+func (bm *BlockMatrix) checkPhalanx() bool {
+	return bm.isPhalanx() &&
+		bm.isElemPhalanx()
+}
+
+// canMul
+// let random choose the calculation destiny and lifecycle
+func (bm *BlockMatrix) canMul(bmt *BlockMatrix) bool {
+	bmBTSize, bmtBTSize := bm.getPhalanxSize(), bmt.getPhalanxSize()
+	return bmBTSize == bmtBTSize &&
+		bm.getElemPhalanxSize() == bmt.getElemPhalanxSize()
+}
+
+// Matrix
+// the matrix keep the previous block address pointer
+// none change them, none copy them
+// assume each block is same size phalanx
+// assume the blocks is phalanx
+// 1 2 | 3 4
+// 5 6 | 7 8
+// - - - - -
+// 9 8 | 7 6
+// 5 4 | 3 2
+func (bm *BlockMatrix) Matrix() *Matrix {
+	if !bm.checkPhalanx() {
+		panic(notSupportedBlockMatrixError)
+	}
+	btSize := bm.getPhalanxSize()
+	bSize := bm.getElemPhalanxSize()
+	matrix := &Matrix{}
+	matrix.assignRow(btSize*bSize, btSize*bSize)
+	for btRowIdx := 0; btRowIdx < btSize; btRowIdx++ {
+		for bRowIdx := 0; bRowIdx < bSize; bRowIdx++ {
+			for btColumnIdx := 0; btColumnIdx < btSize; btColumnIdx++ {
+				matrix.setRowElemAppend(btRowIdx*bSize+bRowIdx, bm.get(btRowIdx, btColumnIdx).getRow(bRowIdx))
+			}
+		}
+	}
+	return matrix
+}
+
+// Display
+// to Matrix Display
+func (bm *BlockMatrix) Display() *BlockMatrix {
+	bm.Matrix().Display()
 	return bm
 }

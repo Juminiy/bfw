@@ -185,7 +185,7 @@ func (pm *PolyMatrix) getPhalanxSize() int {
 	if pm.isPhalanx() {
 		return pm.rowSize
 	}
-	return matrixNotPhalanx
+	return matrixNoSize
 }
 
 func (pm *PolyMatrix) Det() *poly.Poly {

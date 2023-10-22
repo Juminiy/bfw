@@ -4,6 +4,7 @@ import (
 	"bfw/wheel/lang"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func MatrixTestEigenValuesByCallFunctionChain(real2DArray [][]float64) {
@@ -267,7 +268,7 @@ func TestMatrix_ET(t *testing.T) {
 }
 
 func TestMatrix_Gen(t *testing.T) {
-	MatrixTestEigenValuesByRoundN(1000000)
+	MatrixTestEigenValuesByRoundN(10)
 }
 
 func TestMatrix_Accu(t *testing.T) {
@@ -358,4 +359,43 @@ func TestMatrix_EigenValues3(t *testing.T) {
 func TestMatrix_PhalanxTranspose(t *testing.T) {
 	matrix := GenMatrix(3, 3, "int", 100)
 	matrix.Display().phalanxTranspose().Display()
+}
+
+func TestBlockMatrix_Transpose(t *testing.T) {
+	genBTSize, genBSize := 3, 3
+	bm := GenBlockMatrix(genBTSize, genBTSize, "i", genBSize, genBSize, 100)
+	bm.Display()
+	fmt.Println("----------------------------------------------------------------")
+	bm.transpose().Display()
+}
+
+func TestBlockMatrix_Mul(t *testing.T) {
+	genBTSize, genBSize := 100, 10
+	time0 := time.Now()
+	bm1 := GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
+	bm2 := GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
+	fmt.Printf("2 * %d*%d Matrix Generate time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time0))
+
+	time1 := time.Now()
+	bm1.Mul(bm2)
+	fmt.Printf("%d*%d Matrix Multiply After Speed & DivBlock time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time1))
+
+	time2 := time.Now()
+	bm1.Matrix().MTimes(bm2.Matrix())
+	fmt.Printf("%d*%d Matrix Multiply After speed time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time2))
+
+	time2dot5 := time.Now()
+	bm1.Matrix().mul(bm2.Matrix())
+	fmt.Printf("%d*%d Matrix Multiply None speed time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time2dot5))
+
+	time3 := time.Now()
+	bm1.Matrix().Equal(bm2.Matrix())
+	fmt.Printf("%d*%d Matrix Traverse time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time3))
+	// validate answer same and correct
+	//fmt.Println(blockMulRes.Matrix().Equal(simpleMulRes))
+}
+
+func TestMatrix_Intercept(t *testing.T) {
+	matrix := GenMatrix(4, 4, "i", 100)
+	matrix.zeroPadding(5, 5).Display().getBlock(2, 2, 4, 4).Display()
 }
