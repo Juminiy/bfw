@@ -19,13 +19,20 @@ type Real2DArray [][]float64
 
 func (r2da Real2DArray) Len() int { return len(r2da) }
 func (r2da Real2DArray) Less(i, j int) bool {
-	return r2da[i][0] < r2da[j][0] || (r2da[i][0] == r2da[j][0] && r2da[i][1] < r2da[j][1])
+	return (r2da[i][1] == r2da[j][1] && r2da[i][0] < r2da[j][0]) || r2da[i][1] < r2da[j][1]
 }
 func (r2da Real2DArray) Swap(i, j int) {
 	r2da[i], r2da[j] = r2da[j], r2da[i]
 }
 
+func ConstructReal2DArrayByLen(size int) Real2DArray {
+	return ConstructReal2DArray(make([][]float64, size))
+}
+
 func ConstructReal2DArray(real2DArray [][]float64) Real2DArray {
+	for idx := 0; idx < len(real2DArray); idx++ {
+		real2DArray[idx] = make([]float64, 2)
+	}
 	return real2DArray
 }
 

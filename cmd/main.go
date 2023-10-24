@@ -2,8 +2,11 @@ package main
 
 import (
 	"bfw/cmd/web"
-	"bfw/wheel/la"
+	"bfw/wheel/cc"
+	"bfw/wheel/lang"
 	"fmt"
+	"math"
+	"sort"
 	"time"
 )
 
@@ -11,30 +14,41 @@ func runWebApi() {
 	web.ServeRun()
 }
 
-func runMatrixTest() {
-	genBTSize, genBSize := 50, 50
-	time0 := time.Now()
-	bm1 := la.GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
-	bm2 := la.GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
-	fmt.Printf("2 * %d*%d Matrix Generate time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time0))
-
-	time1 := time.Now()
-	bm1.Mul(bm2)
-	fmt.Printf("%d*%d Matrix Multiply After Speed & DivBlock time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time1))
-
+func runCC(routines int) float64 {
+	//time0 := time.Now()
+	f64Arr := lang.GetRandFloat64ArrayByRange(1<<22, 0.0, 1.0)
+	//fmt.Println("Generate 2"+cal.GetExponent("22"), "float64 num, time:", time.Since(time0))
+	//time1 := time.Now()
+	//res0 := func(f []float64) float64 {
+	//	sum0 := 0.0
+	//	for idx := 0; idx < len(f); idx++ {
+	//		sum0 += f[idx]
+	//	}
+	//	return sum0
+	//}(f64Arr)
+	//fmt.Println("single routine calculate sum of 2"+cal.GetExponent("22"), "float64 num, time:", time.Since(time1))
 	time2 := time.Now()
-	bm1.Matrix().MTimes(bm2.Matrix())
-	fmt.Printf("%d*%d Matrix Multiply After speed time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time2))
-
-	time2dot5 := time.Now()
-	bm1.Matrix().Mul(bm2.Matrix())
-	fmt.Printf("%d*%d Matrix Multiply None speed time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time2dot5))
-
-	time3 := time.Now()
-	bm1.Matrix().Equal(bm2.Matrix())
-	fmt.Printf("%d*%d Matrix Traverse time: %v\n", genBSize*genBTSize, genBSize*genBTSize, time.Since(time3))
+	cc.CCSumOfFloat64Array(f64Arr, routines)
+	du := time.Since(time2)
+	//fmt.Printf("%d routines calculate sum of 2"+cal.GetExponent("22")+" float64 num, time:%v\n", routines, du)
+	//fmt.Println("concurrent calculate result is:", lang.EqualFloat64Zero(res0-res1), res0, res1)
+	//res0, res1 = res1, res0
+	return du.Seconds()
 }
 
 func main() {
-	runMatrixTest()
+	time0 := time.Now()
+	timeSlice := lang.ConstructReal2DArrayByLen(1 << 10)
+	minSec, maxSec := 1e10, -1e10
+	for routineCnt := 1; routineCnt < (1 << 12); routineCnt += 4 {
+		duSec := runCC(routineCnt)
+		timeSlice[routineCnt>>2][0] = float64(routineCnt)
+		timeSlice[routineCnt>>2][1] = duSec
+		minSec = math.Min(minSec, duSec)
+		maxSec = math.Max(maxSec, duSec)
+	}
+	fmt.Printf("min time: %fs, max time: %fs\n", minSec, maxSec)
+	sort.Sort(timeSlice)
+	fmt.Println("top 5 min routines:", timeSlice[1], timeSlice[2], timeSlice[3], timeSlice[4], timeSlice[5])
+	fmt.Println("1024 rounds calculate, total time:", time.Since(time0))
 }

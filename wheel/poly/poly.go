@@ -1,5 +1,7 @@
 package poly
 
+// poly Stand for polynomial
+
 import (
 	"bfw/wheel/lang"
 	"errors"

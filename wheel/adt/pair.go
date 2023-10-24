@@ -32,6 +32,19 @@ func MakeIntPairSlice() IntPairSlice {
 	return IntPairSlice{}
 }
 
+func (ips IntPairSlice) Less(i, j int) bool {
+	return (ips[i].key == ips[j].key && ips[i].value < ips[j].value) ||
+		ips[i].key < ips[j].key
+}
+
+func (ips IntPairSlice) Swap(i, j int) {
+	ips[i], ips[j] = ips[j], ips[i]
+}
+
+func (ips IntPairSlice) Len() int {
+	return ips.size()
+}
+
 func (ips IntPairSlice) self() IntPairSlice {
 	return ips
 }

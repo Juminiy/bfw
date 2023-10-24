@@ -402,17 +402,20 @@ func TestMatrix_Intercept(t *testing.T) {
 }
 
 func TestMatrix_MTimes(t *testing.T) {
-	destSize, dataType, dataRange := 4, "i", []float64{10}
+	destSize, dataType, dataRange := 32, "i", []float64{10}
 	matrix1 := GenMatrix(destSize, destSize, dataType, dataRange...)
 	matrix2 := GenMatrix(destSize, destSize, dataType, dataRange...)
 	correctRes1 := matrix1.mulV1(matrix2)
 	correctRes2 := matrix1.mulV2(matrix2)
 	correctRes2Dot5 := matrix1.mulV2Dot5(matrix2)
 	res3 := matrix1.mulV3(matrix2)
-	res4 := matrix1.mulV4(matrix2)
+	//res4 := matrix1.mulV4(matrix2)
 	res5 := matrix1.mulV5(matrix2)
-	correctRes2.displayDiff(res5)
-	fmt.Println(correctRes1.Equal(correctRes2), correctRes1.Equal(correctRes2Dot5), correctRes1.Equal(res3), correctRes1.Equal(res4), correctRes1.Equal(res5))
+	fmt.Println("simple kij mul(cache speed):", correctRes1.Equal(correctRes2))
+	fmt.Println("simple ij mul(A mul B.transpose):", correctRes1.Equal(correctRes2Dot5))
+	fmt.Println("recursive mul O(n^3):", correctRes1.Equal(res3))
+	//fmt.Println("non recursive mul O(n^3):", correctRes1.Equal(res4))
+	fmt.Println("best mul(Strassen algorithm, none recursive, multiple thread, cache speed):", correctRes1.Equal(res5))
 }
 
 func TestMatrix_All(t *testing.T) {
@@ -425,20 +428,27 @@ func TestMatrix_All(t *testing.T) {
 }
 
 func TestMatrix_Mul2(t *testing.T) {
-	size, dType, dRange := 1000, "f", 1e+5
+	size, dType, dRange := 16, "f", 1e+5
 	ma := GenMatrix(size, size, dType, dRange)
 	mb := GenMatrix(size, size, dType, dRange)
 
 	time1 := time.Now()
 	ma.mulV1(mb)
-	fmt.Printf("%d*%d Matrix Multiply None Speed time: %v\n", size, size, time.Since(time1))
+	fmt.Printf("%d*%d Matrix Multiply Simple: %v\n", size, size, time.Since(time1))
 
 	time2 := time.Now()
 	ma.mulV2(mb)
-	fmt.Printf("%d*%d Matrix Multiply After Speed time: %v\n", size, size, time.Since(time2))
+	fmt.Printf("%d*%d Matrix Multiply After Cache Speed: %v\n", size, size, time.Since(time2))
 
 	time3 := time.Now()
 	ma.mulV3(mb)
-	fmt.Printf("%d*%d Matrix Multiply After DivBlock time: %v\n", size, size, time.Since(time3))
+	fmt.Printf("%d*%d Matrix Multiply After DivBlock Recursive O(n^3): %v\n", size, size, time.Since(time3))
 
+	time4 := time.Now()
+	ma.mulV4(mb)
+	fmt.Printf("%d*%d Matrix Multiply After DivBlock, None Recursive, O(n^3): %v\n", size, size, time.Since(time4))
+
+	time5 := time.Now()
+	ma.mulV5(mb)
+	fmt.Printf("%d*%d Matrix Multiply After DivBlock, None Recursive, multiple threads,Straseen Algorithm-O(n^2.807): %v\n", size, size, time.Since(time5))
 }

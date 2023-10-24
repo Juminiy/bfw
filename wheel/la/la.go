@@ -1,10 +1,10 @@
+package la
+
 // la
 // 1. makeCopy() is deep copy
 // 2. ConstructXXX() is for global use
 
-// stand for Linear Algebra
-
-package la
+// la Stand for linear algebra
 
 type RealAlgebraContainer interface {
 	validate() bool

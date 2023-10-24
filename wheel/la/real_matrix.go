@@ -19,6 +19,7 @@ const (
 	simplePhalanxSizeOne     int     = 1
 	simplePhalanxSizeTwo     int     = 2
 	simplePhalanxSizeThree   int     = 3
+	simplePhalanxSizeFour    int     = 4
 )
 
 var (
@@ -308,6 +309,13 @@ func (matrix *Matrix) setRowElemAppend(rowIndex int, rowSlice []float64) {
 	} else {
 		matrix.slice[rowIndex] = append(matrix.slice[rowIndex], rowSlice...)
 	}
+}
+
+func (matrix *Matrix) setBlockElemAppend(rowIndex, columnIndex int, rowSlice []float64) {
+	if !matrix.validateIndex(rowIndex, columnIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+
 }
 
 func (matrix *Matrix) setRowTruncate(rowSize int) {
@@ -1445,6 +1453,21 @@ func (matrix *Matrix) generateRandomFloat64(rowSize, columnSize int, a, b float6
 		}
 	}
 	return mt
+}
+
+func GenerateTwoBlockFitFloat64Phalanx(sizeBit int, rangeStart, rangeEnd float64) (*Matrix, *Matrix) {
+	m1, m2 := &Matrix{}, &Matrix{}
+	m1.assignRow(1<<sizeBit, 1<<sizeBit)
+	m2.assignRow(1<<sizeBit, 1<<sizeBit)
+	return m1, m2
+}
+
+func genTBFFP(A, B *Matrix, sizeBit int, rowIndex, columnIndex int, rangeStart, rangeEnd float64) {
+	if size := 1 << sizeBit; size&simplePhalanxSizeFour > 0 {
+		newFloat64Slice := make([]float64, 1<<(sizeBit+1))
+		A.setRowElemAppend(rowIndex, newFloat64Slice[:1<<4])
+		B.setRowElemAppend(rowIndex, newFloat64Slice[1<<4:])
+	}
 }
 
 func (matrix *Matrix) generateSameSizeMatrix(value interface{}, size ...int) *Matrix {

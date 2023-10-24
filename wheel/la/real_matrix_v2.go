@@ -3,7 +3,6 @@ package la
 import (
 	"bfw/wheel/lang"
 	"fmt"
-	"math"
 )
 
 const (
@@ -166,6 +165,7 @@ func (matrix *Matrix) zeroTruncate(keepRowSize, keepColumnSize int) *Matrix {
 	return matrix
 }
 
+// slight copy, not deep
 func (matrix *Matrix) getBlock(rowIIndex, columnIIndex, rowJIndex, columnJIndex int) *Matrix {
 	if !matrix.validateIndex(rowIIndex, columnIIndex) ||
 		!matrix.validateIndex(rowJIndex, columnJIndex) {
@@ -182,6 +182,20 @@ func (matrix *Matrix) getBlock(rowIIndex, columnIIndex, rowJIndex, columnJIndex 
 		bMatrix.setRow(rowIdx-rowIIndex, matrix.getRow(rowIdx)[columnIIndex:columnJIndex+1])
 	}
 	return bMatrix
+}
+
+// slight copy, not deep
+func (matrix *Matrix) getBlockV2(rowIndex, columnIndex, size int) *Matrix {
+	if !matrix.validateIndex(rowIndex, columnIndex) ||
+		!matrix.validateIndex(rowIndex+size-1, columnIndex+size-1) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	block := &Matrix{}
+	block.assignRow(size, size)
+	for rowCnt := 0; rowCnt < size; rowCnt++ {
+		block.setRow(rowCnt, matrix.getRow(rowCnt + rowIndex)[columnIndex:columnIndex+size])
+	}
+	return block
 }
 
 // speed up the cal, ignore the check func
@@ -211,7 +225,7 @@ func (matrix *Matrix) binDivBlock() *Matrix {
 	return &Matrix{}
 }
 
-func (matrix *Matrix) mulByDivBlock(m *Matrix, matrixMultiplyAlgorithm ...func(*Matrix, *Matrix, int, int, int, int, int, int, int, int, int) *Matrix) *Matrix {
+func (matrix *Matrix) mulByDivBlock(m *Matrix, matrixMultiplyAlgorithm ...func(*Matrix, *Matrix, int, int, int, int, int, int) *Matrix) *Matrix {
 	if !matrix.canMultiply(m) {
 		panic(matrixCanNotMultiplyError)
 	}
@@ -227,7 +241,7 @@ func (matrix *Matrix) mulByDivBlock(m *Matrix, matrixMultiplyAlgorithm ...func(*
 	matrix.zeroPadding(destSize, destSize)
 	m.zeroPadding(destSize, destSize)
 
-	resMatrix := destMatrixMultiplyAlgorithm(matrix, m, 0, 0, destSize-1, destSize-1, 0, 0, destSize-1, destSize-1, destSize)
+	resMatrix := destMatrixMultiplyAlgorithm(matrix, m, 0, 0, 0, 0, destSize, destSize>>1)
 	resMatrix.zeroTruncate(matrixRowSize, mColumnSize)
 
 	// whether to recover
@@ -249,6 +263,8 @@ func (matrix *Matrix) phalanxBlockRowPatch(m *Matrix) *Matrix {
 	return matrix
 }
 
+// [C11, C12, C21, C22]
+//
 // ----------|
 // | C11 C12 |
 // | C21 C22 |
@@ -264,10 +280,11 @@ func phalanxBlock22Patch(C11, C12, C21, C22 *Matrix) *Matrix {
 // speed up, none use more check api
 // cannot write back to C, error
 // Test Pass
-func simplePhalanx22Mul22(A, B *Matrix, ari, aci, arj, acj, bri, bci, brj, bcj int) *Matrix {
+// c[0,0] = a[0,0]*b[0,0]+a[0,1]*b[1,0]; c[0,1] = a[0,0]*b[0,1]+a[0,1]*b[1,1]
+// c[1,0] = a[1,0]*b[0,0]+a[1,1]*b[1,0]; c[1,1] = a[1,0]*b[0,1]+a[1,1]*b[1,1]
+func simplePhalanx22Mul22(A, B *Matrix, ari, aci, bri, bci int) *Matrix {
 	res := MakeZeroMatrix(minAtomMatrixSize, minAtomMatrixSize)
-	//c[0,0] = a[0,0]*b[0,0]+a[0,1]*b[1,0]; c[0,1] = a[0,0]*b[0,1]+a[0,1]*b[1,1]
-	//c[1,0] = a[1,0]*b[0,0]+a[1,1]*b[1,0]; c[1,1] = a[1,0]*b[0,1]+a[1,1]*b[1,1]
+	arj, acj, brj, bcj := ari+1, aci+1, bri+1, bci+1
 	res.slice[0][0] = A.slice[ari][aci]*B.slice[bri][bci] + A.slice[ari][acj]*B.slice[brj][bci]
 	res.slice[0][1] = A.slice[ari][aci]*B.slice[bri][bcj] + A.slice[ari][acj]*B.slice[brj][bcj]
 	res.slice[1][0] = A.slice[arj][aci]*B.slice[bri][bci] + A.slice[arj][acj]*B.slice[brj][bci]
@@ -281,6 +298,7 @@ func debugPrintln(a ...any) {
 
 // SimplePhalanxBlockMul
 // consider speed up in go application level
+// total aims
 // 1. multiple threads
 // 2. application level virtual stack to put temp matrix instead gmp itself
 // 3. algorithm change
@@ -288,95 +306,124 @@ func debugPrintln(a ...any) {
 // 5. binary div convert to three-parts div
 // 6. 1-5 multiple exams
 // 7. cgo to call C lang pure code.
-func SimplePhalanxBlockMul(A, B *Matrix, ari, aci, arj, acj, bri, bci, brj, bcj, sz int) *Matrix {
-	recursiveDepth := int(math.Log2(float64(sz)))
-	if recursiveDepth >= maxRecursiveDepth {
-		return A.getBlock(ari, aci, arj, acj).mulV2(B.getBlock(bri, bci, brj, bcj))
-	}
-	if sz == minAtomMatrixSize {
-		return simplePhalanx22Mul22(A, B, ari, aci, arj, acj, bri, bci, brj, bcj)
-	}
-	sz >>= 1
-	aris, acis := ari+sz, aci+sz
-	aris1, acis1 := aris-1, acis-1
-	bris, bcis := bri+sz, bci+sz
-	bris1, bcis1 := bris-1, bcis-1
+// current suggestions
+// 1. decline the parameter num
+// 2. convert the recursive to none recursive
+// 3. use waitGroup and channel to run multiple core, take advantage of gmp
+func SimplePhalanxBlockMul(A, B *Matrix, ari, aci, bri, bci, size, sz int) *Matrix {
 
+	if recursiveDepth := lang.CeilBinCnt(size); recursiveDepth >= maxRecursiveDepth {
+		return A.getBlockV2(ari, aci, size).mulV2(B.getBlockV2(bri, bci, size))
+	}
+
+	if size == minAtomMatrixSize {
+		return simplePhalanx22Mul22(A, B, ari, aci, bri, bci)
+	}
+
+	aris, acis := ari+sz, aci+sz
+	bris, bcis := bri+sz, bci+sz
+	size, sz = size>>1, sz>>1
 	// calculate along with put data
 	// 1. calculate then put data, the space complexity enlarge * 2
 	// 2. use Aij.mul(), the original address will be changed, because A11,A12...,B11,B12,... is weak reference
 	// 3. case 1 will not be considered
-	//debugPrintln("A11", ari, aci, aris1, acis1, "B11", bri, bci, bris1, bcis1)
-	//debugPrintln("A12", ari, acis, aris1, acj, "B21", bris, bci, brj, bcis1)
-	//debugPrintln("A11", ari, aci, aris1, acis1, "B12", bri, bcis, bris1, bcj)
-	//debugPrintln("A12", ari, acis, aris1, acj, "B22", bris, bcis, brj, bcj)
-	//debugPrintln("A21", aris, aci, arj, acis1, "B11", bri, bci, bris1, bcis1)
-	//debugPrintln("A22", aris, acis, arj, acj, "B21", bris, bci, brj, bcis1)
-	//debugPrintln("A21", aris, aci, arj, acis1, "B12", bri, bcis, bris1, bcj)
-	//debugPrintln("A22", aris, acis, arj, acj, "B22", bris, bcis, brj, bcj)
+	// C11 = A11*B11+A12*B21
+	//debugPrintln("A11", ari, aci, "B11", bri, bci)
+	//debugPrintln("A12", ari, acis, "B21", bris, bci)
+	// C12 = A11*B12+A12*B22
+	//debugPrintln("A11", ari, aci, "B12", bri, bcis)
+	//debugPrintln("A12", ari, acis, "B22", bris, bcis)
+	// C21 = A21*B11+A22*B21
+	//debugPrintln("A21", aris, aci, "B11", bri, bci)
+	//debugPrintln("A22", aris, acis, "B21", bris, bci)
+	// C22 = A21*B12+A22*B22
+	//debugPrintln("A21", aris, aci, "B12", bri, bcis)
+	//debugPrintln("A22", aris, acis, "B22", bris, bcis)
 
-	C11 := SimplePhalanxBlockMul(A, B, ari, aci, aris1, acis1, bri, bci, bris1, bcis1, sz).add(
-		SimplePhalanxBlockMul(A, B, ari, acis, aris1, acj, bris, bci, brj, bcis1, sz))
+	C11 := SimplePhalanxBlockMul(A, B, ari, aci, bri, bci, size, sz).add(
+		SimplePhalanxBlockMul(A, B, ari, acis, bris, bci, size, sz))
 
-	C12 := SimplePhalanxBlockMul(A, B, ari, aci, aris1, acis1, bri, bcis, bris1, bcj, sz).add(
-		SimplePhalanxBlockMul(A, B, ari, acis, aris1, acj, bris, bcis, brj, bcj, sz))
+	C12 := SimplePhalanxBlockMul(A, B, ari, aci, bri, bcis, size, sz).add(
+		SimplePhalanxBlockMul(A, B, ari, acis, bris, bcis, size, sz))
 
-	C21 := SimplePhalanxBlockMul(A, B, aris, aci, arj, acis1, bri, bci, bris1, bcis1, sz).add(
-		SimplePhalanxBlockMul(A, B, aris, acis, arj, acj, bris, bci, brj, bcis1, sz))
+	C21 := SimplePhalanxBlockMul(A, B, aris, aci, bri, bci, size, sz).add(
+		SimplePhalanxBlockMul(A, B, aris, acis, bris, bci, size, sz))
 
-	C22 := SimplePhalanxBlockMul(A, B, aris, aci, arj, acis1, bri, bcis, bris1, bcj, sz).add(
-		SimplePhalanxBlockMul(A, B, aris, acis, arj, acj, bris, bcis, brj, bcj, sz))
+	C22 := SimplePhalanxBlockMul(A, B, aris, aci, bri, bcis, size, sz).add(
+		SimplePhalanxBlockMul(A, B, aris, acis, bris, bcis, size, sz))
 
 	return phalanxBlock22Patch(C11, C12, C21, C22)
 }
 
 // SimplePhalanxBlockMulV2
-// linear no recursive
-func SimplePhalanxBlockMulV2(A, B *Matrix, ari, aci, arj, acj, bri, bci, brj, bcj, sz int) *Matrix {
-	if sz == minAtomMatrixSize {
-		return simplePhalanx22Mul22(A, B, ari, aci, arj, acj, bri, bci, brj, bcj)
+// need to be reconsidered
+// has not been completed
+// no recursive
+func SimplePhalanxBlockMulV2(A, B *Matrix, ari, aci, bri, bci, size, sz int) *Matrix {
+
+	if size == minAtomMatrixSize {
+		return simplePhalanx22Mul22(A, B, ari, aci, bri, bci)
 	}
-	sz >>= 1
-	aris, acis := ari+sz, aci+sz
-	aris1, acis1 := aris-1, acis-1
-	bris, bcis := bri+sz, bci+sz
-	bris1, bcis1 := bris-1, bcis-1
-	//C11 = A11*B11+A12*B21; C12 = A11*B12+A12+B22
-	//C21 = A21*B11+A22*B21; C22 = A21*B12+A22*B22
-	A11, A12 := A.getBlock(ari, aci, aris1, acis1), A.getBlock(ari, acis, aris1, acj)
-	A21, A22 := A.getBlock(aris, aci, arj, acis1), A.getBlock(aris, acis, arj, acj)
-	B11, B12 := B.getBlock(bri, bci, bris1, bcis1), B.getBlock(bri, bcis, bris1, bcj)
-	B21, B22 := B.getBlock(bris, bci, brj, bcis1), B.getBlock(bris, bcis, brj, bcj)
 
-	P1 := A11.makeCopy().mul(B11)
-	P2 := A12.makeCopy().mul(B21)
-	P3 := A11.makeCopy().mul(B12)
-	P4 := A12.makeCopy().mul(B22)
-	P5 := A21.makeCopy().mul(B11)
-	P6 := A22.makeCopy().mul(B21)
-	P7 := A21.makeCopy().mul(B12)
-	P8 := A22.makeCopy().mul(B22)
+	result := MakeZeroMatrix(size, size)
+	stack := []*Matrix{result}
 
-	//C.setBlock(ari, aci, aris1, acis1)
-	return phalanxBlock22Patch(P1.add(P2), P3.add(P4), P5.add(P6), P7.add(P8))
+	for len(stack) > 0 {
+		top := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		sz = size >> 1
+		size >>= 1
+		aris, acis := ari+sz, aci+sz
+		bris, bcis := bri+sz, bci+sz
+
+		// false, directly return
+		C11 := top.getBlockV2(ari, bci, sz).
+			add(A.getBlockV2(ari, aci, sz).mulV2(B.getBlockV2(bri, bci, sz))).
+			add(A.getBlockV2(ari, acis, sz).mulV2(B.getBlockV2(bris, bci, sz)))
+
+		C12 := top.getBlockV2(ari, bcis, sz).
+			add(A.getBlockV2(ari, aci, sz).mulV2(B.getBlockV2(bri, bcis, sz))).
+			add(A.getBlockV2(ari, acis, sz).mulV2(B.getBlockV2(bris, bcis, sz)))
+
+		C21 := top.getBlockV2(aris, bci, sz).
+			add(A.getBlockV2(aris, aci, sz).mulV2(B.getBlockV2(bri, bci, sz))).
+			add(A.getBlockV2(aris, acis, sz).mulV2(B.getBlockV2(bris, bci, sz)))
+
+		C22 := top.getBlockV2(aris, bcis, sz).
+			add(A.getBlockV2(aris, aci, sz).mulV2(B.getBlockV2(bri, bcis, sz))).
+			add(A.getBlockV2(aris, acis, sz).mulV2(B.getBlockV2(bris, bcis, sz)))
+
+		top = phalanxBlock22Patch(C11, C12, C21, C22)
+
+		if size > minAtomMatrixSize {
+			stack = append(stack, top.getBlockV2(0, 0, sz))
+			stack = append(stack, top.getBlockV2(0, size, sz))
+			stack = append(stack, top.getBlockV2(size, 0, sz))
+			stack = append(stack, top.getBlockV2(size, size, sz))
+
+			result = top
+		}
+	}
+
+	return result
 }
 
 // StraseenPhalanxBlockMul
 // Strassen Matrix Multiply
-func StraseenPhalanxBlockMul(A, B *Matrix, ari, aci, arj, acj, bri, bci, brj, bcj, sz int) *Matrix {
-	if sz == minAtomMatrixSize {
-		return simplePhalanx22Mul22(A, B, ari, aci, arj, acj, bri, bci, brj, bcj)
+func StraseenPhalanxBlockMul(A, B *Matrix, ari, aci, bri, bci, size, sz int) *Matrix {
+	if size == minAtomMatrixSize {
+		return simplePhalanx22Mul22(A, B, ari, aci, bri, bci)
 	}
-	sz >>= 1
-	aris, acis := ari+sz, aci+sz
-	aris1, acis1 := aris-1, acis-1
-	bris, bcis := bri+sz, bci+sz
-	bris1, bcis1 := bris-1, bcis-1
 
-	A11, A12 := A.getBlock(ari, aci, aris1, acis1), A.getBlock(ari, acis, aris1, acj)
-	A21, A22 := A.getBlock(aris, aci, arj, acis1), A.getBlock(aris, acis, arj, acj)
-	B11, B12 := B.getBlock(bri, bci, bris1, bcis1), B.getBlock(bri, bcis, bris1, bcj)
-	B21, B22 := B.getBlock(bris, bci, brj, bcis1), B.getBlock(bris, bcis, brj, bcj)
+	size >>= 1
+	aris, acis := ari+size, aci+size
+	bris, bcis := bri+size, bci+size
+
+	A11, A12 := A.getBlockV2(ari, aci, size), A.getBlockV2(ari, acis, size)
+	A21, A22 := A.getBlockV2(aris, aci, size), A.getBlockV2(aris, acis, size)
+	B11, B12 := B.getBlockV2(bri, bci, size), B.getBlockV2(bri, bcis, size)
+	B21, B22 := B.getBlockV2(bris, bci, size), B.getBlockV2(bris, bcis, size)
 
 	S1 := B12.makeCopy().sub(B22)
 	S2 := A11.makeCopy().add(A12)
@@ -389,13 +436,13 @@ func StraseenPhalanxBlockMul(A, B *Matrix, ari, aci, arj, acj, bri, bci, brj, bc
 	S9 := A11.makeCopy().sub(A21)
 	S10 := B11.makeCopy().add(B12)
 
-	P1 := StraseenPhalanxBlockMul(A, S1, ari, aci, aris1, acis1, 0, 0, sz-1, sz-1, sz)
-	P2 := StraseenPhalanxBlockMul(S2, B, 0, 0, sz-1, sz-1, bris, bcis, brj, bcj, sz)
-	P3 := StraseenPhalanxBlockMul(S3, B, 0, 0, sz-1, sz-1, bri, bci, bris1, bcis1, sz)
-	P4 := StraseenPhalanxBlockMul(A, S4, aris, acis, arj, acj, 0, 0, sz-1, sz-1, sz)
-	P5 := StraseenPhalanxBlockMul(S5, S6, 0, 0, sz-1, sz-1, 0, 0, sz-1, sz-1, sz)
-	P6 := StraseenPhalanxBlockMul(S7, S8, 0, 0, sz-1, sz-1, 0, 0, sz-1, sz-1, sz)
-	P7 := StraseenPhalanxBlockMul(S9, S10, 0, 0, sz-1, sz-1, 0, 0, sz-1, sz-1, sz)
+	P1 := StraseenPhalanxBlockMul(A, S1, ari, aci, 0, 0, size, sz)
+	P2 := StraseenPhalanxBlockMul(S2, B, 0, 0, bris, bcis, size, sz)
+	P3 := StraseenPhalanxBlockMul(S3, B, 0, 0, bri, bci, size, sz)
+	P4 := StraseenPhalanxBlockMul(A, S4, aris, acis, 0, 0, size, sz)
+	P5 := StraseenPhalanxBlockMul(S5, S6, 0, 0, 0, 0, size, sz)
+	P6 := StraseenPhalanxBlockMul(S7, S8, 0, 0, 0, 0, size, sz)
+	P7 := StraseenPhalanxBlockMul(S9, S10, 0, 0, 0, 0, size, sz)
 
 	C11 := P5.add(P4).sub(P2).add(P6)
 	C12 := P1.add(P2)

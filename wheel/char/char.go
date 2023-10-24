@@ -1,4 +1,6 @@
-package cal
+package char
+
+// char Stand for character
 
 const (
 	undefinedString = ""
@@ -6,37 +8,10 @@ const (
 	lambdaAes       = "λ"
 )
 
-var (
-	superScript = map[int32]string{
-		'0': "⁰",
-		'1': "¹",
-		'2': "²",
-		'3': "³",
-		'4': "⁴",
-		'5': "⁵",
-		'6': "⁶",
-		'7': "⁷",
-		'8': "⁸",
-		'9': "⁹",
-	}
-	subscript = map[int32]string{
-		'0': "₀",
-		'1': "₁",
-		'2': "₂",
-		'3': "₃",
-		'4': "₄",
-		'5': "₅",
-		'6': "₆",
-		'7': "₇",
-		'8': "₈",
-		'9': "₉",
-	}
-)
-
 func getSuperScript(ss string) string {
 	destSS := undefinedString
 	for _, ssByte := range ss {
-		destSS += superScript[ssByte]
+		destSS += superScript[string(ssByte)]
 	}
 	return destSS
 }
@@ -44,7 +19,7 @@ func getSuperScript(ss string) string {
 func getSubScript(ss string) string {
 	destSS := undefinedString
 	for _, ssByte := range ss {
-		destSS += subscript[ssByte]
+		destSS += subScript[string(ssByte)]
 	}
 	return destSS
 }
@@ -74,4 +49,22 @@ func GetEquationAes(ss string, charType ...string) string {
 		}
 	}
 	return destAes + getSubScript(ss)
+}
+
+func GetSubScript(ss string) string {
+	return getSubScript(ss)
+}
+
+func GetUpperCaseGeekAlphabetBySpell(spell string) string {
+	return upperCaseGeekAlphabet[spell]
+}
+
+func GetLowerCaseGeekAlphabetBySpell(spell string) string {
+	return lowerCaseGeekAlphabet[spell]
+}
+
+// GetFraction
+// example: 2,5 -> ²⁄₅
+func GetFraction(numerator, denominator string) string {
+	return getSuperScript(numerator) + superScript["Frac"] + getSubScript(denominator)
 }

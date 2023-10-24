@@ -314,6 +314,14 @@ func GetRandFloat64ByFloat64Range(a, b float64) float64 {
 	return rand.Float64()*(b-a) + a
 }
 
+func GetRandFloat64ArrayByRange(size int, a, b float64) []float64 {
+	f := make([]float64, size)
+	for idx := 0; idx < size; idx++ {
+		f[idx] = GetRandFloat64ByFloat64Range(a, b)
+	}
+	return f
+}
+
 func Float64Mod(a float64, m int) float64 {
 	return float64(int(a) % m)
 }
@@ -325,12 +333,16 @@ func AbsInt(a int) int {
 	return a
 }
 
-func CeilBin(a int) int {
+func CeilBinCnt(a int) int {
 	binCnt := int(math.Ceil(math.Log2(float64(a))))
 	if binCnt >= 64 {
 		panic(int64BitOutOfBoundError)
 	}
-	return 1 << binCnt
+	return binCnt
+}
+
+func CeilBin(a int) int {
+	return 1 << CeilBinCnt(a)
 }
 
 func MaxIntCeilBin(a ...int) int {
@@ -341,4 +353,11 @@ func MaxIntCeilBin(a ...int) int {
 		}
 	}
 	return CeilBin(destLen)
+}
+
+func Get4RandFloat64(a, b float64) (float64, float64, float64, float64) {
+	return GetRandFloat64ByFloat64Range(a, b),
+		GetRandFloat64ByFloat64Range(a, b),
+		GetRandFloat64ByFloat64Range(a, b),
+		GetRandFloat64ByFloat64Range(a, b)
 }

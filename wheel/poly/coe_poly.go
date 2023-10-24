@@ -1,7 +1,7 @@
 package poly
 
 import (
-	"bfw/wheel/cal"
+	"bfw/wheel/char"
 	"bfw/wheel/fft"
 	"bfw/wheel/lang"
 	"fmt"
@@ -154,7 +154,7 @@ func (cp *CoePoly) getElemString(index int, hasDisplayed bool, precision ...int)
 		}
 		numString = lang.Float64ToString(cp.coe[index], precision...)
 		if index > 1 {
-			expString = cal.GetExponent(strconv.Itoa(index))
+			expString = char.GetExponent(strconv.Itoa(index))
 		}
 		return signString + numString + polyDefaultAesString + expString
 	} else {

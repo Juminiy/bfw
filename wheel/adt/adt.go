@@ -1,6 +1,6 @@
 package adt
 
-// stand for Abstract Data Type
+// adt Stand for abstract data type
 
 // GenericContainer
 // Sequential Container include: queue, stack, deque, list, vector(formed from array or slice), forward_list...

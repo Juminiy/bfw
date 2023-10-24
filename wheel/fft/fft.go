@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// stand for Fast Fourier Transform
+// fft stand for fast fourier transform
 
 // the first case is:
 //  1. high precision multiply
