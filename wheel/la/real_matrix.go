@@ -1597,8 +1597,10 @@ func (matrix *Matrix) IsSimilar(m *Matrix) bool {
 	return false
 }
 
-func (matrix *Matrix) SimilarityTransformation(m *Matrix) *Matrix {
-	return m.GetInverse().MTimes(matrix).MTimes(m)
+// Similar
+// return P⁻¹AP (P⁻¹P = I)
+func (matrix *Matrix) Similar(P *Matrix) *Matrix {
+	return P.GetInverse().MTimes(matrix).MTimes(P)
 }
 
 func (matrix *Matrix) Orth() *Matrix {
@@ -1676,6 +1678,8 @@ func (matrix *Matrix) SmithStandard() *PolyDiagonal {
 	return &PolyDiagonal{}
 }
 
+// JordanStandard
+// return P⁻¹AP (P⁻¹P = I)
 func (matrix *Matrix) JordanStandard() *JordanMatrix {
 	return &JordanMatrix{}
 }
@@ -1796,20 +1800,75 @@ func (matrix *Matrix) Hessenberg() {}
 
 // Matrix Norm
 
-func (matrix *Matrix) norm() float64          { return 0 }
-func (matrix *Matrix) spectralNorm() float64  { return 0 }
-func (matrix *Matrix) L1Norm() float64        { return 0 }
-func (matrix *Matrix) L2Norm() float64        { return matrix.spectralNorm() }
-func (matrix *Matrix) InfiniteNorm() float64  { return 0 }
-func (matrix *Matrix) FrobeniusNorm() float64 { return 0 }
+// M1Norm
+// sum of all elem abs
+func (matrix *Matrix) M1Norm() float64 {
+	sumElemAbs := 0.0
+	matrix.traverse(func(elemValue float64) {
+		sumElemAbs += math.Abs(elemValue)
+	})
+	return sumElemAbs
+}
+
+// FNorm
+// arithmetic square of trace of svd matrix
+// √tr(AᴴA)
+func (matrix *Matrix) FNorm() float64 {
+	return math.Sqrt(matrix.GetTranspose().mulV2(matrix).Trace())
+}
+
+// MInfNorm
+// rowSize dotMul maximum of all elem abs
+func (matrix *Matrix) MInfNorm() float64 {
+	maxElemAbs := 0.0
+	matrix.traverse(func(elemValue float64) {
+		maxElemAbs = math.Max(math.Abs(elemValue), maxElemAbs)
+	})
+	return maxElemAbs * float64(matrix.rowSize)
+}
+
+// L1Norm
+// maximum of column sum of elem abs
+func (matrix *Matrix) L1Norm() float64 {
+	return 0
+}
+
+// L2Norm
+// spectralNorm
+func (matrix *Matrix) L2Norm() float64 {
+	return matrix.spectralNorm()
+}
+
+// spectralNorm
+// max svd value
+func (matrix *Matrix) spectralNorm() float64 {
+	return 0
+}
+
+// InfNorm
+// maximum of row sum of elem abs
+func (matrix *Matrix) InfNorm() float64 {
+	sum := 0.0
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		sum += matrix.getRowElemAbsSum(rowIdx)
+	}
+	return sum
+}
+
+func (matrix *Matrix) norm() float64 {
+	return 0
+}
 
 // Matrix Positive Define
 
-func (matrix *Matrix) IsPositiveDefine() bool { return false }
-func (matrix *Matrix) IsNegativeDefine() bool { return false }
+func (matrix *Matrix) IsPositiveDefine() bool   { return false }
+func (matrix *Matrix) IsNotNegtiveDefine() bool { return false }
+func (matrix *Matrix) IsNegativeDefine() bool   { return false }
 
 // Matrix Symmetric
 
+// IsSymmetric
+// Aᵀ = A
 func (matrix *Matrix) IsSymmetric() bool {
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 		for columnIdx := rowIdx + 1; columnIdx < matrix.columnSize; columnIdx++ {
@@ -1820,6 +1879,9 @@ func (matrix *Matrix) IsSymmetric() bool {
 	}
 	return true
 }
+
+// IsAntiSymmetric
+// Aᵀ = -A
 func (matrix *Matrix) IsAntiSymmetric() bool {
 	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
 		for columnIdx := rowIdx + 1; columnIdx < matrix.columnSize; columnIdx++ {

@@ -1,6 +1,7 @@
 package la
 
 import (
+	"bfw/wheel/adt"
 	"bfw/wheel/lang"
 	"errors"
 	"strconv"
@@ -186,4 +187,9 @@ func (sm *SparseMatrix) transpose() *SparseMatrix {
 func (sm *SparseMatrix) GetTranspose() *SparseMatrix {
 	smCopy := sm.makeCopy()
 	return smCopy.transpose()
+}
+
+type MatrixElem struct {
+	Key *adt.IntPair
+	Val float64
 }

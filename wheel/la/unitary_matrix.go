@@ -1,5 +1,5 @@
 package la
 
 // UnitaryMatrix
-// A
+// AᴴA = AAᴴ = I
 type UnitaryMatrix ComplexMatrix

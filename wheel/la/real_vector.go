@@ -492,6 +492,45 @@ func (vector *Vector) Convolution(v *Vector) *Vector {
 
 // Vector Norm Theory
 
+func (vector *Vector) L0Norm() float64 {
+	return vector.norm('0')
+}
+
+func (vector *Vector) L1Norm() float64 {
+	return vector.manhattanDistance()
+}
+
+func (vector *Vector) manhattanDistance() float64 {
+	return vector.norm('m')
+}
+
+func (vector *Vector) L2Norm() float64 {
+	return vector.euclideanNorm()
+}
+
+// euclideanNorm
+// 2-norm
+// ||x||_{2}
+func (vector *Vector) euclideanNorm() float64 {
+	return vector.norm('e')
+}
+
+func (vector *Vector) PNorm(p float64) float64 {
+	return vector.norm('p', p)
+}
+
+func (vector *Vector) InfiniteNorm() float64 {
+	return vector.PositiveInfiniteNorm()
+}
+
+func (vector *Vector) PositiveInfiniteNorm() float64 {
+	return vector.norm('+')
+}
+
+func (vector *Vector) NegativeInfiniteNorm() float64 {
+	return vector.norm('-')
+}
+
 func (vector *Vector) norm(opt rune, extra ...interface{}) float64 {
 	if !vector.validate() {
 		panic(vectorInValidError)
@@ -550,44 +589,6 @@ func (vector *Vector) norm(opt rune, extra ...interface{}) float64 {
 		resNum = math.Pow(resNum, 1.0/powerP)
 	}
 	return resNum
-}
-
-func (vector *Vector) manhattanDistance() float64 {
-	return vector.norm('m')
-}
-
-// euclideanNorm
-// 2-norm
-// ||x||_{2}
-func (vector *Vector) euclideanNorm() float64 {
-	return vector.norm('e')
-}
-
-func (vector *Vector) L0Norm() float64 {
-	return vector.norm('0')
-}
-
-func (vector *Vector) L1Norm() float64 {
-	return vector.manhattanDistance()
-}
-
-func (vector *Vector) L2Norm() float64 {
-	return vector.euclideanNorm()
-}
-
-func (vector *Vector) PositiveInfiniteNorm() float64 {
-	return vector.norm('+')
-}
-
-func (vector *Vector) NegativeInfiniteNorm() float64 {
-	return vector.norm('-')
-}
-
-func (vector *Vector) InfiniteNorm() float64 {
-	return vector.PositiveInfiniteNorm()
-}
-func (vector *Vector) PNorm(p float64) float64 {
-	return vector.norm('p', p)
 }
 
 func (vector *Vector) GetProjection(v *Vector) *Vector {

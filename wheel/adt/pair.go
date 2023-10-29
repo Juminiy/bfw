@@ -7,11 +7,19 @@ const (
 )
 
 type Pair[K, V any] struct {
-	key   K
-	value V
+	key K
+	val V
 }
 
 type IntPair Pair[int, int]
+
+func (ip *IntPair) GetKey() int {
+	return ip.key
+}
+
+func (ip *IntPair) GetVal() int {
+	return ip.val
+}
 
 func MakeIntPair(a, b int) *IntPair {
 	return &IntPair{a, b}
@@ -22,7 +30,7 @@ func (ip *IntPair) Display(comma ...rune) *IntPair {
 	if len(comma) > 0 {
 		destComma = comma[0]
 	}
-	fmt.Printf("(%v%c%v)", ip.key, destComma, ip.value)
+	fmt.Printf("(%v%c%v)", ip.key, destComma, ip.val)
 	return ip
 }
 
@@ -33,7 +41,7 @@ func MakeIntPairSlice() IntPairSlice {
 }
 
 func (ips IntPairSlice) Less(i, j int) bool {
-	return (ips[i].key == ips[j].key && ips[i].value < ips[j].value) ||
+	return (ips[i].key == ips[j].key && ips[i].val < ips[j].val) ||
 		ips[i].key < ips[j].key
 }
 

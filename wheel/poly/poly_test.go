@@ -194,7 +194,7 @@ func TestPoly_Factoring(t *testing.T) {
 }
 
 func TestPoly_DisplayV2(t *testing.T) {
-	poly1.Display(false, 1)
+	poly1.Display(true, 1)
 }
 
 func TestCoePoly_Mul(t *testing.T) {

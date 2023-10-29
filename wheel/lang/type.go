@@ -1,5 +1,7 @@
 package lang
 
+import "unsafe"
+
 // wheel assertion
 
 func ValidateStringArrayOrSlice(arrayOrSlice []string) bool {
@@ -135,4 +137,8 @@ func ConvertInterfaceElementToString(element interface{}) string {
 		return element.(string)
 	}
 	return undefinedString
+}
+
+func GetUnSafePointer(value any) any {
+	return unsafe.Pointer(&value)
 }

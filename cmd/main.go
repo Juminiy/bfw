@@ -1,8 +1,10 @@
 package main
 
 import (
+	"C"
 	"bfw/cmd/web"
 	"bfw/wheel/cc"
+	"bfw/wheel/la"
 	"bfw/wheel/lang"
 	"fmt"
 	"math"
@@ -36,7 +38,7 @@ func runCC(routines int) float64 {
 	return du.Seconds()
 }
 
-func main() {
+func parallelF64() {
 	time0 := time.Now()
 	timeSlice := lang.ConstructReal2DArrayByLen(1 << 10)
 	minSec, maxSec := 1e10, -1e10
@@ -51,4 +53,8 @@ func main() {
 	sort.Sort(timeSlice)
 	fmt.Println("top 5 min routines:", timeSlice[1], timeSlice[2], timeSlice[3], timeSlice[4], timeSlice[5])
 	fmt.Println("1024 rounds calculate, total time:", time.Since(time0))
+}
+
+func main() {
+	la.TestGenMulDisplayRealMatrix()
 }

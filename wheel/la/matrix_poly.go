@@ -13,6 +13,9 @@ func (mp *MatrixPoly) Matrix() *Matrix {
 	return &Matrix{}
 }
 
+// Hamilton Cayley
+// f(A)*g(A) = 0
+
 type ComplexMatrixPoly struct {
 	matrix *ComplexMatrix
 	poly   *poly.Poly

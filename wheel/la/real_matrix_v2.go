@@ -1,8 +1,11 @@
 package la
 
 import (
+	"bfw/wheel/adt"
 	"bfw/wheel/lang"
 	"fmt"
+	"math"
+	"sync"
 )
 
 const (
@@ -79,6 +82,10 @@ func (matrix *Matrix) mulV2Dot5(m *Matrix) *Matrix {
 	return matrix.mulByRotate2(m)
 }
 
+func (matrix *Matrix) mulV2Dot6(m *Matrix) *Matrix {
+	return matrix.mulByParallel(m)
+}
+
 func (matrix *Matrix) mulV3(m *Matrix) *Matrix {
 	return matrix.mulByDivBlock(m, SimplePhalanxBlockMul)
 }
@@ -91,16 +98,76 @@ func (matrix *Matrix) mulV5(m *Matrix) *Matrix {
 	return matrix.mulByDivBlock(m, StraseenPhalanxBlockMul)
 }
 
+func (matrix *Matrix) setByMatrixElem(matrixElem MatrixElem) {
+	matrix.set(matrixElem.Key.GetKey(), matrixElem.Key.GetVal(), matrixElem.Val)
+}
+
+func (matrix *Matrix) mulByParallel(m *Matrix) *Matrix {
+	if !matrix.canMultiply(m) {
+		panic(matrixCanNotMultiplyError)
+	}
+	mCopy := m.makeCopy().transpose()
+	resMatrix := &Matrix{}
+	resMatrix.assign(matrix.rowSize, m.columnSize)
+
+	var matrixElems = make(chan MatrixElem)
+	var wg = new(sync.WaitGroup)
+	wg.Add(matrix.rowSize * m.columnSize)
+
+	for rowIIdx := 0; rowIIdx < matrix.rowSize; rowIIdx++ {
+		for rowJIdx := 0; rowJIdx < mCopy.rowSize; rowJIdx++ {
+			go matrix.rowDotV2(rowIIdx, mCopy, rowJIdx, wg, matrixElems)
+		}
+	}
+
+	go func() {
+		wg.Wait()
+		close(matrixElems)
+	}()
+
+	for matrixElem := range matrixElems {
+		resMatrix.setByMatrixElem(matrixElem)
+	}
+
+	return resMatrix
+}
+
 func (matrix *Matrix) getRowSum(rowIndex int) float64 {
 	sum := 0.0
-	for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
-		sum += matrix.get(rowIndex, columnIdx)
-	}
+	matrix.traverseRow(rowIndex, func(elemValue float64) {
+		sum += elemValue
+	})
 	return sum
+}
+
+func (matrix *Matrix) getRowElemAbsSum(rowIndex int) float64 {
+	sum := 0.0
+	matrix.traverseRow(rowIndex, func(elemValue float64) {
+		sum += math.Abs(elemValue)
+	})
+	return sum
+}
+
+func (matrix *Matrix) traverseRow(rowIndex int, funcPtr func(float64)) {
+	if !matrix.validateIndex(rowIndex) {
+		panic(matrixIndexOutOfBoundError)
+	}
+	for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+		funcPtr(matrix.get(rowIndex, columnIdx))
+	}
 }
 
 func (matrix *Matrix) rowDot(mRowIndex int, mt *Matrix, mtRowIndex int) float64 {
 	return ConstructVector(matrix.getRow(mRowIndex)).DotMul(ConstructVector(mt.getRow(mtRowIndex)))
+}
+
+func (matrix *Matrix) rowDotV2(mRowIndex int, mt *Matrix, mtRowIndex int, wg *sync.WaitGroup, chanElem chan MatrixElem) {
+	sum := 0.0
+	for columnIdx := 0; columnIdx < matrix.columnSize; columnIdx++ {
+		sum += matrix.slice[mRowIndex][columnIdx] * mt.slice[mtRowIndex][columnIdx]
+	}
+	chanElem <- MatrixElem{Key: adt.MakeIntPair(mRowIndex, mtRowIndex), Val: sum}
+	wg.Done()
 }
 
 // 1 2 | 5 6

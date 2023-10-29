@@ -154,7 +154,7 @@ func TestGenericMatrix_ALL(t *testing.T) {
 	m.setValues([][]float64{{0, 1, 0}, {0, 0, 1}, {-6, -11, -6}}, 3)
 	p := &Matrix{}
 	p.setValues([][]float64{{1, 1, 1}, {-1, -2, -3}, {1, 4, 9}}, 3)
-	m.SimilarityTransformation(p).Display()
+	m.Similar(p).Display()
 	//m.Display()
 	//p.Display()
 }
@@ -176,7 +176,7 @@ func TestMatrix_Approx(t *testing.T) {
 	//eigenVG.get(0).GetUnit().Display()
 	//eigenVGOrthBasis := eigenVG.GetSchmidt().GetUnit().Display()
 	//fmt.Println(eigenVGOrthBasis.ValidateOrthonormalBasis())
-	matrix.SimilarityTransformation(eigenO).Display()
+	matrix.Similar(eigenO).Display()
 }
 
 func TestVector_Add(t *testing.T) {
@@ -402,20 +402,22 @@ func TestMatrix_Intercept(t *testing.T) {
 }
 
 func TestMatrix_MTimes(t *testing.T) {
-	destSize, dataType, dataRange := 32, "i", []float64{10}
+	destSize, dataType, dataRange := 32, "i", []float64{1e2, 1e5}
 	matrix1 := GenMatrix(destSize, destSize, dataType, dataRange...)
 	matrix2 := GenMatrix(destSize, destSize, dataType, dataRange...)
 	correctRes1 := matrix1.mulV1(matrix2)
 	correctRes2 := matrix1.mulV2(matrix2)
 	correctRes2Dot5 := matrix1.mulV2Dot5(matrix2)
+	lookRes2Dot6 := matrix1.mulV2Dot6(matrix2)
 	res3 := matrix1.mulV3(matrix2)
 	//res4 := matrix1.mulV4(matrix2)
-	res5 := matrix1.mulV5(matrix2)
+	//res5 := matrix1.mulV5(matrix2)
 	fmt.Println("simple kij mul(cache speed):", correctRes1.Equal(correctRes2))
-	fmt.Println("simple ij mul(A mul B.transpose):", correctRes1.Equal(correctRes2Dot5))
+	fmt.Println("simple ij mul(A mul B.transpose, vector dot):", correctRes1.Equal(correctRes2Dot5))
+	fmt.Println("parallel mul(A mul B.transpose, vector dot):", correctRes1.Equal(lookRes2Dot6))
 	fmt.Println("recursive mul O(n^3):", correctRes1.Equal(res3))
 	//fmt.Println("non recursive mul O(n^3):", correctRes1.Equal(res4))
-	fmt.Println("best mul(Strassen algorithm, none recursive, multiple thread, cache speed):", correctRes1.Equal(res5))
+	//fmt.Println("best mul(Strassen algorithm, none recursive, multiple thread, cache speed):", correctRes1.Equal(res5))
 }
 
 func TestMatrix_All(t *testing.T) {
@@ -428,7 +430,7 @@ func TestMatrix_All(t *testing.T) {
 }
 
 func TestMatrix_Mul2(t *testing.T) {
-	size, dType, dRange := 16, "f", 1e+5
+	size, dType, dRange := 8192, "f", 1e+5
 	ma := GenMatrix(size, size, dType, dRange)
 	mb := GenMatrix(size, size, dType, dRange)
 
@@ -438,17 +440,28 @@ func TestMatrix_Mul2(t *testing.T) {
 
 	time2 := time.Now()
 	ma.mulV2(mb)
-	fmt.Printf("%d*%d Matrix Multiply After Cache Speed: %v\n", size, size, time.Since(time2))
+	fmt.Printf("%d*%d Matrix Multiply (by change loop order): %v\n", size, size, time.Since(time2))
+
+	time2Dot5 := time.Now()
+	ma.mulV2Dot5(mb)
+	fmt.Printf("%d*%d Matrix Multiply (by transpose vector dot): %v\n", size, size, time.Since(time2Dot5))
+
+	time2Dot6 := time.Now()
+	ma.mulV2Dot6(mb)
+	fmt.Printf("%d*%d Matrix Multiply (by transpose vector dot, parallel by go routine): %v\n", size, size, time.Since(time2Dot6))
 
 	time3 := time.Now()
 	ma.mulV3(mb)
 	fmt.Printf("%d*%d Matrix Multiply After DivBlock Recursive O(n^3): %v\n", size, size, time.Since(time3))
 
-	time4 := time.Now()
-	ma.mulV4(mb)
-	fmt.Printf("%d*%d Matrix Multiply After DivBlock, None Recursive, O(n^3): %v\n", size, size, time.Since(time4))
+	//time4 := time.Now()
+	//ma.mulV4(mb)
+	//fmt.Printf("%d*%d Matrix Multiply After DivBlock, None Recursive, O(n^3): %v\n", size, size, time.Since(time4))
 
-	time5 := time.Now()
-	ma.mulV5(mb)
-	fmt.Printf("%d*%d Matrix Multiply After DivBlock, None Recursive, multiple threads,Straseen Algorithm-O(n^2.807): %v\n", size, size, time.Since(time5))
+	//time5 := time.Now()
+	//ma.mulV5(mb)
+	//fmt.Printf("%d*%d Matrix Multiply After DivBlock, None Recursive, multiple threads,Straseen Algorithm-O(n^2.807): %v\n", size, size, time.Since(time5))
+}
+
+func TestGenMatrix(t *testing.T) {
 }
