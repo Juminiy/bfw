@@ -1,20 +1,13 @@
 package main
 
 import (
-	"C"
-	"bfw/cmd/web"
 	"bfw/wheel/cc"
-	"bfw/wheel/la"
 	"bfw/wheel/lang"
 	"fmt"
 	"math"
 	"sort"
 	"time"
 )
-
-func runWebApi() {
-	web.ServeRun()
-}
 
 func runCC(routines int) float64 {
 	//time0 := time.Now()
@@ -56,5 +49,5 @@ func parallelF64() {
 }
 
 func main() {
-	la.TestGenMulDisplayRealMatrix()
+	parallelF64()
 }
