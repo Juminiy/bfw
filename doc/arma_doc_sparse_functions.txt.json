@@ -1,0 +1,17 @@
+[
+    {
+        "eigs_sym": "limited number of eigenvalues & eigenvectors of sparse symmetric real matrix"
+    },
+    {
+        "eigs_gen": "limited number of eigenvalues & eigenvectors of sparse general square matrix"
+    },
+    {
+        "svds": "truncated svd: limited number of singular values & singular vectors of sparse matrix"
+    },
+    {
+        "spsolve": "solve sparse systems of linear equations"
+    },
+    {
+        "spsolve_factoriser": "factoriser for solving sparse systems of linear equations"
+    }
+]

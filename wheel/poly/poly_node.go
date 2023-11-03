@@ -1,6 +1,7 @@
 package poly
 
 import (
+	"bfw/wheel/char"
 	"bfw/wheel/lang"
 	"errors"
 	"fmt"
@@ -121,6 +122,45 @@ func (pn *Node) isZero() bool {
 
 func (pn *Node) isConstant() bool {
 	return pn.exp == polyNodeExponentZero
+}
+func (pn *Node) one2OneOptNotPanic(opt rune, pnt *Node) bool {
+	if pnt == nil {
+		return false
+	}
+	switch opt {
+	case '+':
+		{
+			if pn.exp != pnt.exp {
+				return false
+			}
+			pn.coe += pnt.coe
+		}
+	case '-':
+		{
+			if pn.exp != pnt.exp {
+				return false
+			}
+			pn.coe -= pnt.coe
+		}
+	case '*':
+		{
+			pn.coe *= pnt.coe
+			pn.exp += pnt.exp
+		}
+	case '/':
+		{
+			if pn.exp < pnt.exp {
+				return false
+			}
+			pn.coe /= pnt.coe
+			pn.exp -= pnt.exp
+		}
+	default:
+		{
+
+		}
+	}
+	return true
 }
 
 func (pn *Node) one2OneOpt(opt rune, pnt *Node) *Node {
@@ -328,7 +368,8 @@ func (pn *Node) getAESStr(aes rune) string {
 func (pn *Node) displayExponent() *Node {
 	if pn.displayValidate() {
 		if pn.exp >= 2 {
-			fmt.Printf("^%v", pn.exp)
+			//fmt.Printf("^%v", pn.exp)
+			fmt.Printf("%s", char.GetExponent(strconv.Itoa(pn.exp)))
 		}
 	}
 	return pn

@@ -1,4 +1,7 @@
-CC = clang
+CC_DARWIN = clang
+CC_WINDOWS = gcc
+CC_LINUX = gcc
+CC = $(CC_WINDOWS)
 CFLAGS = -Wall -Wextra -pedantic -std=c99
 
 home_dir = ..

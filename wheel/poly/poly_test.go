@@ -206,3 +206,12 @@ func TestCoePoly_Mul(t *testing.T) {
 	// 8381630627430
 	fmt.Println(cp1.Mul(cp2).Value(10))
 }
+
+func TestSparsePoly_Plus(t *testing.T) {
+	sp1 := ConstructSparsePolyByOrder([][]float64{{1, 2}, {6, 5}, {10, 21}, {7, 32}})
+	sp2 := ConstructSparsePolyByOrder([][]float64{{4, 3}, {33, 5}, {14, 9}, {8, 32}, {100, 35}})
+	sp1.makeCopy().Display()
+	sp2.makeCopy().Display()
+	sp1.Plus(sp2).Display()
+	sp1.Minus(sp2).Display()
+}

@@ -1,0 +1,134 @@
+[
+    {
+        "submatrix views": "read/write access to contiguous and non-contiguous submatrices"
+    },
+    {
+        "subcube views": "read/write access to contiguous and non-contiguous subcubes"
+    },
+    {
+        "subfield views": "read/write access to contiguous subfields"
+    },
+    {
+        "diag": "read/write access to matrix diagonals"
+    },
+    {
+        "each_col / each_row": "vector operations applied to each column/row of matrix (aka \"broadcasting\")"
+    },
+    {
+        "each_slice": "matrix operations applied to each slice of cube (aka \"broadcasting\")"
+    },
+    {
+        "set_imag / set_real": "set imaginary/real part"
+    },
+    {
+        "insert_rows/cols/slices": "insert vector/matrix/cube at specified row/column/slice"
+    },
+    {
+        "shed_rows/cols/slices": "remove specified rows/columns/slices"
+    },
+    {
+        "swap_rows/cols": "swap specified rows or columns"
+    },
+    {
+        "swap": "swap contents with given object"
+    },
+    {
+        "memptr": "raw pointer to memory"
+    },
+    {
+        "colptr": "raw pointer to memory used by specified column"
+    },
+    {
+        "iterators (matrices)": "iterators and associated member functions for dense matrices and vectors"
+    },
+    {
+        "iterators (cubes)": "iterators and associated member functions for cubes"
+    },
+    {
+        "iterators (sparse matrices)": "iterators and associated member functions for sparse matrices"
+    },
+    {
+        "iterators (submatrices)": "iterators and associated member functions for submatrices & subcubes"
+    },
+    {
+        "compat container functions": "compatibility container functions"
+    },
+    {
+        "as_col / as_row": "return flattened matrix as column or row vector"
+    },
+    {
+        "col_as_mat / row_as_mat": "return matrix representation of cube column or cube row"
+    },
+    {
+        "t / st": "return matrix transpose"
+    },
+    {
+        "i": "return inverse of square matrix"
+    },
+    {
+        "min / max": "return extremum value"
+    },
+    {
+        "index_min / index_max": "return index of extremum value"
+    },
+    {
+        "eval": "force evaluation of delayed expression"
+    },
+    {
+        "in_range": "check whether given location or span is valid"
+    },
+    {
+        "is_empty": "check whether object is empty"
+    },
+    {
+        "is_vec": "check whether matrix is a vector"
+    },
+    {
+        "is_sorted": "check whether vector or matrix is sorted"
+    },
+    {
+        "is_trimatu / is_trimatl": "check whether matrix is upper/lower triangular"
+    },
+    {
+        "is_diagmat": "check whether matrix is diagonal"
+    },
+    {
+        "is_square": "check whether matrix is square sized"
+    },
+    {
+        "is_symmetric": "check whether matrix is symmetric"
+    },
+    {
+        "is_hermitian": "check whether matrix is hermitian"
+    },
+    {
+        "is_sympd": "check whether matrix is symmetric/hermitian positive definite"
+    },
+    {
+        "is_zero": "check whether all elements are zero"
+    },
+    {
+        "is_finite": "check whether all elements are finite"
+    },
+    {
+        "has_inf": "check whether any element is 卤infinity"
+    },
+    {
+        "has_nan": "check whether any element is NaN"
+    },
+    {
+        "print": "print object to std::cout or user specified stream"
+    },
+    {
+        "raw_print": "print object without formatting"
+    },
+    {
+        "brief_print": "print object in shortened/abridged form"
+    },
+    {
+        "save/load (matrices&cubes)": "save/load matrices and cubes in files or streams"
+    },
+    {
+        "save/load (fields)": "save/load fields in files or streams"
+    }
+]

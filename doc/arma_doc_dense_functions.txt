@@ -1,0 +1,19 @@
+chol	; 	Cholesky decomposition
+eig_sym	 ;	eigen decomposition of dense symmetric/hermitian matrix
+eig_gen	 ;	eigen decomposition of dense general square matrix
+eig_pair	; 	eigen decomposition for pair of general dense square matrices
+hess	; 	upper Hessenberg decomposition
+inv	 ;	inverse of general square matrix
+inv_sympd	; 	inverse of symmetric positive definite matrix
+lu  	; 	lower-upper decomposition
+null	; 	orthonormal basis of null space
+orth	; 	orthonormal basis of range space
+pinv	; 	pseudo-inverse / generalised inverse
+qr  	; 	QR decomposition
+qr_econ	 ;	economical QR decomposition
+qz  ;	 	generalised Schur decomposition
+schur	; 	Schur decomposition
+solve	; 	solve systems of linear equations
+svd	 	;singular value decomposition
+svd_econ	 ;	economical singular value decomposition
+syl	 ;	Sylvester equation solver

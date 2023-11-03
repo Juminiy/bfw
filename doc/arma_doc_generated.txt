@@ -1,0 +1,16 @@
+
+linspace	; 	generate vector with linearly spaced elements
+logspace	; 	generate vector with logarithmically spaced elements
+regspace	; 	generate vector with regularly spaced elements
+randperm	; 	generate vector with random permutation of a sequence of integers
+eye	 ;	generate identity matrix
+ones	; 	generate object filled with ones
+zeros	; 	generate object filled with zeros
+randu	; 	generate object with random values (uniform distribution)
+randn	; 	generate object with random values (normal distribution)
+randg	; 	generate object with random values (gamma distribution)
+randi	; 	generate object with random integer values in specified interval
+speye	; 	generate sparse identity matrix
+spones	; 	generate sparse matrix with non-zero elements set to one
+sprandu / sprandn	; 	generate sparse matrix with non-zero elements set to random values
+toeplitz	; 	generate Toeplitz matrix
