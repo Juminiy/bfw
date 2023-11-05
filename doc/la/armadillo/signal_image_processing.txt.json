@@ -1,0 +1,26 @@
+[
+    {
+        "conv": "1D convolution"
+    },
+    {
+        "conv2": "2D convolution"
+    },
+    {
+        "fft / ifft": "1D fast Fourier transform and its inverse"
+    },
+    {
+        "fft2 / ifft2": "2D fast Fourier transform and its inverse"
+    },
+    {
+        "interp1": "1D interpolation"
+    },
+    {
+        "interp2": "2D interpolation"
+    },
+    {
+        "polyfit": "find polynomial coefficients for data fitting"
+    },
+    {
+        "polyval": "evaluate polynomial"
+    }
+]

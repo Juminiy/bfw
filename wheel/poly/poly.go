@@ -51,6 +51,10 @@ func ConstructNullPoly() *Poly {
 	return poly
 }
 
+func MakeNullPoly() *Poly {
+	return new(Poly)
+}
+
 func ValidatePoly(poly ...*Poly) bool {
 	for idx := 0; idx < len(poly); idx++ {
 		if poly[idx] == nil ||

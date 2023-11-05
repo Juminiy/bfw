@@ -5,6 +5,10 @@ import (
 	"math"
 )
 
+func IntPolyMultiplication(p1, p2 []int) []int {
+	return polyIntMul(p1, p2)
+}
+
 // fft stand for fast fourier transform
 
 // the first case is:

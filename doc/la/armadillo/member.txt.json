@@ -1,5 +1,53 @@
 [
     {
+        "zeros": "set all elements to zero"
+    },
+    {
+        "ones": "set all elements to one"
+    },
+    {
+        "eye": "set elements along main diagonal to one and off-diagonal elements to zero"
+    },
+    {
+        "randu / .randn": "set all elements to random values"
+    },
+    {
+        "fill": "set all elements to specified value"
+    },
+    {
+        "imbue": "imbue (fill) with values provided by functor or lambda function"
+    },
+    {
+        "clean": "replace elements below a threshold with zeros"
+    },
+    {
+        "replace": "replace specific elements with a new value"
+    },
+    {
+        "clamp": "clamp values to lower and upper limits"
+    },
+    {
+        "transform": "transform each element via functor or lambda function"
+    },
+    {
+        "for_each": "apply a functor or lambda function to each element"
+    },
+    {
+        "set_size": "change size without keeping elements (fast)"
+    },
+    {
+        "reshape": "change size while keeping elements"
+    },
+    {
+        "resize": "change size while keeping elements and preserving layout"
+    },
+    {
+        "copy_size": "change size to be same as given object"
+    },
+    {
+        "reset": "change size to empty"
+    },
+    {
         "submatrix views": "read/write access to contiguous and non-contiguous submatrices"
     },
     {
@@ -111,7 +159,7 @@
         "is_finite": "check whether all elements are finite"
     },
     {
-        "has_inf": "check whether any element is 卤infinity"
+        "has_inf": "check whether any element is ±infinity"
     },
     {
         "has_nan": "check whether any element is NaN"

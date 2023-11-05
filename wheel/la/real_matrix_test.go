@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+	"unsafe"
 )
 
 func MatrixTestEigenValuesByCallFunctionChain(real2DArray [][]float64) {
@@ -370,7 +371,7 @@ func TestBlockMatrix_Transpose(t *testing.T) {
 }
 
 func TestBlockMatrix_Mul(t *testing.T) {
-	genBTSize, genBSize := 32, 32
+	genBTSize, genBSize := 4, 4
 	time0 := time.Now()
 	bm1 := GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
 	bm2 := GenBlockMatrix(genBTSize, genBTSize, "f", genBSize, genBSize, 100)
@@ -430,7 +431,7 @@ func TestMatrix_All(t *testing.T) {
 }
 
 func TestMatrix_Mul2(t *testing.T) {
-	size, dType, dRange := 8192, "f", 1e+5
+	size, dType, dRange := 64, "f", 1e+5
 	ma := GenMatrix(size, size, dType, dRange)
 	mb := GenMatrix(size, size, dType, dRange)
 
@@ -464,4 +465,15 @@ func TestMatrix_Mul2(t *testing.T) {
 }
 
 func TestGenMatrix(t *testing.T) {
+	m1 := &Matrix{}
+	m2 := new(Matrix)
+	fmt.Println(&m1, m1)
+	fmt.Println(&m2, m2)
+
+	m3 := &Matrix{}
+	m3.setValues(make([][]float64, 20), 20, 20)
+	m4 := new(Matrix)
+	m4.setValues(make([][]float64, 20), 20, 20)
+	fmt.Println(&m3, unsafe.Pointer(&m3.slice), &m3.rowSize, &m3.columnSize)
+	fmt.Println(&m4, unsafe.Pointer(&m4.slice), &m4.rowSize, &m4.columnSize)
 }

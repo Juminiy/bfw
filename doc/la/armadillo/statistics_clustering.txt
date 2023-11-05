@@ -1,0 +1,18 @@
+stats functions	 ;	mean, median, standard deviation, variance
+cov	 ;	covariance
+cor	 ;	correlation
+hist	; 	histogram of counts
+histc	; 	histogram of counts with user specified edges
+quantile	; 	quantiles of a dataset
+princomp	; 	principal component analysis (PCA)
+normpdf	 ;	probability density function of normal distribution
+log_normpdf	 ;	logarithm version of probability density function of normal distribution
+normcdf	 ;	cumulative distribution function of normal distribution
+mvnrnd	 ;	random vectors from multivariate normal distribution
+chi2rnd	 ;	random numbers from chi-squared distribution
+wishrnd	 ;	random matrix from Wishart distribution
+iwishrnd	; 	random matrix from inverse Wishart distribution
+running_stat	; 	running statistics of scalars (one dimensional process/signal)
+running_stat_vec	; 	running statistics of vectors (multi-dimensional process/signal)
+kmeans	 ;	cluster data into disjoint sets
+gmm_diag/gmm_full	 ;	model and evaluate data using Gaussian Mixture Models (GMMs)

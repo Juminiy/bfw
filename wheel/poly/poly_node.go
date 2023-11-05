@@ -48,6 +48,10 @@ func constructPolyNode(coe float64, exp int, null ...bool) *Node {
 	return pn.Construct(coe, exp)
 }
 
+func MakeNullPolyNode() *Node {
+	return new(Node)
+}
+
 func (pn *Node) Construct(coe float64, exp int) *Node {
 	pn.setValues(coe, exp)
 	return pn

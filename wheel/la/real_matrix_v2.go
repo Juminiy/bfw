@@ -478,6 +478,7 @@ func SimplePhalanxBlockMulV2(A, B *Matrix, ari, aci, bri, bci, size, sz int) *Ma
 
 // StraseenPhalanxBlockMul
 // Strassen Matrix Multiply
+// O(Nˡᵒᵍ²⁽⁷⁾)
 func StraseenPhalanxBlockMul(A, B *Matrix, ari, aci, bri, bci, size, sz int) *Matrix {
 	if size == minAtomMatrixSize {
 		return simplePhalanx22Mul22(A, B, ari, aci, bri, bci)

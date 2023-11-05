@@ -50,6 +50,10 @@ func ConstructMatrix(real2DArray [][]float64) *Matrix {
 	return matrix.Construct(real2DArray)
 }
 
+func MakeNullMatrix() *Matrix {
+	return new(Matrix)
+}
+
 func MakeZeroMatrix(rowSize, columnSize int) *Matrix {
 	matrix := &Matrix{}
 	matrix.assign(rowSize, columnSize)
@@ -754,7 +758,7 @@ func (matrix *Matrix) Inv() *Matrix {
 // chained option
 func (matrix *Matrix) GetInverse() *Matrix {
 	mCopy := matrix.makeCopy()
-	return mCopy.inverseV2()
+	return mCopy.inverse()
 }
 
 // Inverse Matrix by Adjoin Matrix

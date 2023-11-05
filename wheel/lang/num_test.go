@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"testing"
+	"time"
 )
 
 func TestFloat64ToString(t *testing.T) {
@@ -59,4 +60,17 @@ func TestGetRandFloat64ByFloat64Range(t *testing.T) {
 func TestFloat64ToString2(t *testing.T) {
 	//fmt.Println(Float64ToString(-10.22, 2))
 	fmt.Println(math.Log2(5))
+}
+
+func TestKaratsubaBigNumberMultiplication(t *testing.T) {
+	size := GetRandomIntValue(1 << 20)
+	time0 := time.Now()
+	A, B := GenerateNumberString(size), GenerateNumberString(size)
+	fmt.Printf("generate two %d number string time: %v\n", size, time.Since(time0))
+	time1 := time.Now()
+	NaiveBigNumberMultiplication(A, B)
+	fmt.Printf("naive %d multiply %d number string time: %v\n", size, size, time.Since(time1))
+	time2 := time.Now()
+	KaratsubaBigNumberMultiplication(A, B)
+	fmt.Printf("karatsuba %d multiply %d number string time: %v\n", size, size, time.Since(time2))
 }

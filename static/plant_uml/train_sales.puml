@@ -1,0 +1,47 @@
+@startuml
+left to right direction
+
+actor User #black
+actor TicketSeller #orange
+
+rectangle "火车票系统" {
+  User --> (选择起始站、终点站和购票日期)
+  User --> (查询所有当日车次)
+  User --> (选择车次、购票张数和类型)
+  User --> (选择乘车人信息)
+  User --> (选择座位)
+  User --> (支付票款)
+  User --> (查看已购车票)
+  User --> (打印票据)
+  User --> (进站验证)
+  User --> (候补票、改签、退票)
+
+  (查询所有当日车次) .. TicketSeller
+  (选择车次、购票张数和类型) .. TicketSeller
+  (选择座位) .. TicketSeller
+  (支付票款) .. TicketSeller
+  (完成订票) .. TicketSeller
+  (发送短信通知) .. TicketSeller
+  (打印票据) .. TicketSeller
+  (进站验证) .. TicketSeller
+
+  (选择起始站、终点站和购票日期) --> (显示当日可以购票的车次信息)
+  (查询所有当日车次) --> (显示当日可以购票的车次信息)
+
+  (选择车次、购票张数和类型) --> (检查座位余量)
+  (选择座位) --> (检查座位可用性)
+  (支付票款) --> (完成订票)
+  (完成订票) --> (发送短信通知)
+  (打印票据) --> (通过身份证打印票据)
+
+  (进站验证) --> (检票机验票)
+
+  (候补票、改签、退票) .. TicketSeller
+
+  note right of User : 用户可以通过多种渠道进行购票，如手机APP、Web网站、微信小程序、自助购票机、购票窗口等
+
+  note left of TicketSeller : 票务销售系统负责处理购票流程和座位分配
+
+}
+
+@enduml

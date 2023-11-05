@@ -110,7 +110,10 @@ func ConvertInt2DArrayToReal2DArray(int2DArray [][]int) [][]float64 {
 	return real2DArray
 }
 
-func Int1DArrayZeroPadding(int1DArray []int, zeroCnt int) []int {
+func Int1DArrayZeroPadding(int1DArray []int, zeroCnt int, direction ...bool) []int {
+	if len(direction) > 0 && direction[0] {
+		return append(make([]int, zeroCnt), int1DArray...)
+	}
 	return append(int1DArray, make([]int, zeroCnt)...)
 }
 

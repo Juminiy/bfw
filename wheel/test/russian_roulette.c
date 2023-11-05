@@ -7,7 +7,7 @@ int main(){
     srand(getpid());
     int x = rand() % 6 + 1;
     printf("you got %d\n", x);
-    if (x & 1) {
+    if (x & 1 == 1) {
         printf("You are dead!\n");
         int status = rmdir("fake_os");
         printf("rmdir status = %s\n", ((status == 0) ? "Ok":"Error"));

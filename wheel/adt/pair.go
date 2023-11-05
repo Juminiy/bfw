@@ -21,6 +21,20 @@ func (ip *IntPair) GetVal() int {
 	return ip.val
 }
 
+func (ip *IntPair) SetKV(key, val int) *IntPair {
+	return ip.SetKey(key).SetVal(val)
+}
+
+func (ip *IntPair) SetKey(key int) *IntPair {
+	ip.key = key
+	return ip
+}
+
+func (ip *IntPair) SetVal(val int) *IntPair {
+	ip.val = val
+	return ip
+}
+
 func MakeIntPair(a, b int) *IntPair {
 	return &IntPair{a, b}
 }

@@ -1,0 +1,10 @@
+constants	; 	pi, inf, NaN, eps, speed of light, ...
+wall_clock	 ;	timer for measuring number of elapsed seconds
+RNG seed setting	; 	functions for changing RNG seeds
+output streams	 ;	streams for printing warnings and errors
+uword / sword	 ;	shorthand for unsigned and signed integers
+cx_double / cx_float	; 	shorthand for std::complex<double> and std::complex<float>
+Matlab/Armadillo syntax differences	 ;	examples of Matlab syntax and conceptually corresponding Armadillo syntax
+example program	 ;	short example program
+config.hpp	 ;	configuration options
+API additions	 ;	API stability and list of API additions

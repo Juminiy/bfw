@@ -6,8 +6,11 @@ import (
 )
 
 func TestGetExponent(t *testing.T) {
-	fmt.Println(GetExponent("-2345"))
-	fmt.Println(GetExponent("-12345"))
+	fmt.Println(GetSubScript("2"))
+	fmt.Println(GetExponent("log2(7)"))
+	fmt.Println(GetExponent("log2(3)"))
+	fmt.Println(GetExponent("1.6"))
+	fmt.Println(GetExponent("k"))
 }
 
 func TestGetFraction(t *testing.T) {

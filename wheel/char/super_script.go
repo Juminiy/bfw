@@ -1,6 +1,7 @@
 package char
 
 // https://tw.piliapp.com/symbol/subscript-superscript/
+// https://lingojam.com/SuperscriptGenerator
 
 // superScript
 // ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾⁄ᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᵋᵝᵞᵟᵠᵡᶥᶿ
@@ -74,4 +75,5 @@ var superScript = map[string]string{
 	"Iota":    "ᶥ",
 	"Theta":   "ᶿ",
 	"Frac":    "⁄",
+	".":       "`",
 }
