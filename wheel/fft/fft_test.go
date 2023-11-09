@@ -1,14 +1,28 @@
 package fft
 
 import (
+	"bfw/wheel/lang"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestFFT(t *testing.T) {
-	// after hadamard and div (1 << bitCnt)
-	//[0 45 76 94 100 70 40 19 6 0 0 0 0 0 0 0]
-	// destValue
-	//[8 3 8 1 0 2 0 5 0]
-	fmt.Println(polyIntMul([]int{5, 4, 3, 2, 1}, []int{0, 9, 8, 7, 6}))
+	size := lang.GetRandomIntValue(1 << 16)
+	time0 := time.Now()
+	A, B := lang.GenerateNumberString(size), lang.GenerateNumberString(size)
+	fmt.Printf("generate two %d length number string time: %v\n", size, time.Since(time0))
+	time1 := time.Now()
+	lang.NaiveBigNumberMultiplication(A, B)
+	fmt.Printf("naive length %d multiply %d number string time: %v\n", size, size, time.Since(time1))
+	time2 := time.Now()
+	lang.KaratsubaBigNumberMultiplication(A, B)
+	fmt.Printf("karatsuba length %d multiply %d number string time: %v\n", size, size, time.Since(time2))
+	time3 := time.Now()
+	DfftBigNumberMultiplication(A, B)
+	fmt.Printf("fft %d length multiply %d length number string time: %v\n", size, size, time.Since(time3))
+}
+
+func TestDfftBigNumberMultiplication(t *testing.T) {
+	fmt.Println(len("fft 10840 length multiply 10840 length number string time"))
 }

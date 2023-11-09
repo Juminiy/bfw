@@ -1,15 +1,14 @@
 package lang
 
 import (
-	"bfw/wheel/fft"
 	"errors"
 	"math/rand"
 )
 
 const (
-	naiveLen int    = 1 << 5
-	digitTen int    = 10
-	Digits   string = "0123456789"
+	naiveLen  int = 1 << 5
+	digitTen  int = 10
+	digitsLen int = 10
 )
 
 var (
@@ -17,18 +16,14 @@ var (
 )
 
 func NaiveBigNumberMultiplication(A, B string) string {
-	return bigNumberMultiplication(A, B, naiveMul)
+	return BigNumberMultiplication(A, B, naiveMul)
 }
 
 func KaratsubaBigNumberMultiplication(A, B string) string {
-	return bigNumberMultiplication(A, B, karatsubaMul)
+	return BigNumberMultiplication(A, B, karatsubaMul)
 }
 
-func FFTBigNumberMultiplication(A, B string) string {
-	return bigNumberMultiplication(A, B, fft.IntPolyMultiplication)
-}
-
-func bigNumberMultiplication(A, B string, algorithm func([]int, []int) []int) string {
+func BigNumberMultiplication(A, B string, algorithm func([]int, []int) []int) string {
 	resSign := ""
 	aSign, bSign := GetNumberStringSign(A), GetNumberStringSign(B)
 	if aSign != bSign {
@@ -205,7 +200,7 @@ func generateNumberSign() string {
 func generateRandomDigits(length int) string {
 	result := make([]byte, length)
 	for i := range result {
-		result[i] = Digits[rand.Intn(digitTen)]
+		result[i] = Digits[rand.Intn(digitsLen)]
 	}
 	return string(result)
 }

@@ -17,6 +17,7 @@ const (
 
 var (
 	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	Digits      = "0123456789"
 )
 
 func ConcatIntToString(d string, a ...int) string {

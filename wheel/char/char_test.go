@@ -11,6 +11,8 @@ func TestGetExponent(t *testing.T) {
 	fmt.Println(GetExponent("log2(3)"))
 	fmt.Println(GetExponent("1.6"))
 	fmt.Println(GetExponent("k"))
+	fmt.Println(GetExponent("-1"))
+	fmt.Println(GetExponent("3"))
 }
 
 func TestGetFraction(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"math"
 )
 
-func IntPolyMultiplication(p1, p2 []int) []int {
-	return polyIntMul(p1, p2)
+func DfftBigNumberMultiplication(A, B string) string {
+	return lang.BigNumberMultiplication(A, B, polyIntMul)
 }
 
 // fft stand for fast fourier transform

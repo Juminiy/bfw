@@ -1792,6 +1792,11 @@ func (matrix *Matrix) LDR() {
 
 }
 
+// LU
+// E'*A = U
+// A = E'⁻¹*U = LU
+// A = LU = LDU'
+// it is about Guass Elimination, the complexity is O(N³)
 func (matrix *Matrix) LU()  {}
 func (matrix *Matrix) PLU() {}
 func (matrix *Matrix) LDU() {}
