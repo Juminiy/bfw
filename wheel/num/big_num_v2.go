@@ -1,9 +1,19 @@
-package lang
+package num
 
 import (
+	"bfw/wheel/fft"
+	"bfw/wheel/lang"
 	"errors"
 	"math/rand"
+	"strconv"
 )
+
+// history:
+// 1800BC math, algebra
+// 1946AD ENIAC
+// BigNum Multiplication simple: 6N² ~ O(N²)
+// 1960AD, BigNum Multiplication karatsuba: 60N¹`⁶ ~ O(Nˡᵒᵍ²⁽³⁾)
+// 1805AD -> 1965AD (fft theorem) -> 1994AD (FFT Realization), BigNum Multiplication fft: O(N*log(N)*log(log(N))) ~ O(N*log(N))
 
 const (
 	naiveLen  int = 1 << 5
@@ -15,6 +25,43 @@ var (
 	InvalidNumberError = errors.New("invalid number found")
 )
 
+// BigNumberMultiply
+// Exam to definite how to choose the mul
+func BigNumberMultiply(A, B string) string {
+	randInt := lang.GetRandomIntValue(3)
+	switch randInt {
+	case 0:
+		{
+			return NaiveBigNumberMultiplication(A, B)
+		}
+	case 1:
+		{
+			return KaratsubaBigNumberMultiplication(A, B)
+		}
+	case 2:
+		{
+			return FFTBigNumberMultiplication(A, B)
+		}
+	default:
+		{
+			panic(errors.New("unsupported algorithm"))
+		}
+	}
+}
+
+func BigNumberPower(Base, Exp int) string {
+	base := strconv.Itoa(Base)
+	res := "1"
+	for Exp > 0 {
+		if Exp&1 != 0 {
+			res = FFTBigNumberMultiplication(res, base)
+		}
+		base = FFTBigNumberMultiplication(base, base)
+		Exp >>= 1
+	}
+	return res
+}
+
 func NaiveBigNumberMultiplication(A, B string) string {
 	return BigNumberMultiplication(A, B, naiveMul)
 }
@@ -23,6 +70,15 @@ func KaratsubaBigNumberMultiplication(A, B string) string {
 	return BigNumberMultiplication(A, B, karatsubaMul)
 }
 
+// FFTBigNumberMultiplication
+// bug still occur
+func FFTBigNumberMultiplication(A, B string) string {
+	return BigNumberMultiplication(A, B, fft.PolyMul)
+}
+
+// BigNumberMultiplication
+// A,B is string by Decimal Integer order format
+// the format also Polynomial Exponent DESC order
 func BigNumberMultiplication(A, B string, algorithm func([]int, []int) []int) string {
 	resSign := ""
 	aSign, bSign := GetNumberStringSign(A), GetNumberStringSign(B)
@@ -33,23 +89,31 @@ func BigNumberMultiplication(A, B string, algorithm func([]int, []int) []int) st
 	if !numbersValidate(A, B) {
 		panic(InvalidNumberError)
 	}
-	A = StringReverse(A)
-	B = StringReverse(B)
+	// A,B reverse
+	A = lang.StringReverse(A)
+	B = lang.StringReverse(B)
 	aLen, bLen := len(A), len(B)
-	destSize := CeilBin(aLen + bLen)
-	AIntArray := string2IntArray(A)
-	BIntArray := string2IntArray(B)
-	AIntArray = Int1DArrayZeroPadding(AIntArray, destSize-aLen)
-	BIntArray = Int1DArrayZeroPadding(BIntArray, destSize-bLen)
+	destSize := lang.CeilBin(aLen + bLen)
+	// A,B to int array
+	AIntArray := String2IntArray(A)
+	BIntArray := String2IntArray(B)
+	// A,B int array trailing zero padding
+	AIntArray = lang.Int1DArrayZeroPadding(AIntArray, destSize-aLen)
+	BIntArray = lang.Int1DArrayZeroPadding(BIntArray, destSize-bLen)
+	// A,B int array calculate result int array
 	resIntArray := algorithm(AIntArray, BIntArray)
+	// result int array bit carry
 	resIntArray = bitCarry(resIntArray)
+	// result int array trailing zero truncate
+	resIntArray = lang.Int1DArrayTruncateTrailingZero(resIntArray)
+	// result int array to string
 	resString := IntArray2String(resIntArray)
-	resString = StringReverse(resString)
-	resString = TruncateStringPrefixZero(resString)
+	// result string reverse
+	resString = lang.StringReverse(resString)
 	return resSign + resString
 }
 
-// number A, B is digit reversed
+// number A, B receive digit reversed
 func naiveMul(A, B []int) []int {
 	aLen, bLen := len(A), len(B)
 	res := make([]int, aLen+bLen)
@@ -63,16 +127,10 @@ func naiveMul(A, B []int) []int {
 	return res
 }
 
+// number A, B receive digit reversed
 func karatsubaMul(A, B []int) []int {
 	return karatsubaRec(A, B, len(A), len(A)>>1)
 }
-
-// history:
-// 1800BC math, algebra
-// 1946AD ENIAC
-// BigNum Multiplication simple: 6N² ~ O(N²)
-// 1960AD, BigNum Multiplication karatsuba: 60N¹`⁶ ~ O(Nˡᵒᵍ²⁽³⁾)
-// 1805AD -> 1965AD (fft theorem) -> 1994AD, BigNum Multiplication fft: O(N*log(N)*log(log(N))) ~ O(N*log(N))
 
 // Karatsuba Algorithm:
 // expand the original number: 0D123456789,0D987654321 -> 2ᵏ,2ᵏ bit
@@ -158,7 +216,7 @@ func numbersValidate(A ...string) bool {
 	return true
 }
 
-func string2IntArray(str string) []int {
+func String2IntArray(str string) []int {
 	strLen := len(str)
 	res := make([]int, strLen)
 	for i := 0; i < strLen; i++ {
@@ -179,7 +237,7 @@ func GetNumberStringSign(A string) string {
 	if len(A) > 0 && A[0] == '-' {
 		return "-"
 	}
-	return undefinedString
+	return ""
 }
 
 func truncateNumberStringSign(A string) string {
@@ -200,7 +258,7 @@ func generateNumberSign() string {
 func generateRandomDigits(length int) string {
 	result := make([]byte, length)
 	for i := range result {
-		result[i] = Digits[rand.Intn(digitsLen)]
+		result[i] = lang.Digits[rand.Intn(digitsLen)]
 	}
 	return string(result)
 }

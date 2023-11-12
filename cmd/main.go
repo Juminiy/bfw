@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bfw/wheel/fft"
 	"bfw/wheel/lang"
+	"bfw/wheel/num"
 	"errors"
 	"fmt"
 	"os"
@@ -27,15 +27,15 @@ func main() {
 	}
 	size := lang.GetRandomIntValue(1 << bits)
 	time0 := time.Now()
-	A, B := lang.GenerateNumberString(size), lang.GenerateNumberString(size)
+	A, B := num.GenerateNumberString(size), num.GenerateNumberString(size)
 	fmt.Printf("generate two %d length number string time: %v\n", size, time.Since(time0))
 	time1 := time.Now()
-	lang.NaiveBigNumberMultiplication(A, B)
+	num.NaiveBigNumberMultiplication(A, B)
 	fmt.Printf("naive length %d multiply %d number string time: %v\n", size, size, time.Since(time1))
 	time2 := time.Now()
-	lang.KaratsubaBigNumberMultiplication(A, B)
+	num.KaratsubaBigNumberMultiplication(A, B)
 	fmt.Printf("karatsuba length %d multiply %d number string time: %v\n", size, size, time.Since(time2))
 	time3 := time.Now()
-	fft.DfftBigNumberMultiplication(A, B)
+	num.FFTBigNumberMultiplication(A, B)
 	fmt.Printf("fft %d length multiply %d length number string time: %v\n", size, size, time.Since(time3))
 }

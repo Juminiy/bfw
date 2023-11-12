@@ -4,6 +4,7 @@ package poly
 
 import (
 	"bfw/wheel/lang"
+	"bfw/wheel/num"
 	"errors"
 	"fmt"
 )
@@ -118,7 +119,7 @@ func (p *Poly) Construct(real2DArray [][]float64, aes ...rune) *Poly {
 	for idx := 0; idx < real2DArraySize; idx++ {
 		node := real2DArray[idx]
 		if len(node) >= 2 {
-			maxExp = lang.MaxInt(maxExp, int(node[1]))
+			maxExp = max(maxExp, int(node[1]))
 			nodes = append(nodes, ConstructPolyNode(node[0], int(node[1])))
 		}
 	}
@@ -441,7 +442,7 @@ func (p *Poly) one2OneOpt(opt rune, pt *Poly) *Poly {
 	if !ValidatePoly(p, pt) {
 		return p
 	}
-	polyDestMaxExp := lang.MaxInt(p.maxExp, pt.maxExp)
+	polyDestMaxExp := max(p.maxExp, pt.maxExp)
 	p.resetMapExp(polyDestMaxExp)
 	pt.resetMapExp(polyDestMaxExp)
 	for idx := 0; idx <= polyDestMaxExp; idx++ {
@@ -712,7 +713,7 @@ func (p *Poly) Solve() *Solution {
 			exp1Coe := p.getSetElem(1, 1).coe
 			exp2Coe := p.getSetElem(2, 2).coe
 			solution1, solution2, validateSolve :=
-				lang.SolveQuadraticEquationOfOneVariable(exp2Coe, exp1Coe, exp0Coe)
+				num.SolveQuadraticEquationOfOneVariable(exp2Coe, exp1Coe, exp0Coe)
 			if !validateSolve {
 				panic(polyEquationNoSolution)
 			}
@@ -727,7 +728,7 @@ func (p *Poly) Solve() *Solution {
 			exp2Coe := p.getSetElem(2, 2).coe
 			exp3Coe := p.getSetElem(3, 3).coe
 			solution1, solution2, solution3, validateSolve :=
-				lang.SolveCubicEquationOfOneVariableBySJ(exp3Coe, exp2Coe, exp1Coe, exp0Coe)
+				num.SolveCubicEquationOfOneVariableBySJ(exp3Coe, exp2Coe, exp1Coe, exp0Coe)
 			if !validateSolve {
 				panic(polyEquationNoSolution)
 			}

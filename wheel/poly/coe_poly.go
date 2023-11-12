@@ -54,13 +54,14 @@ func (cp *CoePoly) trailingZeroPadding(destSize int) *CoePoly {
 	return cp
 }
 
+// Mul
+// compare to 0D array is reverse
 func (cp *CoePoly) Mul(cpt *CoePoly) *CoePoly {
 	return cp.fftMul(cpt)
 }
 
 func (cp *CoePoly) fftMul(cpt *CoePoly) *CoePoly {
-	bitCnt := int(math.Ceil(math.Log2(float64(cp.size() + cpt.size()))))
-	destSize := 1 << bitCnt
+	destSize := lang.CeilBin(cp.size() + cpt.size())
 	cp.trailingZeroPadding(destSize).setVal().dft()
 	cpt.trailingZeroPadding(destSize).setVal().dft()
 	cp.hadamardProduct(cpt).idft().setElemAndDiv(float64(destSize))

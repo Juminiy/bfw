@@ -204,6 +204,7 @@ func TestCoePoly_Mul(t *testing.T) {
 	//[0 45 76 94 100 70 40 19 6.000000000000002 0 0 0 0 0 0 0]
 	// destValue
 	// 8381630627430
+	// 8381630627430
 	fmt.Println(cp1.Mul(cp2).Value(10))
 }
 

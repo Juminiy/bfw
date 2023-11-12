@@ -22,7 +22,7 @@ func runCCSumOfFloat64BenchMark(routines int) float64 {
 	//}(f64Arr)
 	//fmt.Println("single routine calculate sum of 2"+cal.GetExponent("22"), "float64 num, time:", time.Since(time1))
 	time2 := time.Now()
-	CCSumOfFloat64Array(f64Arr, routines)
+	SumOfFloat64Array(f64Arr, routines)
 	du := time.Since(time2)
 	//fmt.Printf("%d routines calculate sum of 2"+cal.GetExponent("22")+" float64 num, time:%v\n", routines, du)
 	//fmt.Println("concurrent calculate result is:", lang.EqualFloat64Zero(res0-res1), res0, res1)
@@ -32,7 +32,7 @@ func runCCSumOfFloat64BenchMark(routines int) float64 {
 
 func ParallelF64BenchMark() {
 	time0 := time.Now()
-	timeSlice := lang.ConstructReal2DArrayByLen(1 << 10)
+	timeSlice := lang.ConstructReal2DArrayBySize(1 << 10)
 	minSec, maxSec := 1e10, -1e10
 	for routineCnt := 1; routineCnt < (1 << 12); routineCnt += 4 {
 		duSec := runCCSumOfFloat64BenchMark(routineCnt)

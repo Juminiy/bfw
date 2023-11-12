@@ -11,7 +11,7 @@ func sumOfFloat64Array(a []float64, wg *sync.WaitGroup, sumChan chan float64) {
 		aIdx = 0
 		sum  = 0.0
 	)
-	if lang.Odd(aLen) {
+	if lang.IsOdd(aLen) {
 		sum += a[aIdx]
 		aIdx++
 	}
@@ -22,7 +22,7 @@ func sumOfFloat64Array(a []float64, wg *sync.WaitGroup, sumChan chan float64) {
 	wg.Done()
 }
 
-func CCSumOfFloat64Array(a []float64, rCnt int) float64 {
+func SumOfFloat64Array(a []float64, rCnt int) float64 {
 	rCnt = lang.CeilBin(rCnt)
 	totalSum := 0.0
 	preIdx := 0

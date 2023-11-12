@@ -196,7 +196,7 @@ func (vg *VectorGroup) Construct(real2DArray [][]float64, shape ...bool) *Vector
 		vShape = shape[0]
 	}
 	for idx := 0; idx < size; idx++ {
-		vSize = lang.MaxInt(vSize, len(real2DArray[idx]))
+		vSize = max(vSize, len(real2DArray[idx]))
 	}
 	vg.setSize(size)
 	vg.setShape(vShape)

@@ -71,7 +71,7 @@ func (matrix *Matrix) Construct(real2DArray [][]float64) *Matrix {
 	)
 	matrix.setValues(real2DArray, rowSize, maxColumnSize)
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
-		maxColumnSize = lang.MaxInt(maxColumnSize, len(real2DArray[rowIdx]))
+		maxColumnSize = max(maxColumnSize, len(real2DArray[rowIdx]))
 	}
 	for rowIdx := 0; rowIdx < rowSize; rowIdx++ {
 		matrix.setRowZeroPadding(maxColumnSize, rowIdx)
@@ -680,7 +680,7 @@ func (matrix *Matrix) det() float64 {
 		// 2. laplace calculation
 		//return matrix.laplaceDet(n)
 		// 3. mixture calculation
-		if lang.Odd(n) {
+		if lang.IsOdd(n) {
 			return matrix.simpleDet(n)
 		} else {
 			return matrix.laplaceDet(n)
@@ -993,7 +993,7 @@ func (matrix *Matrix) flip() *Matrix {
 			matrix.setElemSwap(rowIdx, columnIdx, size-1-rowIdx, size-1-columnIdx)
 		}
 	}
-	if lang.Odd(size) {
+	if lang.IsOdd(size) {
 		matrix.setRowElemSwap(size >> 1)
 	}
 	return matrix

@@ -25,7 +25,7 @@ func (r2da Real2DArray) Swap(i, j int) {
 	r2da[i], r2da[j] = r2da[j], r2da[i]
 }
 
-func ConstructReal2DArrayByLen(size int) Real2DArray {
+func ConstructReal2DArrayBySize(size int) Real2DArray {
 	return ConstructReal2DArray(make([][]float64, size))
 }
 
@@ -125,7 +125,7 @@ func Divide1DArrayEvenOddPart(int1DArray []int) ([]int, []int) {
 	size := len(int1DArray)
 	evenPart, oddPart := make([]int, 0), make([]int, 0)
 	for idx := 0; idx < size; idx++ {
-		if Odd(idx) {
+		if IsOdd(idx) {
 			oddPart = append(oddPart, int1DArray[idx])
 		} else {
 			evenPart = append(evenPart, int1DArray[idx])
@@ -163,6 +163,13 @@ func Int1DArrayDivLambda(a []int, lambda int) []int {
 	return a
 }
 
+func Int1DArrayShiftBit(a []int, bit int) []int {
+	for idx := 0; idx < len(a); idx++ {
+		a[idx] >>= bit
+	}
+	return a
+}
+
 func Int1DArrayReverse(a []int) []int {
 	for idx := 0; idx < (len(a) >> 1); idx++ {
 		a[idx], a[len(a)-1-idx] = a[len(a)-1-idx], a[idx]
@@ -175,4 +182,11 @@ func Int1DArrayTruncateLeadingZero(a []int) []int {
 	for ; sIndex < len(a) && a[sIndex] == 0; sIndex++ {
 	}
 	return a[sIndex:]
+}
+
+func Int1DArrayTruncateTrailingZero(a []int) []int {
+	sIndex := len(a) - 1
+	for ; sIndex >= 0 && a[sIndex] == 0; sIndex-- {
+	}
+	return a[:sIndex+1]
 }

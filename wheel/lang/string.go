@@ -151,3 +151,27 @@ func StringReverse(str string) string {
 	}
 	return string(runes)
 }
+
+func Float64ToString(a float64, precision ...int) string {
+	precisionBit := defaultFloat64Precision
+	if len(precision) > 0 {
+		precisionBit = precision[0]
+	}
+	return strconv.FormatFloat(a, byte('f'), precisionBit, 64)
+}
+
+func IsStringValueIntZero(valStr string) bool {
+	strIdx, strLen := 0, len(valStr)
+	for strIdx < strLen {
+		if valStr[strIdx] == ' ' ||
+			valStr[strIdx] == '+' ||
+			valStr[strIdx] == '-' ||
+			valStr[strIdx] == '.' ||
+			valStr[strIdx] == '0' {
+			strIdx++
+		} else {
+			break
+		}
+	}
+	return strIdx == strLen
+}

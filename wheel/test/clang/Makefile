@@ -10,6 +10,10 @@ zero_cpp: zero_value_test.cpp
 run_zero_cpp: zero_cpp 
 	./$<
 
+inverse_sqrt: inverse_sqrt.c
+	clang $< -o $@
+	./$@
+
 
 
 

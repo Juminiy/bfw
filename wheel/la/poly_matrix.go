@@ -221,7 +221,7 @@ func (pm *PolyMatrix) det() *poly.Poly {
 		// 2. laplace calculation
 		//return pm.laplaceDet(n)
 		// 3. mixture calculation
-		if lang.Odd(n) {
+		if lang.IsOdd(n) {
 			return pm.simpleDet(n)
 		} else {
 			return pm.laplaceDet(n)

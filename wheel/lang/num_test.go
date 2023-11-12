@@ -18,30 +18,6 @@ func TestMath_Pow(t *testing.T) {
 	fmt.Println(math.Pow(-27, 1.0/3))
 }
 
-// 999000
-// 000999
-// 000001
-
-// 0100
-// 0010
-
-// 02222111
-// 01231231
-
-// 0002000
-// 0000442
-// 0004000
-// 0080000
-// 0800000
-// 0884000
-func TestBigNum_Construct(t *testing.T) {
-	num1 := ConstructBigNum("-1234567877")
-	num2 := ConstructBigNum("123456")
-	//num1.add(num2).Display(false, false)
-	//num1.sub(num2).Display(false, false)
-	num1.Mul(num2).Display(false, false)
-}
-
 func TestGetRandFloat64ByFloat64Range(t *testing.T) {
 	fmt.Println(GetRandFloat64ByInt32Range(10, 20))
 	fmt.Println(GetRandFloat64ByInt32Range(10, 20))
@@ -59,4 +35,12 @@ func TestGetRandFloat64ByFloat64Range(t *testing.T) {
 func TestFloat64ToString2(t *testing.T) {
 	//fmt.Println(Float64ToString(-10.22, 2))
 	fmt.Println(math.Log2(5))
+}
+
+func TestAbsInt(t *testing.T) {
+	fmt.Println(AbsInt(11))
+	fmt.Println(AbsInt(0))
+	fmt.Println(AbsInt(+0))
+	fmt.Println(AbsInt(-0))
+	fmt.Println(AbsInt(-100))
 }

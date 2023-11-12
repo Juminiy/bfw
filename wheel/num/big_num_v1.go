@@ -1,6 +1,7 @@
-package lang
+package num
 
 import (
+	"bfw/wheel/lang"
 	"errors"
 	"fmt"
 )
@@ -60,7 +61,7 @@ func ConstructBigNum(num string, base ...int) *BigNum {
 // " 123456789 "
 // " -123456789 "
 func (bn *BigNum) Construct(num string, base ...int) *BigNum {
-	num = TruncateStringPrefixSuffixSpace(num)
+	num = lang.TruncateStringPrefixSuffixSpace(num)
 	baseByte := baseByteDec
 	signByte := signBytePositive
 	if len(base) > 0 {
@@ -463,7 +464,7 @@ func (bn *BigNum) one2OneOpt(opt rune, bnt *BigNum) *BigNum {
 // -a add +b -> if a=b, res=0; if a>b, res=-(a-b); if a<b, res=+(b-a)
 // -a add -b -> -(a+b)
 func (bn *BigNum) Add(bnt *BigNum) *BigNum {
-	bnDestSize := MaxInt(bn.size, bnt.size) + 1
+	bnDestSize := max(bn.size, bnt.size) + 1
 	bn.prefixZeroPadding(bnDestSize)
 	bnt.prefixZeroPadding(bnDestSize)
 	if signRes := bn.compareSign(bnt); signRes == eqByte {
@@ -492,7 +493,7 @@ func (bn *BigNum) Add(bnt *BigNum) *BigNum {
 // -a sub +b -> -(a+b)
 // -a sub -b -> if a=b, res=0; if a>b, res=-(a-b); if a<b, res=+(b-a)
 func (bn *BigNum) Sub(bnt *BigNum) *BigNum {
-	bnDestSize := MaxInt(bn.size, bnt.size) + 1
+	bnDestSize := max(bn.size, bnt.size) + 1
 	bn.prefixZeroPadding(bnDestSize)
 	bnt.prefixZeroPadding(bnDestSize)
 	if signRes := bn.compareSign(bnt); signRes != eqByte {
@@ -551,7 +552,7 @@ func (bn *BigNum) Div(bnt *BigNum) *BigNum {
 
 func (bn *BigNum) effect() *BigNum {
 	if !bn.isZero() {
-		destString := TruncateStringPrefixZero(string(bn.slice))
+		destString := lang.TruncateStringPrefixZero(string(bn.slice))
 		bn.setSlice([]byte(destString))
 		bn.setSize(len(destString))
 	}

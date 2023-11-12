@@ -2,6 +2,7 @@ package lang
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -103,7 +104,7 @@ func DivideComplex128ArrayEvenOddPart(complex128Array []complex128) ([]complex12
 	size := len(complex128Array)
 	evenPart, oddPart := make([]complex128, 0), make([]complex128, 0)
 	for idx := 0; idx < size; idx++ {
-		if Odd(idx) {
+		if IsOdd(idx) {
 			oddPart = append(oddPart, complex128Array[idx])
 		} else {
 			evenPart = append(evenPart, complex128Array[idx])
@@ -125,10 +126,12 @@ func Complex1281DArrayHadamard(p1, p2 []complex128) []complex128 {
 	return p1
 }
 
+// Complex128ArrayToIntArray
+// Ceil Must
 func Complex128ArrayToIntArray(p []complex128) []int {
 	pInt := make([]int, len(p))
 	for idx := 0; idx < len(p); idx++ {
-		pInt[idx] = int(real(p[idx]))
+		pInt[idx] = int(math.Ceil(real(p[idx])))
 	}
 	return pInt
 }

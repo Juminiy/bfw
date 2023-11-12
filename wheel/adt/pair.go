@@ -1,6 +1,8 @@
 package adt
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	defaultPairComma = ','
@@ -12,6 +14,22 @@ type Pair[K, V any] struct {
 }
 
 type IntPair Pair[int, int]
+
+func MakeIntPair(a, b int) *IntPair {
+	return &IntPair{a, b}
+}
+
+func (ip *IntPair) Self() *IntPair {
+	return ip
+}
+
+func (ip *IntPair) Assign(ipt *IntPair) {
+	ip.SetKV(ipt.GetKV())
+}
+
+func (ip *IntPair) GetKV() (int, int) {
+	return ip.key, ip.val
+}
 
 func (ip *IntPair) GetKey() int {
 	return ip.key
@@ -35,8 +53,9 @@ func (ip *IntPair) SetVal(val int) *IntPair {
 	return ip
 }
 
-func MakeIntPair(a, b int) *IntPair {
-	return &IntPair{a, b}
+func (ip *IntPair) SetKVSwap() *IntPair {
+	ip.key, ip.val = ip.val, ip.key
+	return ip
 }
 
 func (ip *IntPair) Display(comma ...rune) *IntPair {

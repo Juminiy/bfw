@@ -562,7 +562,7 @@ func (vector *Vector) norm(opt rune, extra ...interface{}) float64 {
 			}
 		case '2', 'e':
 			{
-				resNum += lang.Square(val)
+				resNum += math.Pow(val, 2)
 			}
 		case 'i', '+':
 			{

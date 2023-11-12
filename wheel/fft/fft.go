@@ -5,11 +5,11 @@ import (
 	"math"
 )
 
-func DfftBigNumberMultiplication(A, B string) string {
-	return lang.BigNumberMultiplication(A, B, polyIntMul)
-}
-
 // fft stand for fast fourier transform
+
+func PolyMul(p1, p2 []int) []int {
+	return polyMul(p1, p2)
+}
 
 // the first case is:
 //  1. high precision multiply
@@ -18,20 +18,25 @@ func DfftBigNumberMultiplication(A, B string) string {
 //  2. polynomial multiply
 //     (1). coefficient polynomial stands
 //     (2). trailing zero padding, 2^k - len(p1)+len(p2)
-func polyIntMul(p1, p2 []int) []int {
-	p1Len, p2Len := len(p1), len(p2)
-	destSize := lang.CeilBin(p1Len + p2Len)
-	p1 = lang.Int1DArrayZeroPadding(p1, destSize-p1Len)
-	p2 = lang.Int1DArrayZeroPadding(p2, destSize-p2Len)
+//
+// when to call polyMul, all condition must fit
+// 1. int array is digit reversed
+// 2. int array is trialing zero padding
+// 3. len(p1) == len(p2)
+func polyMul(p1, p2 []int) []int {
+	destSize := len(p1)
+	// p1,p2 dft
 	p1DFT := polyDFT(lang.IntArrayToComplex128Array(p1))
 	p2DFT := polyDFT(lang.IntArrayToComplex128Array(p2))
-	p1DFT = lang.Complex1281DArrayHadamard(p1DFT, p2DFT)
-	destIntArray := lang.Complex128ArrayToIntArray(polyIDFT(p1DFT))
-	destIntArray = lang.Int1DArrayDivLambda(destIntArray, destSize)
-	destIntArray = lang.Int1DArrayContribute(destIntArray, false)
-	destIntArray = lang.Int1DArrayReverse(destIntArray)
-	destIntArray = lang.Int1DArrayTruncateLeadingZero(destIntArray)
-	return destIntArray
+	// p1,p2 hadamard resDFT
+	resDFT := lang.Complex1281DArrayHadamard(p1DFT, p2DFT)
+	// resDFT idft
+	resDFT = polyIDFT(resDFT)
+	// to res int array
+	resIntArray := lang.Complex128ArrayToIntArray(resDFT)
+	// res int array div destSize
+	resIntArray = lang.Int1DArrayShiftBit(resIntArray, lang.CeilBinCnt(destSize))
+	return resIntArray
 }
 
 func polyDFT(p []complex128) []complex128 {

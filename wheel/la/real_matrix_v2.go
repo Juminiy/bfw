@@ -191,13 +191,13 @@ func (matrix *Matrix) mulByRotate2(m *Matrix) *Matrix {
 }
 
 func (matrix *Matrix) setPower2ZeroPadding(size ...int) *Matrix {
-	destSize := lang.CeilBin(lang.MaxInt(matrix.rowSize, matrix.columnSize))
+	destSize := lang.CeilBin(max(matrix.rowSize, matrix.columnSize))
 	if sizeLen := len(size); sizeLen > 0 {
 		if sizeLen == 1 && size[0] > destSize {
 			destSize = lang.CeilBin(size[0])
 		}
 		if sizeLen == 2 && (size[0] > destSize || size[1] > destSize) {
-			destSize = lang.CeilBin(lang.MaxInt(size[0], size[1]))
+			destSize = lang.CeilBin(max(size[0], size[1]))
 		}
 	}
 	return matrix.zeroPadding(destSize, destSize)
