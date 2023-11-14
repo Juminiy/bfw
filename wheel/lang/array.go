@@ -2,6 +2,7 @@ package lang
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 )
 
@@ -189,4 +190,46 @@ func Int1DArrayTruncateTrailingZero(a []int) []int {
 	for ; sIndex >= 0 && a[sIndex] == 0; sIndex-- {
 	}
 	return a[:sIndex+1]
+}
+
+func DisplayInt1DArrayInPythonFormat(a []int) {
+	aLen := len(a)
+	fmt.Printf("[")
+	if aLen > 0 {
+		fmt.Printf("%d", a[0])
+		for idx := 1; idx < aLen; idx++ {
+			fmt.Printf(", %d", a[idx])
+		}
+	} else {
+		fmt.Printf("null")
+	}
+	fmt.Println("]")
+}
+
+func DisplayInt641DArrayInPythonFormat(a []int64) {
+	aLen := len(a)
+	fmt.Printf("[")
+	if aLen > 0 {
+		fmt.Printf("%d", a[0])
+		for idx := 1; idx < aLen; idx++ {
+			fmt.Printf(", %d", a[idx])
+		}
+	} else {
+		fmt.Printf("null")
+	}
+	fmt.Println("]")
+}
+
+func DisplayFloat641DArrayInPythonFormat(a []float64) {
+	aLen := len(a)
+	fmt.Printf("[")
+	if aLen > 0 {
+		fmt.Printf("%f", a[0])
+		for idx := 1; idx < aLen; idx++ {
+			fmt.Printf(", %f", a[idx])
+		}
+	} else {
+		fmt.Printf("null")
+	}
+	fmt.Println("]")
 }

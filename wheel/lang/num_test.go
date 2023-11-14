@@ -44,3 +44,9 @@ func TestAbsInt(t *testing.T) {
 	fmt.Println(AbsInt(-0))
 	fmt.Println(AbsInt(-100))
 }
+
+func TestDisplayInt1DArrayInPythonFormat(t *testing.T) {
+	DisplayInt1DArrayInPythonFormat([]int{1, 2, 3})
+	DisplayInt1DArrayInPythonFormat([]int{})
+	DisplayInt1DArrayInPythonFormat(nil)
+}

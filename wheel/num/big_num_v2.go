@@ -4,8 +4,11 @@ import (
 	"bfw/wheel/fft"
 	"bfw/wheel/lang"
 	"errors"
+	"fmt"
+	"math/big"
 	"math/rand"
 	"strconv"
+	"time"
 )
 
 // history:
@@ -28,19 +31,19 @@ var (
 // BigNumberMultiply
 // Exam to definite how to choose the mul
 func BigNumberMultiply(A, B string) string {
-	randInt := lang.GetRandomIntValue(3)
+	randInt := lang.GetRandomIntValue(2)
 	switch randInt {
 	case 0:
 		{
-			return NaiveBigNumberMultiplication(A, B)
+			return KaratsubaBigNumberMultiplication(A, B)
 		}
 	case 1:
 		{
-			return KaratsubaBigNumberMultiplication(A, B)
+			return FFTBigNumberMultiplication(A, B)
 		}
 	case 2:
 		{
-			return FFTBigNumberMultiplication(A, B)
+			return LangBigNumberMultiplication(A, B)
 		}
 	default:
 		{
@@ -54,12 +57,18 @@ func BigNumberPower(Base, Exp int) string {
 	res := "1"
 	for Exp > 0 {
 		if Exp&1 != 0 {
-			res = FFTBigNumberMultiplication(res, base)
+			res = BigNumberMultiply(res, base)
 		}
-		base = FFTBigNumberMultiplication(base, base)
+		base = BigNumberMultiply(base, base)
 		Exp >>= 1
 	}
 	return res
+}
+
+func LangBigNumberMultiplication(A, B string) string {
+	X, _ := new(big.Int).SetString(A, 10)
+	Y, _ := new(big.Int).SetString(B, 10)
+	return X.Mul(X, Y).String()
 }
 
 func NaiveBigNumberMultiplication(A, B string) string {
@@ -110,6 +119,9 @@ func BigNumberMultiplication(A, B string, algorithm func([]int, []int) []int) st
 	resString := IntArray2String(resIntArray)
 	// result string reverse
 	resString = lang.StringReverse(resString)
+	if len(resString) == 0 {
+		return "0"
+	}
 	return resSign + resString
 }
 
@@ -265,4 +277,70 @@ func generateRandomDigits(length int) string {
 
 func GenerateNumberString(size int) string {
 	return generateNumberSign() + generateRandomDigits(size)
+}
+
+func GetTimeOfBigNumberMultiplyByBit(bit int, runNaive ...bool) (int, time.Duration, time.Duration, time.Duration, time.Duration) {
+	size := lang.GetRandomIntValue(1 << bit)
+	if size == 0 {
+		return size, 0, 0, 0, 0
+	}
+	var (
+		time0               time.Time
+		du1, du2, du3, du4  time.Duration
+		_, res2, res3, res4 string
+	)
+	//time0 := time.Now()
+	A, B := GenerateNumberString(size), GenerateNumberString(size)
+	//fmt.Printf("generate two %d length number string time: %v\n", size, time.Since(time0))
+	if len(runNaive) > 0 && runNaive[0] {
+		time0 = time.Now()
+		_ = NaiveBigNumberMultiplication(A, B)
+		du1 = time.Since(time0)
+	}
+	//fmt.Printf("naive length %d multiply %d number string time: %v\n", size, size, time.Since(time1))
+	time0 = time.Now()
+	res2 = KaratsubaBigNumberMultiplication(A, B)
+	du2 = time.Since(time0)
+	//fmt.Printf("karatsuba length %d multiply %d number string time: %v\n", size, size, time.Since(time2))
+	time0 = time.Now()
+	res3 = FFTBigNumberMultiplication(A, B)
+	du3 = time.Since(time0)
+	//fmt.Printf("fft %d length multiply %d length number string time: %v\n", size, size, time.Since(time3))
+	time0 = time.Now()
+	res4 = LangBigNumberMultiplication(A, B)
+	du4 = time.Since(time0)
+	if res4 != res2 || res4 != res3 {
+		panic(errors.New("algorithm is something wrong"))
+	}
+	return size, du1, du2, du3, du4
+}
+
+func RunBigNumberMultiply(maxBit, eachBitLoop int) {
+	time0 := time.Now()
+	sizeArray := make([]int, 0)
+	//naiveArray := make([]int64, 0)
+	karatsubaArray := make([]int64, 0)
+	fftArray := make([]int64, 0)
+	langArray := make([]int64, 0)
+	for bit := 0; bit < maxBit; bit++ {
+		for lp := 0; lp < eachBitLoop; lp++ {
+			sizeN, _, karatsubaT, fftT, langT := GetTimeOfBigNumberMultiplyByBit(bit)
+			sizeArray = append(sizeArray, sizeN)
+			//naiveArray = append(naiveArray, lang.GetMS(naiveT))
+			karatsubaArray = append(karatsubaArray, lang.GetUS(karatsubaT))
+			fftArray = append(fftArray, lang.GetUS(fftT))
+			langArray = append(langArray, lang.GetUS(langT))
+		}
+	}
+	fmt.Println("size = ")
+	lang.DisplayInt1DArrayInPythonFormat(sizeArray)
+	//fmt.Println("naive = ")
+	//lang.DisplayInt641DArrayInPythonFormat(naiveArray)
+	fmt.Println("karatsuba = ")
+	lang.DisplayInt641DArrayInPythonFormat(karatsubaArray)
+	fmt.Println("fft = ")
+	lang.DisplayInt641DArrayInPythonFormat(fftArray)
+	fmt.Println("lang = ")
+	lang.DisplayInt641DArrayInPythonFormat(langArray)
+	fmt.Println("total time = ", time.Since(time0))
 }

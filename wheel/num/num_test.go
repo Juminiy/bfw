@@ -2,41 +2,10 @@ package num
 
 import (
 	"bfw/wheel/lang"
-	"errors"
 	"fmt"
 	"testing"
 	"time"
 )
-
-func GetTimeBigNumberMultiplyByBit(bit int) (int, time.Duration, time.Duration, time.Duration) {
-	size := lang.GetRandomIntValue(1 << bit)
-	if size == 0 {
-		return size, 0, 0, 0
-	}
-	var (
-		time0         time.Time
-		du1, du2, du3 time.Duration
-	)
-	//time0 := time.Now()
-	A, B := GenerateNumberString(size), GenerateNumberString(size)
-	//fmt.Printf("generate two %d length number string time: %v\n", size, time.Since(time0))
-	time0 = time.Now()
-	res1 := NaiveBigNumberMultiplication(A, B)
-	du1 = time.Since(time0)
-	//fmt.Printf("naive length %d multiply %d number string time: %v\n", size, size, time.Since(time1))
-	time0 = time.Now()
-	res2 := KaratsubaBigNumberMultiplication(A, B)
-	du2 = time.Since(time0)
-	//fmt.Printf("karatsuba length %d multiply %d number string time: %v\n", size, size, time.Since(time2))
-	time0 = time.Now()
-	res3 := FFTBigNumberMultiplication(A, B)
-	du3 = time.Since(time0)
-	//fmt.Printf("fft %d length multiply %d length number string time: %v\n", size, size, time.Since(time3))
-	if res1 != res2 || res1 != res3 {
-		panic(errors.New("algorithm is something wrong"))
-	}
-	return size, du1, du2, du3
-}
 
 // 999000
 // 000999
@@ -78,29 +47,31 @@ func TestBigNumberMultiplication(t *testing.T) {
 }
 
 func TestBigNumberMultiplication2(t *testing.T) {
-	sizeN, naiveT, karatsubaT, fftT := GetTimeBigNumberMultiplyByBit(14)
+	sizeN, naiveT, karatsubaT, fftT := GetTimeOfBigNumberMultiplyByBit(14)
 	fmt.Println(sizeN, lang.GetMS(naiveT), lang.GetMS(karatsubaT), lang.GetMS(fftT))
 }
 
 func TestBigNumberMultiply(t *testing.T) {
-	maxBit, eachBitLoop := 20, 4
+	time0 := time.Now()
+	maxBit, eachBitLoop := 13, 1
 	sizeArray := make([]int, 0)
-	naiveArray := make([]float64, 0)
-	karatsubaArray := make([]float64, 0)
-	fftArray := make([]float64, 0)
+	naiveArray := make([]int64, 0)
+	karatsubaArray := make([]int64, 0)
+	fftArray := make([]int64, 0)
 	for bit := 0; bit < maxBit; bit++ {
 		for lp := 0; lp < eachBitLoop; lp++ {
-			sizeN, naiveT, karatsubaT, fftT := GetTimeBigNumberMultiplyByBit(bit)
+			sizeN, naiveT, karatsubaT, fftT := GetTimeOfBigNumberMultiplyByBit(bit)
 			sizeArray = append(sizeArray, sizeN)
 			naiveArray = append(naiveArray, lang.GetMS(naiveT))
 			karatsubaArray = append(karatsubaArray, lang.GetMS(karatsubaT))
 			fftArray = append(fftArray, lang.GetMS(fftT))
 		}
 	}
-	fmt.Println(sizeArray)
-	fmt.Println(naiveArray)
-	fmt.Println(karatsubaArray)
-	fmt.Println(fftArray)
+	lang.DisplayInt1DArrayInPythonFormat(sizeArray)
+	lang.DisplayInt641DArrayInPythonFormat(naiveArray)
+	lang.DisplayInt641DArrayInPythonFormat(karatsubaArray)
+	lang.DisplayInt641DArrayInPythonFormat(fftArray)
+	fmt.Println("total time:", time.Since(time0))
 }
 
 func TestDfftBigNumberMultiplication(t *testing.T) {
@@ -114,8 +85,60 @@ func TestDfftBigNumberPower(t *testing.T) {
 }
 
 func TestBigNumberPower(t *testing.T) {
-	var i uint64 = 0
-	for ; i <= 63; i++ {
-		fmt.Printf("%v\n%s\n\n", uint64(1<<i), BigNumberPower(2, int(i)))
+	for i := 0; i <= 13; i++ {
+		fmt.Printf("%v\n%s\n\n", uint64(lang.Power2MulByBitCalculation(2, i)), BigNumberPower(2, i))
 	}
+}
+
+func TestFraction_Add(t *testing.T) {
+	frac := MakeFraction(-1, 2)
+	frac.Display(true).
+		setND(-1, -2).Display().
+		setND(1, 2).Display().
+		setND(1, -2).Display()
+}
+
+func TestFraction_Display(t *testing.T) {
+	// 1/2
+	f1 := MakeFraction(-3, -6).Display()
+	// -2/1
+	f2 := MakeFraction(-2, 1).Display()
+	// 5/2
+	f1.Sub(f2).Display()
+	// -3/2
+	f1.Add(f2).Display()
+	// -1/1
+	f1.Mul(f2).Display()
+	// -1/4
+	f1.Div(f2).Display()
+}
+
+func TestFraction_Display1(t *testing.T) {
+	// -1/5
+	f1 := MakeFraction(2, -10).Display()
+	// -9/1
+	f2 := MakeFraction(9, -1).Display()
+	// 44/5
+	f1.Sub(f2).Display()
+	// -46/5
+	f1.Add(f2).Display()
+	// 9/5
+	f1.Mul(f2).Display()
+	// 1/45
+	f1.Div(f2).Display()
+}
+
+func TestFraction_Display2(t *testing.T) {
+	// 1/5
+	f1 := MakeFraction(-2, -10).Display()
+	// 9/1
+	f2 := MakeFraction(-9, -1).Display()
+	// -44/5
+	f1.Sub(f2).Display()
+	// 46/5
+	f1.Add(f2).Display()
+	// 9/5
+	f1.Mul(f2).Display()
+	// 1/45
+	f1.Div(f2).Display()
 }

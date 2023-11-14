@@ -211,3 +211,22 @@ func GetFloat32ByBit(bit int32) float32 {
 func GetFloat64ByBit(bit int64) float64 {
 	return *(*float64)(unsafe.Pointer(&bit))
 }
+
+func IsIntSameSign(a, b int) bool {
+	return (a > 0 && b > 0) ||
+		(a < 0 && b < 0) ||
+		(a == 0 && b == 0)
+}
+
+// Power2MulByBitCalculation
+// base * (1 << exp)
+func Power2MulByBitCalculation(base, exp int) int {
+	return base << exp
+}
+
+func GetOriginNum(a int, sign bool) int {
+	if sign {
+		a = ^a + 1
+	}
+	return a
+}
