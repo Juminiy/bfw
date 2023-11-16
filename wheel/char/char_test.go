@@ -14,6 +14,7 @@ func TestGetExponent(t *testing.T) {
 	fmt.Println(GetExponent("-1"))
 	fmt.Println(GetExponent("3"))
 	fmt.Println(latexMap["sqrt"])
+	fmt.Println(latexMap["mu"])
 }
 
 func TestGetFraction(t *testing.T) {

@@ -47,7 +47,7 @@ func TestBigNumberMultiplication(t *testing.T) {
 }
 
 func TestBigNumberMultiplication2(t *testing.T) {
-	sizeN, naiveT, karatsubaT, fftT := GetTimeOfBigNumberMultiplyByBit(14)
+	sizeN, naiveT, karatsubaT, fftT, _ := GetTimeOfBigNumberMultiplyByBit(14)
 	fmt.Println(sizeN, lang.GetMS(naiveT), lang.GetMS(karatsubaT), lang.GetMS(fftT))
 }
 
@@ -60,7 +60,7 @@ func TestBigNumberMultiply(t *testing.T) {
 	fftArray := make([]int64, 0)
 	for bit := 0; bit < maxBit; bit++ {
 		for lp := 0; lp < eachBitLoop; lp++ {
-			sizeN, naiveT, karatsubaT, fftT := GetTimeOfBigNumberMultiplyByBit(bit)
+			sizeN, naiveT, karatsubaT, fftT, _ := GetTimeOfBigNumberMultiplyByBit(bit)
 			sizeArray = append(sizeArray, sizeN)
 			naiveArray = append(naiveArray, lang.GetMS(naiveT))
 			karatsubaArray = append(karatsubaArray, lang.GetMS(karatsubaT))
@@ -141,4 +141,13 @@ func TestFraction_Display2(t *testing.T) {
 	f1.Mul(f2).Display()
 	// 1/45
 	f1.Div(f2).Display()
+}
+
+// 3/2 + 7/12 = 18/12 + 7/12
+func TestFraction_Div(t *testing.T) {
+	MakeFraction(1, 1).
+		Add(MakeFraction(1, 2)).
+		Add(MakeFraction(1, 3)).
+		Add(MakeFraction(1, 4)).
+		Display()
 }
