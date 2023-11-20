@@ -59,14 +59,39 @@ func GetTwoRandomIntValue(n int) (int, int) {
 	return rand.Intn(n), rand.Intn(n)
 }
 
+// [offset,maxN)
+func getRandomIntValue(maxN, offset int) int {
+	if maxN < offset {
+		panic(errors.New("maxN must be larger or equal than offset"))
+	}
+	return rand.Intn(maxN-offset) + offset
+}
+
 // GetRandomIntValue -> [0,n)
 func GetRandomIntValue(n int) int {
-	return rand.Intn(n)
+	return getRandomIntValue(n, 0)
 }
 
 // GetRandomIntValueV2 -> [1,n)
 func GetRandomIntValueV2(n int) int {
-	return rand.Intn(n-1) + 1
+	return getRandomIntValue(n, 1)
+}
+
+// GetRandomIntValueV3 -> [2,n)
+func GetRandomIntValueV3(n int) int {
+	return getRandomIntValue(n, 2)
+}
+
+func GetRandomInt64Value(maxN int64, minus ...bool) int64 {
+	binCnt := CeilBinCnt(int(maxN)) - 1
+	maxVal := rand.Int63n(1 << binCnt)
+	if len(minus) > 0 && minus[0] {
+		sign := GetRandomIntValue(2)
+		if sign == 1 {
+			maxVal = ^maxVal + 1
+		}
+	}
+	return maxVal
 }
 
 func GetRandomMapValue(n, k int) map[int]bool {

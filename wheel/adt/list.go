@@ -6,7 +6,7 @@ var (
 	genericListHeadAndTailError = errors.New("GenericList head and tail error")
 	genericListHeadError        = errors.New("GenericList head error")
 	genericListTailError        = errors.New("GenericList tail error")
-	genericListSizeError        = errors.New("GenericList size error")
+	genericListSizeError        = errors.New("GenericList totalSize error")
 )
 
 // GenericList Template Type of forward_list

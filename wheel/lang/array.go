@@ -233,3 +233,30 @@ func DisplayFloat641DArrayInPythonFormat(a []float64) {
 	}
 	fmt.Println("]")
 }
+
+func GenerateInt641DArray(size int, maxValAbs int64) []int64 {
+	i641da := make([]int64, size)
+	for idx, _ := range i641da {
+		i641da[idx] = GetRandomInt64Value(int64(AbsInt(int(maxValAbs))), true)
+	}
+	return i641da
+}
+func GenerateUInt641DArray(size int, maxValAbs int64) []int64 {
+	i641da := make([]int64, size)
+	for idx, _ := range i641da {
+		i641da[idx] = GetRandomInt64Value(int64(AbsInt(int(maxValAbs))))
+	}
+	return i641da
+}
+
+func EqualInt641DArray(a, b []int64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for idx := 0; idx < len(a); idx++ {
+		if a[idx] != b[idx] {
+			return false
+		}
+	}
+	return true
+}

@@ -50,3 +50,12 @@ func TestDisplayInt1DArrayInPythonFormat(t *testing.T) {
 	DisplayInt1DArrayInPythonFormat([]int{})
 	DisplayInt1DArrayInPythonFormat(nil)
 }
+
+func TestGetRandFloat64ArrayByRange(t *testing.T) {
+	for bitCnt := 27; bitCnt < 48; bitCnt++ {
+		if 1<<bitCnt > int64(4e9) {
+			fmt.Printf("bit = %d, val = %d", bitCnt, 1<<bitCnt)
+			break
+		}
+	}
+}
