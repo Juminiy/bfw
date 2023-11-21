@@ -187,6 +187,10 @@ func (frac *Fraction) inv() *Fraction {
 	return frac
 }
 
+func (frac *Fraction) Float64() float64 {
+	return float64(frac.GetKey()) / float64(frac.GetVal())
+}
+
 func (frac *Fraction) Display(isPrintln ...bool) *Fraction {
 	if !frac.validate() {
 		panic(FractionDenominatorCanNotBeZeroError)

@@ -10,7 +10,11 @@
 *.dylib
 *.o
 *.a
-
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.so.*
 
 # Test binary, built with `lang test -c`
 *.test
@@ -18,9 +22,8 @@
 # Output of the lang coverage tool, specifically when used with LiteIDE
 *.out
 
-
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
@@ -37,14 +40,11 @@ wheel/cgo/bin/*
 wheel/cgo/lib/*
 
 
-
-
 # c
 # Prerequisites
 *.d
 
 # Object files
-*.o
 *.ko
 *.obj
 *.elf
@@ -57,26 +57,14 @@ wheel/cgo/lib/*
 # Precompiled Headers
 *.gch
 *.pch
+*.slo
 
 # Libraries
 *.lib
 *.a
 *.la
 *.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+*.lai
 
 # Debug files
 *.dSYM/
@@ -93,36 +81,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# cpp
-# Prerequisites
-*.d
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
 
-# Precompiled Headers
-*.gch
-*.pch
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
 
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
