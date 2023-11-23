@@ -3,6 +3,7 @@ package num
 import (
 	"bfw/wheel/lang"
 	"fmt"
+	"math"
 	"testing"
 	"time"
 )
@@ -150,4 +151,24 @@ func TestFraction_Div(t *testing.T) {
 		Add(MakeFraction(1, 3)).
 		Add(MakeFraction(1, 4)).
 		Display()
+}
+
+func TestFraction_Float64(t *testing.T) {
+	fmt.Println("pi^3 = ", math.Pow(math.Pi, 3.0))
+	// 945 + 945*(sum_{1/i^6},i>2) > 961
+	// sum = 0.01693122
+	sum := 0.0
+	for i := 1; ; i++ {
+		sum += 1.0 / math.Pow(float64(i)*1.0, 6.0)
+		if sum*945.0 > 961.0 {
+			fmt.Printf("n = %d, sum =  %f\n", i, sum*945)
+			break
+		}
+	}
+	//fmt.Println(1.0 / math.Pow(2, 6.0))
+}
+
+func TestXOR(t *testing.T) {
+	fmt.Printf("%x", ^0b1010)
+	fmt.Println(math.Pi)
 }

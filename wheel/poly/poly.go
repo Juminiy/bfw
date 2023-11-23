@@ -713,7 +713,7 @@ func (p *Poly) Solve() *Solution {
 			exp1Coe := p.getSetElem(1, 1).coe
 			exp2Coe := p.getSetElem(2, 2).coe
 			solution1, solution2, validateSolve :=
-				num.SolveQuadraticEquationOfOneVariable(exp2Coe, exp1Coe, exp0Coe)
+				num.SolveQuadratic2EquationOfOneVariable(exp2Coe, exp1Coe, exp0Coe)
 			if !validateSolve {
 				panic(polyEquationNoSolution)
 			}
@@ -735,6 +735,24 @@ func (p *Poly) Solve() *Solution {
 			s.setElem(0, solution1)
 			s.setElem(1, solution2)
 			s.setElem(2, solution3)
+		}
+	case 4:
+		{
+			s.setValues(make([]complex128, 4), 4)
+			exp0Coe := p.getSetElem(0, 0).coe
+			exp1Coe := p.getSetElem(1, 1).coe
+			exp2Coe := p.getSetElem(2, 2).coe
+			exp3Coe := p.getSetElem(3, 3).coe
+			exp4Coe := p.getSetElem(4, 4).coe
+			solution1, solution2, solution3, solution4, validateSolve :=
+				num.SolveQuadratic4EquationOfOneVariableRealResult(exp4Coe, exp3Coe, exp2Coe, exp1Coe, exp0Coe)
+			if !validateSolve {
+				panic(polyEquationNoSolution)
+			}
+			s.setElem(0, complex(solution1, 0))
+			s.setElem(1, complex(solution2, 0))
+			s.setElem(2, complex(solution3, 0))
+			s.setElem(3, complex(solution4, 0))
 		}
 		// TODO: more power equation should be developed
 	default:

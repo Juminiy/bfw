@@ -47,8 +47,26 @@ var (
 	polyNode72 = ConstructPolyNode(-7, 2)
 	polyNode73 = ConstructPolyNode(1, 3)
 
+	// (x-1)
+	polyNode80 = ConstructPolyNode(-1, 0)
+	polyNode81 = ConstructPolyNode(1, 1)
+	// (x-2)
+	polyNode82 = ConstructPolyNode(-2, 0)
+	polyNode83 = ConstructPolyNode(1, 1)
+	// (x-3)
+	polyNode84 = ConstructPolyNode(-3, 0)
+	polyNode85 = ConstructPolyNode(1, 1)
+	// (x-4)
+	polyNode86 = ConstructPolyNode(-4, 0)
+	polyNode87 = ConstructPolyNode(1, 1)
+
+	// (x^2-3x+2)(x^2-7x+12)
+	// x^4-10x^3+35x^2-50x+24
+
 	poly1 = &Poly{}
 	poly2 = &Poly{}
+	poly3 = &Poly{}
+	poly4 = &Poly{}
 )
 
 func TestPolyNode_Display(t *testing.T) {
@@ -215,4 +233,25 @@ func TestSparsePoly_Plus(t *testing.T) {
 	sp2.makeCopy().Display()
 	sp1.Plus(sp2).Display()
 	sp1.Minus(sp2).Display()
+}
+
+func TestAddPoly(t *testing.T) {
+	ply := ConstructPoly([][]float64{{0.4142135623730950488016887242097, 0}, {2, 1}, {2.8284271247461900976033774484194, 2}, {1, 3}}, 'x')
+	s := ply.Solve()
+	s.Display(5, 5)
+}
+
+func TestPoly_SolvePoly(t *testing.T) {
+	poly1.setNodeByOrder(polyNode80, polyNode81)
+	poly2.setNodeByOrder(polyNode82, polyNode83)
+	poly3.setNodeByOrder(polyNode84, polyNode85)
+	poly4.setNodeByOrder(polyNode86, polyNode87)
+	destPoly := poly1.Mul(poly2).Mul(poly3).Mul(poly4)
+	destPoly.Display(true)
+	sl := destPoly.Solve()
+	sl.Display(5, 5)
+}
+
+func TestNum(t *testing.T) {
+	fmt.Println(math.Pow(math.Pow(2.0, 1.0/3.0), 3.0))
 }

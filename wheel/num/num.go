@@ -109,9 +109,9 @@ func QPower(base, exp int) int {
 	return res
 }
 
-// SolveQuadraticEquationOfOneVariable
+// SolveQuadratic2EquationOfOneVariable
 // delta = b^2-4a*c
-func SolveQuadraticEquationOfOneVariable(a, b, c float64) (complex128, complex128, bool) {
+func SolveQuadratic2EquationOfOneVariable(a, b, c float64) (complex128, complex128, bool) {
 	if lang.EqualFloat64Zero(a) {
 		return 0, 0, false
 	}
@@ -177,6 +177,9 @@ func SolveCubicEquationOfOneVariableByCommon(a, b, c, d float64) (complex128, co
 }
 
 func SolveCubicEquationOfOneVariableBySJ(a, b, c, d float64) (complex128, complex128, complex128, bool) {
+	if lang.EqualFloat64Zero(a) {
+		return 0, 0, 0, false
+	}
 	var (
 		A                    = math.Pow(b*1.0, 2.0) - 3.0*a*c
 		B                    = b*c - 9.0*a*d
@@ -223,4 +226,31 @@ func SolveCubicEquationOfOneVariableBySJ(a, b, c, d float64) (complex128, comple
 		}
 	}
 	return 0, 0, 0, false
+}
+
+// SolveQuadratic4EquationOfOneVariableRealResult
+// cannot solve quadratic equation effectly
+func SolveQuadratic4EquationOfOneVariableRealResult(a, b, c, d, e float64) (float64, float64, float64, float64, bool) {
+	if lang.EqualFloat64Zero(a) {
+		return 0, 0, 0, 0, false
+	}
+	var (
+		Delta1         = math.Pow(c, 2.0) - 3.0*b*d + 12.0*a*e
+		Delta2         = 2.0*math.Pow(c, 3.0) - 9.0*b*c*d + 27.0*a*math.Pow(d, 2.0) + 27.0*math.Pow(b, 2.0)*e - 72.0*a*c*e
+		m1             = math.Pow(Delta2+math.Sqrt(-4.0*math.Pow(Delta1, 3.0)+math.Pow(Delta2, 2.0)), 1.0/3.0)
+		twoExpOneThird = math.Pow(2.0, 1.0/3.0)
+		Delta3         = (twoExpOneThird*Delta1)/(3.0*a*m1) + (m1)/(3.0*twoExpOneThird*a)
+		m2             = math.Pow((b)/(2.0*a), 2.0) - (2.0*c)/(3.0*a)
+		m3             = -math.Pow(b/a, 3.0) + (4.0*b*c)/(math.Pow(a, 2.0)) - (8.0*d)/(a)
+		m4             = -(b) / (4.0 * a)
+		m5             = 0.5 * math.Sqrt(m2+Delta3)
+		m6Patch1       = 2.0*m2 - Delta3
+		m6Patch2       = (m3) / (8.0 * m5)
+		m6a            = 0.5 * math.Sqrt(m6Patch1-m6Patch2)
+		m6b            = 0.5 * math.Sqrt(m6Patch1+m6Patch2)
+		resPatch1      = m4 - m5
+		resPatch2      = m4 + m5
+	)
+
+	return resPatch1 - m6a, resPatch1 + m6a, resPatch2 - m6b, resPatch2 + m6b, true
 }
