@@ -1801,6 +1801,7 @@ func (matrix *Matrix) LU()  {}
 func (matrix *Matrix) PLU() {}
 func (matrix *Matrix) LDU() {}
 
+func (matrix *Matrix) CR()         {}
 func (matrix *Matrix) QR()         {}
 func (matrix *Matrix) Cholesky()   {}
 func (matrix *Matrix) SVD()        {}
@@ -1904,10 +1905,33 @@ func (matrix *Matrix) IsAntiSymmetric() bool {
 
 // AI algorithm
 
+// IsMarkovStateTransformPhalanx
+// Markov Procedure
+func (matrix *Matrix) IsMarkovStateTransformPhalanx() bool {
+	globalValue := true
+	for rowIdx := 0; rowIdx < matrix.rowSize; rowIdx++ {
+		rowSum := 0.0
+		matrix.traverseRow(rowIdx, func(elemValue float64) {
+			if elemValue < 0 {
+				globalValue = false
+			}
+			rowSum += elemValue
+		})
+		if !globalValue || !lang.EqualFloat64Zero(rowSum-1.0) {
+			globalValue = false
+			break
+		}
+	}
+	return globalValue
+}
+
 // Convergence
 // change self
 // chained option
 func (matrix *Matrix) Convergence() (*Matrix, int) {
+	if !matrix.IsMarkovStateTransformPhalanx() {
+		panic(errors.New("matrix is not markov matrix"))
+	}
 	convergenceMatrix := matrix.makeCopy()
 	convergenceIteratorTime := 0
 	for {
@@ -1919,6 +1943,16 @@ func (matrix *Matrix) Convergence() (*Matrix, int) {
 		}
 	}
 	return convergenceMatrix, convergenceIteratorTime
+}
+
+func (matrix *Matrix) IsMarkovConvergencePhalanxReducible() bool {
+
+	return false
+}
+
+func (matrix *Matrix) MarkovCommunicationClass() map[int][]int {
+
+	return nil
 }
 
 // Matrix shape to other Algebra Container

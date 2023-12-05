@@ -521,14 +521,15 @@ func StraseenPhalanxBlockMul(A, B *Matrix, ari, aci, bri, bci, size, sz int) *Ma
 }
 
 // mPowerV2
+// none change self
 // quick Power
 func (matrix *Matrix) mPowerV2(n int) *Matrix {
 	resMatrix := matrix.GetIdentity().Matrix()
 	for n > 0 {
 		if n&1 != 0 {
-			resMatrix.MTimes(matrix)
+			resMatrix.mul(matrix)
 		}
-		matrix.MTimes(matrix)
+		matrix.mul(matrix)
 		n >>= 1
 	}
 	return resMatrix

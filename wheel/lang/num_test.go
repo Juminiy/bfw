@@ -1,6 +1,7 @@
 package lang
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"math"
 	"testing"
@@ -58,4 +59,10 @@ func TestGetRandFloat64ArrayByRange(t *testing.T) {
 			break
 		}
 	}
+}
+
+func TestCountSHA256DiffBits(t *testing.T) {
+	a, b := []byte{'x'}, []byte{'X'}
+	fmt.Println(sha256.Sum256(a), "\n", sha256.Sum256(b))
+	fmt.Println(CountSHA256DiffBits(a, b))
 }

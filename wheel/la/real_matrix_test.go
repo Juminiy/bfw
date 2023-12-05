@@ -3,6 +3,7 @@ package la
 import (
 	"bfw/wheel/lang"
 	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 	"unsafe"
@@ -73,22 +74,38 @@ func TestMatrix_Calculate1(t *testing.T) {
 }
 
 func TestMatrix_Convergence(t *testing.T) {
-	m := &Matrix{rowSize: 3, columnSize: 3, slice: [][]float64{{0.2, 0.6, 0.2}, {0.3, 0, 0.7}, {0.5, 0, 0.5}}}
-	hamburger := &Vector{size: 3, shape: false, slice: []float64{1, 0, 0}}
-	pizza := &Vector{size: 3, shape: false, slice: []float64{0, 1, 0}}
-	hotdog := &Vector{size: 3, shape: false, slice: []float64{0, 0, 1}}
-	converM, converMT := m.Convergence()
-	fmt.Println("Matrix Self convergence time:", converMT)
-	converM.Display()
-	converHam, converHamT := hamburger.Convergence(m)
-	fmt.Println("Vector convergence time:", converHamT)
-	converHam.Display()
-	converPiz, converPizT := pizza.Convergence(m)
-	fmt.Println("Vector convergence time:", converPizT)
-	converPiz.Display()
-	converHot, converHotT := hotdog.Convergence(m)
-	fmt.Println("Vector convergence time:", converHotT)
-	converHot.Display()
+	m := &Matrix{rowSize: 3, columnSize: 3, slice: [][]float64{{0, 0.5, 0.5}, {1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0}, {0, 1, 0}}}
+	// from one state start, finally convergence to a static state
+	//hamburger := &Vector{size: 3, shape: false, slice: []float64{1, 0, 0}}
+	//pizza := &Vector{size: 3, shape: false, slice: []float64{0, 1, 0}}
+	//hotdog := &Vector{size: 3, shape: false, slice: []float64{0, 0, 1}}
+	//converM, converMT := m.Convergence()
+	//fmt.Println("Matrix Self convergence time:", converMT)
+	//converM.Display()
+	//converHam, converHamT := hamburger.Convergence(m)
+	//fmt.Println("Vector convergence time:", converHamT)
+	//converHam.Display()
+	//converPiz, converPizT := pizza.Convergence(m)
+	//fmt.Println("Vector convergence time:", converPizT)
+	//converPiz.Display()
+	//converHot, converHotT := hotdog.Convergence(m)
+	//fmt.Println("Vector convergence time:", converHotT)
+	//converHot.Display()
+	//fmt.Println()
+
+	probabilityPi := &Vector{size: 3, shape: false, slice: []float64{0.5, 0, 0.5}}
+	probabilityPi, piT := probabilityPi.Convergence(m)
+	fmt.Println("pi convergence time:", piT)
+	probabilityPi.Display()
+	// now calculate the eigenvalue and eigenvectors
+	//m.EigenValues().Display()
+}
+
+func TestMatrix_Convergence2(t *testing.T) {
+	m := ConstructMatrix([][]float64{{0.5, 0.2, 0.3}, {0.6, 0.2, 0.2}, {0.1, 0.8, 0.1}})
+	m, timeT := m.Convergence()
+	fmt.Println(timeT)
+	m.Display()
 }
 
 func TestMatrix_Adjoin(t *testing.T) {
@@ -476,4 +493,52 @@ func TestGenMatrix(t *testing.T) {
 	m4.setValues(make([][]float64, 20), 20, 20)
 	fmt.Println(&m3, unsafe.Pointer(&m3.slice), &m3.rowSize, &m3.columnSize)
 	fmt.Println(&m4, unsafe.Pointer(&m4.slice), &m4.rowSize, &m4.columnSize)
+}
+
+func TestGenerateTwoBlockFitFloat64Phalanx(t *testing.T) {
+	n := lang.GetRandomIntValue(10)
+	p := rand.Float64()
+	q := 1 - p
+	for i := 0; i < (n<<1 + 1); i++ {
+		for j := 0; j < (n<<1 + 1); j++ {
+			if j == i+1 {
+				fmt.Printf("%f ", p)
+			} else if j == i-1 {
+				fmt.Printf("%f ", q)
+			} else {
+				fmt.Printf("0 ")
+			}
+		}
+		fmt.Println()
+	}
+}
+
+func TestConstructMatrix(t *testing.T) {
+	m := ConstructMatrix([][]float64{{0.5, 0.25, 0.125, 0.125}, {0, 0, 1, 0}, {0, 0, 0, 1}, {1, 0, 0, 0}})
+	fmt.Println("P1")
+	m.MPower(1).Display()
+	fmt.Println("P2")
+	m.MPower(2).Display()
+	fmt.Println("P3")
+	m.MPower(3).Display()
+	fmt.Println("P4")
+	m.MPower(4).Display()
+	v := ConstructVector([]float64{0.25, 0.25, 0.25, 0.25})
+	v, vT := v.Convergence(m)
+	fmt.Println(vT)
+	v.Display()
+}
+
+func TestAddRealMatrix(t *testing.T) {
+	m := ConstructMatrix([][]float64{
+		{0, 0.5, 0, 0.5},
+		{0.5, 0, 0.5, 0},
+		{0, 0.5, 0, 0.5},
+		{0.5, 0, 0.5, 0}})
+	m.MPower(2).Display()
+	//v := ConstructVector([]float64{1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0}, true)
+	//v, _ = v.Convergence(m)
+	//v.Display()
+	//m, _ = m.Convergence()
+	//v.MulMatrix(m).Display()
 }

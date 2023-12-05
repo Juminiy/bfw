@@ -260,3 +260,7 @@ func EqualInt641DArray(a, b []int64) bool {
 	}
 	return true
 }
+
+func PairIntEqual(a1, b1, a2, b2 int) bool {
+	return a1 == a2 && b1 == b2
+}

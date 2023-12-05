@@ -658,6 +658,9 @@ func (vector *Vector) IsHermite() bool {
 // change self
 // chained option
 func (vector *Vector) Convergence(matrix *Matrix) (*Vector, int) {
+	if !matrix.IsMarkovStateTransformPhalanx() {
+		panic(errors.New("matrix is not markov matrix"))
+	}
 	convergenceVector := vector.makeCopy()
 	convergenceIteratorTime := 0
 	for {

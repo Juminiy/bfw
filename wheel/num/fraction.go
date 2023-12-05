@@ -191,6 +191,21 @@ func (frac *Fraction) Float64() float64 {
 	return float64(frac.GetKey()) / float64(frac.GetVal())
 }
 
+func MakeZero() *Fraction {
+	return MakeFraction(0, 1)
+}
+func (frac *Fraction) Zero() {
+	frac.SetKV(0, 1)
+}
+
+func MakeOne() *Fraction {
+	return MakeFraction(1, 1)
+}
+
+func (frac *Fraction) One() {
+	frac.SetKV(1, 1)
+}
+
 func (frac *Fraction) Display(isPrintln ...bool) *Fraction {
 	if !frac.validate() {
 		panic(FractionDenominatorCanNotBeZeroError)

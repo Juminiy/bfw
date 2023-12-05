@@ -36,3 +36,22 @@ func TestInt1DArrayContribute(t *testing.T) {
 	fmt.Printf("traverse %d size int64 array time:%v\n", size, time.Since(time0))
 
 }
+
+func TestReal2DArray_Len(t *testing.T) {
+	arr := [32]byte{'0', '1', '2', '3', '4', '5'}
+	sl1 := arr[2:4]
+	sl2 := arr[3:7]
+	fmt.Println(arr, "\n", sl1, "\n", sl2)
+	sl1[0] = 'x'
+	sl2[1] = 'X'
+	fmt.Println(arr, "\n", sl1, "\n", sl2)
+	revByteSlice := func(ba []byte) {
+		baL := len(ba)
+		for i := 0; i < (baL >> 1); i++ {
+			ba[i], ba[baL-i-1] = ba[baL-i-1], ba[i]
+		}
+	}
+	fmt.Println(sl1)
+	revByteSlice(sl1)
+	fmt.Println(sl1)
+}
