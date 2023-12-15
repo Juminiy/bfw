@@ -78,3 +78,9 @@ func TestBitMap_Array(t *testing.T) {
 	bitMap.Insert(8).Insert(8)
 	fmt.Println(bitMap.Count(8))
 }
+
+func TestItemLess(t *testing.T) {
+	//i1 := Int(5)
+	//i2 := Int(8)
+	fmt.Println(ItemLess(GetInf(-1), GetInf(+1)))
+}
