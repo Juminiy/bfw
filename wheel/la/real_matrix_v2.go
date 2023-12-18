@@ -376,7 +376,7 @@ func debugPrintln(a ...any) {
 // current suggestions
 // 1. decline the parameter num
 // 2. convert the recursive to none recursive
-// 3. use waitGroup and channel to run multiple core, take advantage of gmp
+// 3. use waitGroup and channel to run_any multiple core, take advantage of gmp
 func SimplePhalanxBlockMul(A, B *Matrix, ari, aci, bri, bci, size, sz int) *Matrix {
 
 	if recursiveDepth := lang.CeilBinCnt(size); recursiveDepth >= maxRecursiveDepth {
