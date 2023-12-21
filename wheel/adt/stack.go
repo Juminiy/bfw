@@ -1,9 +1,5 @@
 package adt
 
-import (
-	"bfw/wheel/lang"
-)
-
 // GenericStack Template Type of stack
 type GenericStack[T any] struct {
 	slice []T
@@ -19,7 +15,7 @@ func (stack *GenericStack[T]) SetSlice(ts []T) {
 }
 
 func (stack *GenericStack[T]) Empty() bool {
-	return !lang.ValidateInterfaceArrayOrSlice(stack.slice)
+	return len(stack.slice) == 0
 }
 
 func (stack *GenericStack[T]) Len() int {

@@ -15,11 +15,34 @@ func Spinner(sleepTime time.Duration) {
 	}
 }
 
+func ProgressBar(s chan bool, firstLine ...string) {
+	if len(firstLine) > 0 {
+		fmt.Printf(firstLine[0])
+	}
+	t0 := time.Now()
+	for {
+		select {
+		case <-s:
+			{
+				fmt.Printf("\u001B[2J\r[==========100.0%%=========]")
+				break
+			}
+		default:
+			{
+				time.Sleep(100 * time.Millisecond)
+				fmt.Printf("\u001B[2J\r[==========%.1f%%=========]", time.Since(t0).Seconds()/6.0682377*100.0)
+			}
+		}
+	}
+}
+
 func RunFibonacci() {
-	go Spinner(100 * time.Millisecond)
-	time0 := time.Now()
+	s := make(chan bool)
 	n := 45
+	go ProgressBar(s)
+	time0 := time.Now()
 	fn := classical.Fibonacci(n)
-	fmt.Println("\r\n", classical.DisplayFibonacci(n, fn))
+	s <- true
+	fmt.Println("\n", classical.DisplayFibonacci(n, fn))
 	fmt.Printf("fibonacci CPU time: %v", time.Since(time0))
 }

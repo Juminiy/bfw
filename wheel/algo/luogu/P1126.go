@@ -3,6 +3,7 @@ package luogu
 import (
 	"bfw/wheel/adt"
 	"errors"
+	"fmt"
 )
 
 var (
@@ -11,13 +12,26 @@ var (
 
 type RMI struct {
 	graph    [][]bool
+	visited  [][]bool
 	ini, aim rNode
-	cur      rNode
 	n, m     int
 }
 
-func MakeRMI(n, m int, graph [][]bool, ini, aim rNode) *RMI {
-	return &RMI{graph: graph, ini: ini, aim: aim, n: n, m: m}
+func MakeRMI(n, m int, graph [][]bool, ix, iy, ax, ay int, iface byte) *RMI {
+	r := &RMI{graph: graph, ini: rNode{x: ix, y: iy, face: iface}, aim: rNode{x: ax, y: ay}, n: n, m: m}
+	return r.make()
+}
+
+func (r *RMI) BFS() int {
+	res := r.bfs()
+	if res.step == 0 &&
+		res.prev == nil {
+		return -1
+	} else {
+		r.aim.print()
+		res.printPath()
+		return res.step
+	}
 }
 
 func (r *RMI) bfs() rRes {
@@ -25,6 +39,7 @@ func (r *RMI) bfs() rRes {
 	q.Push(r.ini)
 	for !q.Empty() {
 		t := q.Front()
+		q.Pop()
 		if t.equal(r.aim) {
 			return t.rRes
 		}
@@ -34,15 +49,19 @@ func (r *RMI) bfs() rRes {
 				q.Push(tE)
 			}
 		}
+		r.setVis(t.x, t.y)
+		//r.debugQ(q)
 	}
 	return rRes{}
 }
 
 func (r *RMI) valNode(n rNode) bool {
 	return r.valBound(n.x, n.y) &&
-		r.valBlock(n.x, n.y)
+		r.valBlock(n.x, n.y) &&
+		!r.visited[n.x][n.y]
 }
 
+// x,y is block NW vec
 func (r *RMI) valBlock(x, y int) bool {
 	cA, cB, cC, cD := true, true, true, true
 	if r.valBound(x, y) {
@@ -65,6 +84,30 @@ func (r *RMI) valBound(x, y int) bool {
 		y >= 1 && y < r.m
 }
 
+func (r *RMI) make() *RMI {
+	r.visited = nil
+	r.visited = make([][]bool, r.n)
+	for i := 0; i < r.n; i++ {
+		r.visited[i] = make([]bool, r.m)
+	}
+	return r
+}
+
+func (r *RMI) setVis(x, y int) {
+	if r.valBound(x, y) {
+		r.visited[x][y] = true
+	}
+}
+
+func (r *RMI) debugQ(q adt.GenericQueue[rNode]) {
+	qa := q.GetSlice()
+	for _, qe := range qa {
+		qe.print()
+		fmt.Print(" ")
+	}
+	fmt.Println()
+}
+
 func (r *RMI) aStar() {
 
 }
@@ -72,22 +115,13 @@ func (r *RMI) aStar() {
 // x,y is rNode central
 type rNode struct {
 	x, y int
-	face rune
+	face byte
 	rRes
 }
 
 func (r *rNode) equal(rt rNode) bool {
 	return r.x == rt.x &&
 		r.y == rt.y
-}
-
-type rRes struct {
-	step int
-	prev *rNode
-}
-
-func makerRes(step int, prev *rNode) rRes {
-	return rRes{step, prev}
 }
 
 func (r *rNode) ins() []rNode {
@@ -126,15 +160,37 @@ func (r *rNode) run(step int) rNode {
 	}
 }
 
-func left(face rune) rune {
+func (r *rNode) print() {
+	fmt.Printf("(%d,%d,%c)", r.x, r.y, r.face)
+}
+
+type rRes struct {
+	step int
+	prev *rNode
+}
+
+func makerRes(step int, prev *rNode) rRes {
+	return rRes{step, prev}
+}
+
+func (r *rRes) printPath() {
+	prev := r.prev
+	for prev != nil {
+		fmt.Print("<-")
+		prev.print()
+		prev = prev.prev
+	}
+}
+
+func left(face byte) byte {
 	return turn(face, true)
 }
 
-func right(face rune) rune {
+func right(face byte) byte {
 	return turn(face, false)
 }
 
-func turn(face rune, left bool) rune {
+func turn(face byte, left bool) byte {
 	switch face {
 	case 'N':
 		{

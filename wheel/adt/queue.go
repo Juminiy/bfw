@@ -1,7 +1,7 @@
 package adt
 
 import (
-	"bfw/wheel/lang"
+	"fmt"
 )
 
 // GenericQueue Template Type of queue
@@ -19,7 +19,7 @@ func (queue *GenericQueue[T]) SetSlice(ts []T) {
 }
 
 func (queue *GenericQueue[T]) Empty() bool {
-	return !lang.ValidateInterfaceArrayOrSlice(queue.slice)
+	return len(queue.slice) == 0
 }
 
 func (queue *GenericQueue[T]) Len() int {
@@ -55,5 +55,12 @@ func (queue *GenericQueue[T]) Push(t T) {
 func (queue *GenericQueue[T]) Pop() {
 	if !queue.Empty() {
 		queue.slice = queue.slice[1:]
+	}
+}
+
+func (queue *GenericQueue[T]) Print() {
+	if !queue.Empty() &&
+		queue.Len() < defaultPrintLen {
+		fmt.Println(queue.slice)
 	}
 }
