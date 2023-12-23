@@ -84,3 +84,16 @@ func TestItemLess(t *testing.T) {
 	//i2 := Int(8)
 	fmt.Println(ItemLess(GetInf(-1), GetInf(+1)))
 }
+
+func TestMakeIntHeap(t *testing.T) {
+	h := MakeIntHeap(false)
+	for i := 10; i >= 0; i-- {
+		h.Push(i)
+		//h.Print()
+	}
+	for i := 0; i < 10; i++ {
+		e := h.Pop(1)[0]
+		fmt.Printf("%d ", e)
+		//h.Print()
+	}
+}

@@ -12,7 +12,7 @@ var (
 
 type RMI struct {
 	graph    [][]bool
-	visited  [][]bool
+	visited  [][][]bool
 	ini, aim rNode
 	n, m     int
 }
@@ -44,58 +44,67 @@ func (r *RMI) bfs() rRes {
 			return t.rRes
 		}
 		tL := t.ins()
-		for _, tE := range tL {
+		for i, tE := range tL {
 			if r.valNode(tE) {
 				q.Push(tE)
+			} else {
+				if i >= 2 {
+					break
+				}
 			}
 		}
-		r.setVis(t.x, t.y)
+		r.setVis(t.x, t.y, t.face)
 		//r.debugQ(q)
 	}
 	return rRes{}
 }
 
 func (r *RMI) valNode(n rNode) bool {
-	return r.valBound(n.x, n.y) &&
+	return r.valRNodeCentral(n.x, n.y) &&
 		r.valBlock(n.x, n.y) &&
-		!r.visited[n.x][n.y]
+		!r.visited[n.x][n.y][faceI(n.face)]
 }
 
-// x,y is block NW vec
+// x,y is central
+// case 2*2 = 4
 func (r *RMI) valBlock(x, y int) bool {
-	cA, cB, cC, cD := true, true, true, true
-	if r.valBound(x, y) {
-		cA = !r.graph[x][y]
+	for px := x - 1; px < x+1; px++ {
+		for py := y - 1; py < y+1; py++ {
+			if r.valBound(px, py) {
+				if r.graph[px][py] {
+					return false
+				}
+			}
+		}
 	}
-	if r.valBound(x, y+1) {
-		cB = !r.graph[x][y+1]
-	}
-	if r.valBound(x+1, y) {
-		cC = !r.graph[x+1][y]
-	}
-	if r.valBound(x+1, y+1) {
-		cD = !r.graph[x+1][y+1]
-	}
-	return cA && cB && cC && cD
+	return true
 }
 
-func (r *RMI) valBound(x, y int) bool {
+func (r *RMI) valRNodeCentral(x, y int) bool {
 	return x >= 1 && x < r.n &&
 		y >= 1 && y < r.m
 }
 
+func (r *RMI) valBound(x, y int) bool {
+	return x >= 0 && x < r.n &&
+		y >= 0 && y < r.m
+}
+
 func (r *RMI) make() *RMI {
 	r.visited = nil
-	r.visited = make([][]bool, r.n)
+	r.visited = make([][][]bool, r.n)
 	for i := 0; i < r.n; i++ {
-		r.visited[i] = make([]bool, r.m)
+		r.visited[i] = make([][]bool, r.m)
+		for j := 0; j < r.m; j++ {
+			r.visited[i][j] = make([]bool, 4)
+		}
 	}
 	return r
 }
 
-func (r *RMI) setVis(x, y int) {
-	if r.valBound(x, y) {
-		r.visited[x][y] = true
+func (r *RMI) setVis(x, y int, face byte) {
+	if r.valRNodeCentral(x, y) {
+		r.visited[x][y][faceI(face)] = true
 	}
 }
 
@@ -126,11 +135,11 @@ func (r *rNode) equal(rt rNode) bool {
 
 func (r *rNode) ins() []rNode {
 	rNodeList := []rNode{
-		r.run(3),
-		r.run(2),
-		r.run(1),
 		{r.x, r.y, left(r.face), makerRes(r.step+1, r)},
 		{r.x, r.y, right(r.face), makerRes(r.step+1, r)},
+		r.run(1),
+		r.run(2),
+		r.run(3),
 	}
 	return rNodeList
 }
@@ -230,4 +239,29 @@ func turn(face byte, left bool) byte {
 		}
 	}
 	return face
+}
+
+func faceI(face byte) int {
+	switch face {
+	case 'N':
+		{
+			return 0
+		}
+	case 'S':
+		{
+			return 1
+		}
+	case 'W':
+		{
+			return 2
+		}
+	case 'E':
+		{
+			return 3
+		}
+	default:
+		{
+			panic(rFaceError)
+		}
+	}
 }

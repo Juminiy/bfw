@@ -16,77 +16,77 @@ func ValidateInterfaceArrayOrSlice(infArrayOrSlice interface{}) bool {
 	switch infArrayOrSlice.(type) {
 	case []int:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.([]int)) != 0 {
+			if len(infArrayOrSlice.([]int)) != 0 {
 				return true
 			}
 			return false
 		}
 	case []string:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.([]string)) != 0 {
+			if len(infArrayOrSlice.([]string)) != 0 {
 				return true
 			}
 			return false
 		}
 	case []*struct{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.([]*struct{})) != 0 {
+			if len(infArrayOrSlice.([]*struct{})) != 0 {
 				return true
 			}
 			return false
 		}
 	case []struct{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.([]struct{})) != 0 {
+			if len(infArrayOrSlice.([]struct{})) != 0 {
 				return true
 			}
 			return false
 		}
 	case []*interface{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.([]*interface{})) != 0 {
+			if len(infArrayOrSlice.([]*interface{})) != 0 {
 				return true
 			}
 			return false
 		}
 	case []interface{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.([]interface{})) != 0 {
+			if len(infArrayOrSlice.([]interface{})) != 0 {
 				return true
 			}
 			return false
 		}
 	case map[int][]int:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.(map[int][]int)) != 0 {
+			if len(infArrayOrSlice.(map[int][]int)) != 0 {
 				return true
 			}
 			return false
 		}
 	case map[int]*struct{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.(map[int]*struct{})) != 0 {
+			if len(infArrayOrSlice.(map[int]*struct{})) != 0 {
 				return true
 			}
 			return false
 		}
 	case map[int]struct{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.(map[int]struct{})) != 0 {
+			if len(infArrayOrSlice.(map[int]struct{})) != 0 {
 				return true
 			}
 			return false
 		}
 	case map[int]interface{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.(map[int]interface{})) != 0 {
+			if len(infArrayOrSlice.(map[int]interface{})) != 0 {
 				return true
 			}
 			return false
 		}
 	case map[int]*interface{}:
 		{
-			if infArrayOrSlice != nil && len(infArrayOrSlice.(map[int]*interface{})) != 0 {
+			if len(infArrayOrSlice.(map[int]*interface{})) != 0 {
 				return true
 			}
 			return false

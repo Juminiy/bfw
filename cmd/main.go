@@ -23,17 +23,16 @@ func main() {
 		ix, iy, ax, ay int
 		iface          byte
 	)
-	fmt.Scan(&n, &m)
+	fmt.Scanf("%d %d", &n, &m)
 	graph = make([][]bool, n)
 	for i := 0; i < n; i++ {
 		graph[i] = make([]bool, m)
 		for j := 0; j < m; j++ {
-			fmt.Scan(&t)
+			fmt.Scanf("%d", &t)
 			graph[i][j] = t == 1
 		}
 	}
-	fmt.Scan(&ix, &iy, &ax, &ay, &iface)
-	iface = 'S'
+	fmt.Scanf("%d %d %d %d %c ", &ix, &iy, &ax, &ay, &iface)
 	r := luogu.MakeRMI(n, m, graph, ix, iy, ax, ay, iface)
-	fmt.Println("\n", r.BFS())
+	r.BFS()
 }

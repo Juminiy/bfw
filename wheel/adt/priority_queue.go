@@ -8,8 +8,7 @@ type GenericPriorityQueue[T any] struct {
 }
 
 func (heap *GenericPriorityQueue[T]) Empty() bool {
-	return heap.slice != nil &&
-		heap.Len() != 0
+	return heap.Len() != 0
 }
 
 func (heap *GenericPriorityQueue[T]) Len() int {
