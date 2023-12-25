@@ -1,0 +1,22 @@
+@startuml
+title Multi-Paxos Leader 投票选举过程
+
+participant "提议者(Proposer)" as Proposer
+participant "接受者(Acceptor)" as Acceptor
+participant "学习者(Learner)" as Learner
+
+== 阶段 1: Prepare ==
+Proposer -> Acceptor: 发送 Prepare 请求\n(带有提议编号 N)
+Acceptor -> Proposer: 如果 N 大于所有收到的提议编号，\n则返回 Promise 响应\n(带有之前接受的最大编号的提议)
+
+== 阶段 2: Accept ==
+loop 每个命令
+    Proposer -> Acceptor: 收到多数的 Promise 响应后，\n发送 Accept 请求\n(带有提议编号 N 和提议值 V)
+    Acceptor -> Proposer: 如果 N 不小于收到的最大提议编号，\n则接受该提议
+end
+
+== 阶段 3: 学习 ==
+Acceptor -> Learner: 通知已接受的提议
+Learner -> Learner: 学习已接受的提议
+
+@enduml

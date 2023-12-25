@@ -86,7 +86,22 @@ func TestItemLess(t *testing.T) {
 }
 
 func TestMakeIntHeap(t *testing.T) {
-	h := MakeIntHeap(false)
+	h := MakeIntHeap(true)
+	for i := 10; i >= 0; i-- {
+		h.Push(i)
+		//h.Print()
+	}
+	for i := 0; i < 10; i++ {
+		e := h.Pop(1)[0]
+		fmt.Printf("%d ", e)
+		//h.Print()
+	}
+}
+
+func TestMakeHeap(t *testing.T) {
+	h := MakeHeap[int](func(a int, b int) bool {
+		return a < b
+	})
 	for i := 10; i >= 0; i-- {
 		h.Push(i)
 		//h.Print()

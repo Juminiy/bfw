@@ -1,0 +1,37 @@
+@startuml
+title 客户端和服务器集群交互图
+
+package "Master 服务器" {
+  [Master1] as Master1
+  [Master2] as Master2
+  [Master3] as Master3
+}
+
+database "元数据存储" as MetaData
+
+[客户端] as Client
+[客户端缓存] as ClientCache
+[Leader 服务器] as Leader
+[Proposer 服务器] as Proposer
+[Follower 服务器] as Follower
+[数据块存储服务器] as DataBlockServer
+
+Client --> ClientCache : 查询缓存
+ClientCache --> Client : 返回缓存结果
+
+Client --> Master1 : 建立连接、发送读写请求
+Master1 --> Client : 返回请求结果
+Master1 --> MetaData : 存储元数据
+
+Client --> Leader : 传输要写的数据
+Leader --> DataBlockServer : 对数据块进行修改
+DataBlockServer --> Leader : 返回操作结果
+Leader --> Master1 : 更新块信息
+
+Master1 --> Proposer : 控制选举开始
+Proposer --> Leader : 选取 Leader
+
+Master1 --> Follower : 发起广播
+Follower --> DataBlockServer : 更新数据
+
+@enduml

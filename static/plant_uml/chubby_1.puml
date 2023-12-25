@@ -1,0 +1,35 @@
+@startuml
+title 系统架构
+
+package "单元" {
+  [副本1] as Replica1
+  [副本2] as Replica2
+  [副本3] as Replica3
+  [副本4] as Replica4
+  [副本5] as Replica5
+}
+
+database "简单数据库" as DB
+
+[客户端库] as ClientLib
+[客户端应用程序] as ClientApp
+[服务器] as Server
+[代理服务器] as ProxyServer
+
+ClientApp --> ClientLib : 发送请求
+ClientLib --> Server : 通过 RPC 进行通信
+ClientLib --> ProxyServer : 通过 RPC 进行通信 (可选)
+
+Server --> Replica1 : 选举主服务器
+Server --> Replica2 : 选举主服务器
+Server --> Replica3 : 选举主服务器
+Server --> Replica4 : 选举主服务器
+Server --> Replica5 : 选举主服务器
+
+Replica1 --> DB : 维护数据库副本
+Replica2 --> DB : 维护数据库副本
+Replica3 --> DB : 维护数据库副本
+Replica4 --> DB : 维护数据库副本
+Replica5 --> DB : 维护数据库副本
+
+@enduml

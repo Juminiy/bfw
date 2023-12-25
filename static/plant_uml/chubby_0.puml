@@ -1,0 +1,18 @@
+@startuml
+title Service Architecture
+
+package "Service" {
+  [Leader] --> [State]
+  [Follower] --> [State]
+  [Leader] --> [Event Notification]
+  [Follower] --> [Event Notification]
+}
+
+legend right
+  **Leader** : The node that handles all client requests.
+  **Follower** : The nodes that follow the leader's decisions.
+  **State** : The state of the system, replicated across all nodes.
+  **Event Notification** : System for notifying clients of changes.
+endlegend
+
+@enduml

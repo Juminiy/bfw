@@ -1,40 +1,6 @@
 package leetcode
 
-func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
-	var head, tNode *ListNode
-	if l1 == nil {
-		return l2
-	}
-	if l2 == nil {
-		return l1
-	}
-	for l1 != nil && l2 != nil {
-		xNode := l1
-		if l1.Val < l2.Val {
-			xNode = l1
-			l1 = l1.Next
-		} else {
-			xNode = l2
-			l2 = l2.Next
-		}
-		if head == nil {
-			tNode = xNode
-			head = tNode
-			head.Next = nil
-		} else {
-			tNode.Next = xNode
-			tNode = xNode
-			tNode.Next = nil
-		}
-	}
-	if l1 == nil {
-		tNode.Next = l2
-	}
-	if l2 == nil {
-		tNode.Next = l1
-	}
-	return head
-}
+import "bfw/wheel/adt"
 
 func mergeKLists(lists []*ListNode) *ListNode {
 	l := len(lists)
@@ -48,4 +14,24 @@ func mergeKLists(lists []*ListNode) *ListNode {
 		p2 := mergeKLists(lists[mid:])
 		return mergeTwoLists(p1, p2)
 	}
+}
+
+func mergeKListsV2(lists []*ListNode) *ListNode {
+	h := adt.MakeHeap[*ListNode](func(a *ListNode, b *ListNode) bool {
+		return a.Val < b.Val
+	})
+	for _, n := range lists {
+		if n != nil {
+			h.Push(n)
+		}
+	}
+	i := makeIterator(&ListNode{})
+	for !h.Empty() {
+		t := h.Pop(1)[0]
+		i.splice(t)
+		if t.Next != nil {
+			h.Push(t.Next)
+		}
+	}
+	return i.head()
 }

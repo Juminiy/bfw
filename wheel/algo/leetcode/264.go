@@ -3,7 +3,10 @@ package leetcode
 import "bfw/wheel/adt"
 
 func nthUglyNumber(n int) int {
-	h := adt.MakeIntHeap(false)
+	//h := adt.MakeIntHeap(true)
+	h := adt.MakeHeap[int](func(a int, b int) bool {
+		return a < b
+	})
 	m := make(map[int]bool)
 	e := 1
 	h.Push(e)

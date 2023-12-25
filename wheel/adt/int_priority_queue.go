@@ -1,29 +1,24 @@
 package adt
 
 import (
-	"errors"
 	"fmt"
 )
 
-var (
-	intHeapUnknownError = errors.New("IntHeap UnKnown Error")
-	intHeapIndexError   = errors.New("IntHeap Index Error")
-	intHeapEmptyError   = errors.New("IntHeap Empty Error")
-)
-
+// Deprecated: Use adt.GenericPriorityQueue instead.
 type IntHeap struct {
 	slice []int
-	sort  bool
+	asc   bool
 }
 
-func MakeIntHeap(sort bool) *IntHeap {
+// Deprecated: Use adt.GenericPriorityQueue instead.
+func MakeIntHeap(asc bool) *IntHeap {
 	h := &IntHeap{}
-	h.make(sort)
+	h.make(asc)
 	return h
 }
 
 func (h *IntHeap) make(sort bool) {
-	h.sort = sort
+	h.asc = sort
 }
 
 func (h *IntHeap) Len() int {
@@ -36,10 +31,10 @@ func (h *IntHeap) Swap(i, j int) {
 
 func (h *IntHeap) Less(i, j int) bool {
 	r := h.slice[i] < h.slice[j]
-	if h.sort {
-		return r
-	} else {
+	if h.asc {
 		return !r
+	} else {
+		return r
 	}
 }
 
@@ -69,7 +64,7 @@ func (h *IntHeap) push(e int) {
 
 func (h *IntHeap) pop() int {
 	if h.Empty() {
-		panic(intHeapEmptyError)
+		panic(HeapEmptyError)
 	}
 	si, ei := 0, h.Len()-1
 	h.Swap(si, ei)
@@ -88,39 +83,39 @@ func (h *IntHeap) adjust(down2top bool) {
 }
 
 // 1. down to top
-// 2. sort by Less
+// 2. asc by Less
 // 3. O(log(N))
 func (h *IntHeap) down2top() {
 	if h.Len() <= 1 {
 		return
 	}
 	curI := h.Len() - 1
-	parI := h.up(curI)
+	parI := parents(curI)
 	for curI > 0 {
-		if h.right(parI) == curI {
+		if rightChild(parI) == curI {
 			sI := h.iBySort(parI, curI-1, curI)
 			h.Swap(sI, parI)
-		} else if h.left(parI) == curI {
+		} else if leftChild(parI) == curI {
 			sI := h.iBySort(parI, curI)
 			h.Swap(sI, parI)
 		} else {
 			// never can occur case
-			panic(intHeapUnknownError)
+			panic(HeapUnknownError)
 		}
-		curI, parI = parI, h.up(parI)
+		curI, parI = parI, parents(parI)
 	}
 }
 
 // 1. top to down
-// 2. sort by Less
+// 2. asc by Less
 // 3. O(log(N))
 func (h *IntHeap) top2down() {
 	curI := 0
 	for curI < h.Len() {
 		sI := curI
-		if rI := h.right(curI); rI < h.Len() {
+		if rI := rightChild(curI); rI < h.Len() {
 			sI = h.iBySort(curI, rI-1, rI)
-		} else if lI := h.left(curI); lI < h.Len() {
+		} else if lI := leftChild(curI); lI < h.Len() {
 			sI = h.iBySort(curI, lI)
 		} else {
 			break
@@ -134,26 +129,14 @@ func (h *IntHeap) top2down() {
 	}
 }
 
-func (h *IntHeap) up(i int) int {
-	return (i - 1) >> 1
-}
-
-func (h *IntHeap) left(i int) int {
-	return i<<1 + 1
-}
-
-func (h *IntHeap) right(i int) int {
-	return i<<1 + 2
-}
-
 func (h *IntHeap) iBySort(i ...int) int {
 	if len(i) == 0 {
-		panic(intHeapIndexError)
+		panic(HeapIndexError)
 	}
 	iE := i[0]
 	for _, iI := range i {
 		if !h.valI(iI) {
-			panic(intHeapIndexError)
+			panic(HeapIndexError)
 		}
 		if h.Less(iE, iI) {
 			iE = iI
