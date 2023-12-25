@@ -1,8 +1,12 @@
 package leetcode
 
+<<<<<<< HEAD
 import (
 	"fmt"
 )
+=======
+import "fmt"
+>>>>>>> ba4054c (1. all update)
 
 type ListNode struct {
 	Val  int
@@ -10,9 +14,9 @@ type ListNode struct {
 }
 
 func GenList(v ...int) *ListNode {
-	i := makeIterator(&ListNode{})
+	i := makeIter(&ListNode{})
 	for _, vV := range v {
-		i.splice(&ListNode{vV, nil})
+		i.append(&ListNode{Val: vV})
 	}
 	return i.head()
 }
@@ -25,68 +29,76 @@ func GenLists(v [][]int) []*ListNode {
 	return ls
 }
 
-// s,t is order by asc
-// l = puppet->merge(s,t)
-func (l *ListNode) merge(s, t *ListNode) *ListNode {
-	i := makeIterator(l)
-	for s != nil && t != nil {
-		if s.Val < t.Val {
-			i.splice(s)
-			s = s.Next
-		} else {
-			i.splice(t)
-			t = t.Next
-		}
-	}
-	if s != nil {
-		i.splice(s)
-	}
-	if t != nil {
-		i.splice(t)
-	}
-	return l.Next
+func (l *ListNode) Len() int {
+	return makeIter(l).len()
+}
+
+func (l *ListNode) NextK(k int) *ListNode {
+	i := makeIter(l)
+	i.next(k)
+	return i.tail()
+}
+
+func (l *ListNode) Tail() *ListNode {
+	return makeIter(l).end()
 }
 
 func (l *ListNode) Print() {
-	h := l
-	for h != nil {
-		fmt.Printf("%d ", h.Val)
-		h = h.Next
+	i := makeIter(l)
+	for i.tail() != nil {
+		fmt.Printf("%d ", i.tail().Val)
+		i.next()
 	}
 	fmt.Println()
 }
 
-type iterator struct {
-	puppet *ListNode
-	cur    *ListNode
+type iter struct {
+	pup, cur *ListNode
 }
 
-func makeIterator(head *ListNode) *iterator {
-	i := &iterator{}
-	i.puppet = head
-	i.cur = head
-	return i
+func makeIter(l *ListNode) *iter {
+	return &iter{l, l}
 }
 
-func (i *iterator) head() *ListNode {
-	return i.puppet.Next
-}
-
-func (i *iterator) walk() {
-	i.cur = i.cur.Next
-}
-
-func (i *iterator) next() *ListNode {
-	return i.cur.Next
-}
-
-func (i *iterator) hasNext() bool {
-	return i.next() == nil
-}
-
-func (i *iterator) splice(n ...*ListNode) {
-	for _, nN := range n {
-		i.cur.Next = nN
-		i.cur = nN
+func (i *iter) len() int {
+	curCur, curLen := i.cur, 0
+	for curCur != nil {
+		curCur = curCur.Next
+		curLen++
 	}
+	return curLen
+}
+
+func (i *iter) append(l ...*ListNode) {
+	for _, lL := range l {
+		i.cur.Next = lL
+		i.cur = lL
+	}
+}
+
+func (i *iter) next(n ...int) {
+	nN := 1
+	if len(n) > 0 && n[0] > 0 {
+		nN = n[0]
+	}
+	for i.cur != nil && nN > 0 {
+		nN--
+		i.cur = i.cur.Next
+	}
+}
+
+func (i *iter) head() *ListNode {
+	return i.pup.Next
+}
+
+func (i *iter) tail() *ListNode {
+	return i.cur
+}
+
+func (i *iter) end() *ListNode {
+	cur := i.cur
+	for cur != nil && cur.Next != nil {
+		cur = cur.Next
+	}
+	return cur
 }

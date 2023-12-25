@@ -14,15 +14,23 @@ func TestLC1(t *testing.T) {
 	fmt.Println(nthUglyNumber(10))
 }
 
-func TestLC2(t *testing.T) {
-	lists := GenLists([][]int{{1, 4, 5}, {1, 3, 4}, {2, 6}})
-	//lists := GenLists([][]int{{}, {}})
-	//mergeKListsV2(lists).Print()
-	mergeKLists(lists).Print()
+func TestLC3(t *testing.T) {
+	//fmt.Println(numOfBurgers(16, 7))
+	//fmt.Println(numOfBurgers(17, 4))
+	//fmt.Println(numOfBurgers(4, 17))
+	//fmt.Println(numOfBurgers(0, 0))
+	//fmt.Println(numOfBurgers(2, 1))
+	//fmt.Println(isPalindrome(31013))
+	//fmt.Println(countDigitOne(13))
 }
 
-func TestLC3(t *testing.T) {
+func TestLC4(t *testing.T) {
 	l := GenList(1, 2, 3, 4, 5)
-	//removeNthFromEnd(l, 2).Print()
-	swapPairs(l).Print()
+	//reverseList(l).Print()
+	//swapPairs(l).Print()
+	//i := makeIter(l)
+	//i.next(2)
+	//fmt.Println(i.tail().Val)
+	//reverseKGroup(l, 3).Print()
+	rotateRight(l, 1).Print()
 }

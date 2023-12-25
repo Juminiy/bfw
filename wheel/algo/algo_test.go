@@ -2,6 +2,7 @@ package algo
 
 import (
 	"bfw/wheel/algo/beyond"
+	"bfw/wheel/algo/classical"
 	"bfw/wheel/lang"
 	"fmt"
 	"testing"
@@ -39,4 +40,9 @@ func TestMakeST(t *testing.T) {
 	for _, q := range querySlice {
 		fmt.Println(st.Query(q[0], q[1]))
 	}
+}
+
+func TestFib(t *testing.T) {
+	fmt.Println(classical.FibonacciV2(45), "\n\r",
+		classical.FibonacciV3(45))
 }
