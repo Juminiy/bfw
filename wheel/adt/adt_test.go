@@ -85,17 +85,18 @@ func TestItemLess(t *testing.T) {
 	fmt.Println(ItemLess(GetInf(-1), GetInf(+1)))
 }
 
+// Deprecated: Use TestMakeHeap instead.
 func TestMakeIntHeap(t *testing.T) {
-	h := MakeIntHeap(true)
-	for i := 10; i >= 0; i-- {
-		h.Push(i)
-		//h.Print()
-	}
-	for i := 0; i < 10; i++ {
-		e := h.Pop(1)[0]
-		fmt.Printf("%d ", e)
-		//h.Print()
-	}
+	//h := MakeIntHeap(true)
+	//for i := 10; i >= 0; i-- {
+	//	h.Push(i)
+	//	//h.Print()
+	//}
+	//for i := 0; i < 10; i++ {
+	//	e := h.Pop(1)[0]
+	//	fmt.Printf("%d ", e)
+	//	//h.Print()
+	//}
 }
 
 func TestMakeHeap(t *testing.T) {

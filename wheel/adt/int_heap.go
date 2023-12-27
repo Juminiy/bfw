@@ -10,7 +10,7 @@ type IntHeap struct {
 	asc   bool
 }
 
-// Deprecated: Use adt.GenericPriorityQueue instead.
+// Deprecated: Use adt.MakeHeap instead.
 func MakeIntHeap(asc bool) *IntHeap {
 	h := &IntHeap{}
 	h.make(asc)

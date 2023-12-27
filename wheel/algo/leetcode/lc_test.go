@@ -24,13 +24,46 @@ func TestLC3(t *testing.T) {
 	//fmt.Println(countDigitOne(13))
 }
 
+func TestMerge(t *testing.T) {
+	lists := GenLists([][]int{{1, 2, 3}, {1, 3, 4}, {1, 5, 6}, {1, 7, 8}, {1, 10, 25}})
+	//lists := GenLists([][]int{})
+	//lists := GenLists([][]int{{}, {}, {}})
+	//mergeKLists(lists).Print()
+	mergeKListsV2(lists).Print()
+}
+
 func TestLC4(t *testing.T) {
-	l := GenList(1, 2, 3, 4, 5)
+	list := GenList(1, 2, 3, 4, 5)
 	//reverseList(l).Print()
 	//swapPairs(l).Print()
 	//i := makeIter(l)
 	//i.next(2)
 	//fmt.Println(i.tail().Val)
 	//reverseKGroup(l, 3).Print()
-	rotateRight(l, 1).Print()
+	//rotateRight(i.head(), 1).Print()
+	//rotateRight(i.head(), 2).Print()
+	//rotateRight(i.head(), 3).Print()
+	//rotateRight(i.head(), 4).Print()
+	//rotateRight(i.head(), 5).Print()
+	//rotateRight(i.head(), 6).Print()
+	//deleteDuplicates(list).Print()
+	//list, nl := NextEquals(list)
+	//list.Print()
+	//nl.Print()
+	//deleteAllDuplicates(list).Print()
+	reverseBetween(list, 2, 4).Print()
+}
+
+func TestLC5(t *testing.T) {
+	//seats := [][]string{
+	//	{"#", ".", "#", "#", ".", "#"},
+	//	{".", "#", "#", "#", "#", "."},
+	//	{"#", ".", "#", "#", ".", "#"},
+	//}
+	// dp[i][j] =
+}
+
+func TestLC6(t *testing.T) {
+	node := GenNode(1, 2, 3, 4, 5)
+	copyRandomList(node).Print()
 }

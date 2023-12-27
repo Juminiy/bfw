@@ -5,7 +5,7 @@ func reverseKGroup(head *ListNode, k int) *ListNode {
 	var newHead, nextGroup *ListNode
 
 	for cur != nil {
-		t := cur.NextK(k)
+		t := NextK(cur, k)
 		if t == nil {
 			break
 		}
@@ -15,7 +15,7 @@ func reverseKGroup(head *ListNode, k int) *ListNode {
 		if newHead == nil {
 			newHead = cur
 		}
-		cur = cur.NextK(k)
+		cur = NextK(cur, k)
 		cur.Next = nextGroup
 	}
 	if newHead == nil {

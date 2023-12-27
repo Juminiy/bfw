@@ -1,6 +1,5 @@
 package leetcode
 
-func mergeTwoLists(l1, l2 *ListNode) *ListNode {
-	l := &ListNode{}
-	return l.merge(l1, l2)
+func mergeTwoLists(s, t *ListNode) *ListNode {
+	return Merge(s, t)
 }

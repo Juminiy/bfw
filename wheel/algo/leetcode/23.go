@@ -17,7 +17,7 @@ func mergeKLists(lists []*ListNode) *ListNode {
 }
 
 func mergeKListsV2(lists []*ListNode) *ListNode {
-	h := adt.MakeHeap[*ListNode](func(a *ListNode, b *ListNode) bool {
+	h := adt.MakeHeap[*ListNode](func(a, b *ListNode) bool {
 		return a.Val < b.Val
 	})
 	for _, n := range lists {
@@ -25,10 +25,10 @@ func mergeKListsV2(lists []*ListNode) *ListNode {
 			h.Push(n)
 		}
 	}
-	i := makeIterator(&ListNode{})
+	i := makeIter(&ListNode{})
 	for !h.Empty() {
 		t := h.Pop(1)[0]
-		i.splice(t)
+		i.append(t)
 		if t.Next != nil {
 			h.Push(t.Next)
 		}

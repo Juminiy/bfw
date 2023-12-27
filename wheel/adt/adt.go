@@ -26,3 +26,18 @@ type GenericLinkedContainer[T any] interface {
 	Len() int
 	Clear()
 }
+
+type GenericIterated[T any] interface {
+	Next(n ...int)
+	Append(...*T)
+	Reset()
+	Dummy() *T
+	Head() *T
+	Tail() *T
+	End() *T
+	Nil() bool
+	Len() int
+	Swap(int, int)
+	Less(int, int) bool
+	Equal(int, int) bool
+}
