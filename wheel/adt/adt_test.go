@@ -113,3 +113,25 @@ func TestMakeHeap(t *testing.T) {
 		//h.Print()
 	}
 }
+
+func TestMakeLRU(t *testing.T) {
+	c := MakeLRU[int, int](2, -1)
+
+	//case 1
+	c.Put(1, 1)
+	c.Put(2, 2)
+	fmt.Println(c.Get(1))
+	c.Put(3, 3)
+	fmt.Println(c.Get(2))
+	c.Put(4, 4)
+	fmt.Println(c.Get(1))
+	fmt.Println(c.Get(3))
+	fmt.Println(c.Get(4))
+
+	//case 2
+	//c.Put(2, 1)
+	//fmt.Println(c.Get(2))
+	//c.Put(3, 2)
+	//fmt.Println(c.Get(2))
+	//fmt.Println(c.Get(3))
+}

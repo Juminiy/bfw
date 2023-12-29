@@ -38,34 +38,36 @@ var (
 	unSupportedValCntError   = errors.New("you set cntMode = false, please use other bitMap to put you value")
 )
 
-type BitMap struct {
-	i64Bit            []uint64
-	minusI64Bit       []uint64
-	i64BitValCnt      []*bitValCnt
-	minusI64BitValCnt []*bitValCnt
-	maxBitValBit      uint64
-	maxVal            int64
-	minVal            int64
-	totalSize         uint64
-	distinctSize      uint64
-	signMode          bool
-	cntMode           bool
-	dDMode            *discreteDistribute
-}
+type (
+	BitMap struct {
+		i64Bit            []uint64
+		minusI64Bit       []uint64
+		i64BitValCnt      []*bitValCnt
+		minusI64BitValCnt []*bitValCnt
+		maxBitValBit      uint64
+		maxVal            int64
+		minVal            int64
+		totalSize         uint64
+		distinctSize      uint64
+		signMode          bool
+		cntMode           bool
+		dDMode            *discreteDistribute
+	}
 
-type bitValCnt struct {
-	// none used
-	// i64Bit uint64
-	// size = 64
-	valCnt []uint64
-}
+	bitValCnt struct {
+		// none used
+		// i64Bit uint64
+		// size = 64
+		valCnt []uint64
+	}
 
-type discreteDistribute struct {
-	PosMaxAbs int64
-	PosMinAbs int64
-	NegMaxAbs int64
-	NegMinAbs int64
-}
+	discreteDistribute struct {
+		PosMaxAbs int64
+		PosMinAbs int64
+		NegMaxAbs int64
+		NegMinAbs int64
+	}
+)
 
 func makeDDMode() *discreteDistribute {
 	dD := &discreteDistribute{}

@@ -1,6 +1,9 @@
 package lang
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestNewFeaturesClear(t *testing.T) {
 	NewFeaturesClear()
@@ -8,4 +11,9 @@ func TestNewFeaturesClear(t *testing.T) {
 
 func TestPointerNew(t *testing.T) {
 	PointerNew()
+}
+
+func TestGetGenericsZeroValue(t *testing.T) {
+	gs := GenericStruct{}
+	fmt.Println(gs)
 }

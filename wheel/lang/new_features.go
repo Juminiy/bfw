@@ -29,3 +29,12 @@ func PointerNew() {
 	vTypePtr.b = "a"
 	fmt.Println(vTypePtr)
 }
+
+type CommonInterface interface {
+	func() int
+	func(int, int) bool
+	func(int, int)
+}
+
+type GenericStruct[T CommonInterface] struct {
+}

@@ -10,10 +10,250 @@ var (
 )
 
 // GenericList Template Type of forward_list
-type GenericList[T any] struct {
-	head *GenericListNode[T]
-	tail *GenericListNode[T]
-	size int
+type (
+	GenericList[T any] struct {
+		head *GenericListNode[T]
+		tail *GenericListNode[T]
+		size int
+	}
+	GenericListNode[T any] struct {
+		Data T
+		Prev *GenericListNode[T]
+		Next *GenericListNode[T]
+	}
+)
+
+func MakeGenericList[T any](data ...T) *GenericList[T] {
+	return &GenericList[T]{}
+}
+
+// Empty
+// O(1)
+func (list *GenericList[T]) Empty() bool {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+	return list.size == 0
+}
+
+// Len
+// O(1)
+func (list *GenericList[T]) Len() int {
+	if !list.Empty() {
+		return list.size
+	}
+	return 0
+}
+
+// Front
+// O(1)
+func (list *GenericList[T]) Front() T {
+	if list.Empty() {
+		var t T
+		return t
+	}
+
+	return list.head.Data
+}
+
+// Back
+// O(1)
+func (list *GenericList[T]) Back() T {
+	if list.Empty() {
+		var t T
+		return t
+	}
+
+	return list.tail.Data
+}
+
+// PushFront
+// O(1)
+func (list *GenericList[T]) PushFront(t T) {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	err = list.addHead(&GenericListNode[T]{Data: t})
+	if err != nil {
+		panic(err)
+	}
+}
+
+// PopFront
+// O(1)
+func (list *GenericList[T]) PopFront() {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = list.delTail()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// PushBack
+// O(1)
+func (list *GenericList[T]) PushBack(t T) {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	err = list.addTail(&GenericListNode[T]{Data: t})
+	if err != nil {
+		panic(err)
+	}
+}
+
+// PopBack
+// O(1)
+func (list *GenericList[T]) PopBack() {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = list.delTail()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (list *GenericList[T]) ChainedPushFront(t T) *GenericList[T] {
+	list.PushFront(t)
+	return list
+}
+
+func (list *GenericList[T]) ChainedPopFront() *GenericList[T] {
+	list.PopFront()
+	return list
+}
+
+func (list *GenericList[T]) ChainedPushBack(t T) *GenericList[T] {
+	list.PushBack(t)
+	return list
+}
+
+func (list *GenericList[T]) ChainedPopBack() *GenericList[T] {
+	list.PopBack()
+	return list
+}
+
+func (list *GenericList[T]) Assign(ts *GenericList[T]) {
+	if ts != nil {
+		err := ts.validate()
+		if err != nil {
+			panic(err)
+		}
+		list.construct(ts.head, ts.tail, ts.size)
+	} else {
+		list.Clear()
+	}
+}
+
+// Swap
+// O(1)
+// can not be used, lang do not permit wheel assertion in generic
+func (list *GenericList[T]) Swap(ts *GenericList[T]) {
+	var tsCopy *GenericList[T]
+	tsCopy.Assign(ts)
+	ts.Assign(list)
+	list.Assign(tsCopy)
+}
+
+func (list *GenericList[T]) Clear() {
+	list.construct(nil, nil, 0)
+}
+
+func (list *GenericList[T]) At(index int) T {
+	var t T
+	return t
+}
+
+// Merge
+// O(1)
+// can not be used, lang do not permit wheel assertion in generic
+func (list *GenericList[T]) Merge(ts *GenericList[T]) {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	if ts != nil {
+		err = ts.validate()
+		if err != nil {
+			panic(err)
+		}
+		if list.size == 0 {
+			list.Assign(ts)
+		} else {
+			if ts.size != 0 {
+				list.tail.Next = ts.head
+				list.tail = ts.tail
+				list.size += ts.size
+			}
+		}
+	}
+
+}
+
+func (list *GenericList[T]) Insert(index int, t T) {
+
+}
+
+func (list *GenericList[T]) Erase(index int) {
+
+}
+
+func (list *GenericList[T]) Unique() {
+
+}
+
+func (list *GenericList[T]) Sort() {
+
+}
+
+// ForwardTraverse
+// O(N)
+func (list *GenericList[T]) ForwardTraverse(funcPtr func(...any) (int, error)) {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+	var (
+		node = list.head
+	)
+	if node != nil {
+		for node != nil {
+			funcPtr(node.Data)
+			node = node.Next
+		}
+	}
+	// head is nil, do nothing
+}
+
+// ReverseTraverse
+// O(N)
+func (list *GenericList[T]) ReverseTraverse(funcPtr func(...any) (int, error)) {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+	var (
+		node = list.tail
+	)
+	if node != nil {
+		for node != nil {
+			funcPtr(node.Data)
+			node = node.Prev
+		}
+	}
+	// tail is nil, do nothing
 }
 
 func (list *GenericList[T]) validate() error {
@@ -39,56 +279,6 @@ func (list *GenericList[T]) validate() error {
 		}
 	}
 	return nil
-}
-
-// GetHead
-// O(1)
-func (list *GenericList[T]) GetHead() interface{} {
-	return list.head
-}
-
-// Empty
-// O(1)
-func (list *GenericList[T]) Empty() bool {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-	return list.size == 0
-}
-
-// Len
-// O(1)
-func (list *GenericList[T]) Len() int {
-	if !list.Empty() {
-		return list.size
-	}
-	return 0
-}
-
-type GenericListNode[T any] struct {
-	Data T
-	Prev *GenericListNode[T]
-	Next *GenericListNode[T]
-}
-
-func (node *GenericListNode[T]) construct(t T, prev, next *GenericListNode[T]) {
-	node.Data = t
-	node.Prev = prev
-	node.Next = next
-}
-
-func (node *GenericListNode[T]) Assign(nd *GenericListNode[T]) {
-	if nd != nil {
-		node.construct(nd.Data, nd.Prev, nd.Next)
-	} else {
-		node.SetZero()
-	}
-}
-
-func (node *GenericListNode[T]) SetZero() {
-	var t T
-	node.construct(t, nil, nil)
 }
 
 // addHead
@@ -231,218 +421,31 @@ func (list *GenericList[T]) delTail() (*GenericListNode[T], error) {
 	return node, nil
 }
 
-// Front
-// O(1)
-func (list *GenericList[T]) Front() T {
-	if list.Empty() {
-		var t T
-		return t
-	}
-
-	return list.head.Data
-}
-
-// Back
-// O(1)
-func (list *GenericList[T]) Back() T {
-	if list.Empty() {
-		var t T
-		return t
-	}
-
-	return list.tail.Data
-}
-
-// PushFront
-// O(1)
-func (list *GenericList[T]) PushFront(t T) {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	err = list.addHead(&GenericListNode[T]{Data: t})
-	if err != nil {
-		panic(err)
-	}
-}
-
-// PopFront
-// O(1)
-func (list *GenericList[T]) PopFront() {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = list.delTail()
-	if err != nil {
-		panic(err)
-	}
-}
-
-// PushBack
-// O(1)
-func (list *GenericList[T]) PushBack(t T) {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	err = list.addTail(&GenericListNode[T]{Data: t})
-	if err != nil {
-		panic(err)
-	}
-}
-
-// PopBack
-// O(1)
-func (list *GenericList[T]) PopBack() {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = list.delTail()
-	if err != nil {
-		panic(err)
-	}
-}
-
-// ForwardTraverse
-// O(N)
-func (list *GenericList[T]) ForwardTraverse(funcPtr func(...any) (int, error)) {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-	var (
-		node = list.head
-	)
-	if node != nil {
-		for node != nil {
-			funcPtr(node.Data)
-			node = node.Next
-		}
-	}
-	// head is nil, do nothing
-}
-
-// ReverseTraverse
-// O(N)
-func (list *GenericList[T]) ReverseTraverse(funcPtr func(...any) (int, error)) {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-	var (
-		node = list.tail
-	)
-	if node != nil {
-		for node != nil {
-			funcPtr(node.Data)
-			node = node.Prev
-		}
-	}
-	// tail is nil, do nothing
-}
-
 func (list *GenericList[T]) construct(head, tail *GenericListNode[T], size int) {
 	list.head = head
 	list.tail = tail
 	list.size = size
 }
 
-func (list *GenericList[T]) Assign(ts *GenericList[T]) {
-	if ts != nil {
-		err := ts.validate()
-		if err != nil {
-			panic(err)
-		}
-		list.construct(ts.head, ts.tail, ts.size)
+func MakeGenericListNode[T any](data T) *GenericListNode[T] {
+	return &GenericListNode[T]{Data: data}
+}
+
+func (node *GenericListNode[T]) construct(t T, prev, next *GenericListNode[T]) {
+	node.Data = t
+	node.Prev = prev
+	node.Next = next
+}
+
+func (node *GenericListNode[T]) Assign(nd *GenericListNode[T]) {
+	if nd != nil {
+		node.construct(nd.Data, nd.Prev, nd.Next)
 	} else {
-		list.Clear()
+		node.SetZero()
 	}
 }
 
-// Swap
-// O(1)
-// can not be used, lang do not permit wheel assertion in generic
-func (list *GenericList[T]) Swap(ts *GenericList[T]) {
-	var tsCopy *GenericList[T]
-	tsCopy.Assign(ts)
-	ts.Assign(list)
-	list.Assign(tsCopy)
-}
-
-func (list *GenericList[T]) Clear() {
-	list.construct(nil, nil, 0)
-}
-
-func (list *GenericList[T]) At(index int) T {
+func (node *GenericListNode[T]) SetZero() {
 	var t T
-	return t
-}
-
-// Merge
-// O(1)
-// can not be used, lang do not permit wheel assertion in generic
-func (list *GenericList[T]) Merge(ts *GenericList[T]) {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	if ts != nil {
-		err = ts.validate()
-		if err != nil {
-			panic(err)
-		}
-		if list.size == 0 {
-			list.Assign(ts)
-		} else {
-			if ts.size != 0 {
-				list.tail.Next = ts.head
-				list.tail = ts.tail
-				list.size += ts.size
-			}
-		}
-	}
-
-}
-
-func (list *GenericList[T]) Insert(index int, t T) {
-
-}
-
-func (list *GenericList[T]) Erase(index int) {
-
-}
-
-func (list *GenericList[T]) Unique() {
-
-}
-
-func (list *GenericList[T]) Sort(func(comp, comped T) bool) {
-
-}
-
-func (list *GenericList[T]) ChainedPushFront(t T) *GenericList[T] {
-	list.PushFront(t)
-	return list
-}
-
-func (list *GenericList[T]) ChainedPopFront() *GenericList[T] {
-	list.PopFront()
-	return list
-}
-
-func (list *GenericList[T]) ChainedPushBack(t T) *GenericList[T] {
-	list.PushBack(t)
-	return list
-}
-
-func (list *GenericList[T]) ChainedPopBack() *GenericList[T] {
-	list.PopBack()
-	return list
+	node.construct(t, nil, nil)
 }

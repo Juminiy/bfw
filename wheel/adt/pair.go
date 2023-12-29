@@ -13,6 +13,35 @@ type Pair[K, V any] struct {
 	val V
 }
 
+func MakePair[K, V any](k K, v V) *Pair[K, V] {
+	return &Pair[K, V]{k, v}
+}
+
+func (p *Pair[K, V]) Key() K {
+	return p.key
+}
+
+func (p *Pair[K, V]) Val() V {
+	return p.val
+}
+
+func (p *Pair[K, V]) Get() (K, V) {
+	return p.key, p.val
+}
+
+func (p *Pair[K, V]) SetKey(k K) {
+	p.key = k
+}
+
+func (p *Pair[K, V]) SetVal(v V) {
+	p.val = v
+}
+
+func (p *Pair[K, V]) Set(k K, v V) {
+	p.SetKey(k)
+	p.SetVal(v)
+}
+
 type IntPair Pair[int, int]
 
 func MakeIntPair(a, b int) *IntPair {
