@@ -13,19 +13,19 @@ func TestGenericList_Back(t *testing.T) {
 	list.PushFront(1)
 	list.PushBack(2)
 	list.ForwardTraverse(fmt.Println)
-	//fmt.Println("--------------------")
+	fmt.Println("--------------------")
 	list.ReverseTraverse(fmt.Println)
-	//fmt.Println("--------------------")
+	fmt.Println("--------------------")
 	list.PopFront()
 	list.ForwardTraverse(fmt.Println)
-	//fmt.Println("--------------------")
+	fmt.Println("--------------------")
 	list.ReverseTraverse(fmt.Println)
-	//fmt.Println("--------------------")
+	fmt.Println("--------------------")
 	list.PopBack()
 	list.ForwardTraverse(fmt.Println)
-	//fmt.Println("--------------------")
+	fmt.Println("--------------------")
 	list.ReverseTraverse(fmt.Println)
-	//fmt.Println("--------------------")
+	fmt.Println("--------------------")
 	//list.Assign(nil)
 }
 
@@ -129,6 +129,7 @@ func TestMakeLRU(t *testing.T) {
 	fmt.Println(c.Get(4))
 
 	//case 2
+	//c := MakeLRU[int, int](1, -1)
 	//c.Put(2, 1)
 	//fmt.Println(c.Get(2))
 	//c.Put(3, 2)

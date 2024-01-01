@@ -46,104 +46,6 @@ func (list *GenericList[T]) Len() int {
 	return 0
 }
 
-// Front
-// O(1)
-func (list *GenericList[T]) Front() T {
-	if list.Empty() {
-		var t T
-		return t
-	}
-
-	return list.head.Data
-}
-
-// Back
-// O(1)
-func (list *GenericList[T]) Back() T {
-	if list.Empty() {
-		var t T
-		return t
-	}
-
-	return list.tail.Data
-}
-
-// PushFront
-// O(1)
-func (list *GenericList[T]) PushFront(t T) {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	err = list.addHead(&GenericListNode[T]{Data: t})
-	if err != nil {
-		panic(err)
-	}
-}
-
-// PopFront
-// O(1)
-func (list *GenericList[T]) PopFront() {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = list.delTail()
-	if err != nil {
-		panic(err)
-	}
-}
-
-// PushBack
-// O(1)
-func (list *GenericList[T]) PushBack(t T) {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	err = list.addTail(&GenericListNode[T]{Data: t})
-	if err != nil {
-		panic(err)
-	}
-}
-
-// PopBack
-// O(1)
-func (list *GenericList[T]) PopBack() {
-	err := list.validate()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = list.delTail()
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (list *GenericList[T]) ChainedPushFront(t T) *GenericList[T] {
-	list.PushFront(t)
-	return list
-}
-
-func (list *GenericList[T]) ChainedPopFront() *GenericList[T] {
-	list.PopFront()
-	return list
-}
-
-func (list *GenericList[T]) ChainedPushBack(t T) *GenericList[T] {
-	list.PushBack(t)
-	return list
-}
-
-func (list *GenericList[T]) ChainedPopBack() *GenericList[T] {
-	list.PopBack()
-	return list
-}
-
 func (list *GenericList[T]) Assign(ts *GenericList[T]) {
 	if ts != nil {
 		err := ts.validate()
@@ -168,6 +70,134 @@ func (list *GenericList[T]) Swap(ts *GenericList[T]) {
 
 func (list *GenericList[T]) Clear() {
 	list.construct(nil, nil, 0)
+}
+
+// Front
+// O(1)
+func (list *GenericList[T]) Front() T {
+	if list.Empty() {
+		var t T
+		return t
+	}
+
+	return list.head.Data
+}
+
+// Back
+// O(1)
+func (list *GenericList[T]) Back() T {
+	if list.Empty() {
+		var t T
+		return t
+	}
+
+	return list.tail.Data
+}
+
+func (list *GenericList[T]) ChainedPushFront(t T) *GenericList[T] {
+	list.PushFront(t)
+	return list
+}
+
+func (list *GenericList[T]) ChainedPopFront() *GenericList[T] {
+	list.PopFront()
+	return list
+}
+
+func (list *GenericList[T]) ChainedPushBack(t T) *GenericList[T] {
+	list.PushBack(t)
+	return list
+}
+
+func (list *GenericList[T]) ChainedPopBack() *GenericList[T] {
+	list.PopBack()
+	return list
+}
+
+// PushFront
+// O(1)
+func (list *GenericList[T]) PushFront(t T) {
+	list.AddHead(&GenericListNode[T]{Data: t})
+}
+
+// PopFront
+// O(1)
+func (list *GenericList[T]) PopFront() T {
+	node := list.DelHead()
+	return node.Data
+}
+
+// PushBack
+// O(1)
+func (list *GenericList[T]) PushBack(t T) {
+	list.AddTail(&GenericListNode[T]{Data: t})
+}
+
+// PopBack
+// O(1)
+func (list *GenericList[T]) PopBack() T {
+	node := list.DelTail()
+	return node.Data
+}
+
+func (list *GenericList[T]) Head() *GenericListNode[T] {
+	return list.head
+}
+
+func (list *GenericList[T]) Tail() *GenericListNode[T] {
+	return list.tail
+}
+
+func (list *GenericList[T]) AddHead(node *GenericListNode[T]) {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	err = list.addHead(node)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (list *GenericList[T]) DelHead() *GenericListNode[T] {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	node, err := list.delHead()
+	if err != nil {
+		panic(err)
+	}
+
+	return node
+}
+
+func (list *GenericList[T]) AddTail(node *GenericListNode[T]) {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	err = list.addTail(node)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (list *GenericList[T]) DelTail() *GenericListNode[T] {
+	err := list.validate()
+	if err != nil {
+		panic(err)
+	}
+
+	node, err := list.delTail()
+	if err != nil {
+		panic(err)
+	}
+
+	return node
 }
 
 func (list *GenericList[T]) At(index int) T {
@@ -448,4 +478,15 @@ func (node *GenericListNode[T]) Assign(nd *GenericListNode[T]) {
 func (node *GenericListNode[T]) SetZero() {
 	var t T
 	node.construct(t, nil, nil)
+}
+
+func (node *GenericListNode[T]) SetSolitary() {
+	if node.Prev != nil {
+		node.Prev.Next = node.Next
+	}
+	if node.Next != nil {
+		node.Next.Prev = node.Prev
+	}
+	node.Prev = nil
+	node.Next = nil
 }
