@@ -67,3 +67,7 @@ func TestLC3(t *testing.T) {
 	fmt.Println(trie.Search("app"))
 	fmt.Println(trie.Search("cal"))
 }
+
+func TestLC4(t *testing.T) {
+
+}
