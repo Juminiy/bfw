@@ -1,7 +1,6 @@
 package lang
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -14,6 +13,17 @@ func TestPointerNew(t *testing.T) {
 }
 
 func TestGetGenericsZeroValue(t *testing.T) {
-	gs := GenericStruct{}
-	fmt.Println(gs)
+
+}
+
+func TestAReceiver_Inc(t *testing.T) {
+	a := AReceiver{}
+	a.Inc()
+	a.Print()
+	a.Inc()
+	a.Print()
+	a.Plus(1)
+	a.Print()
+	a.Plus(1)
+	a.Print()
 }

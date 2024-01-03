@@ -2,6 +2,7 @@ package lang
 
 import (
 	"fmt"
+	"sync"
 )
 
 type vType struct {
@@ -37,4 +38,37 @@ type CommonInterface interface {
 }
 
 type GenericStruct[T CommonInterface] struct {
+}
+
+type AReceiver struct {
+	i int
+	sync.Mutex
+}
+
+func (a *AReceiver) Inc() {
+	a.Lock()
+	a.i++
+	a.Unlock()
+}
+
+func (a *AReceiver) Dec() {
+	a.Lock()
+	a.i--
+	a.Unlock()
+}
+
+func (a *AReceiver) Plus(d int) {
+	a.Lock()
+	a.i += d
+	a.Unlock()
+}
+
+func (a *AReceiver) Minus(d int) {
+	a.Lock()
+	a.i -= d
+	a.Unlock()
+}
+
+func (a *AReceiver) Print() {
+	fmt.Println(a.i)
 }
