@@ -204,7 +204,7 @@ func (pm *PolyMatrix) det() *poly.Poly {
 		return pm.get(0, 0)
 	} else if n == simplePhalanxSizeTwo {
 		res1 := poly.ChainedMul(pm.get(0, 0), pm.get(1, 1))
-		res2 := poly.ChainedMul(pm.get(0, 1), pm.get(1, 1))
+		res2 := poly.ChainedMul(pm.get(0, 1), pm.get(1, 0))
 		return poly.ChainedSub(res1, res2)
 	} else if n == simplePhalanxSizeThree {
 		res1 := poly.ChainedMul(pm.get(0, 0), pm.get(1, 1), pm.get(2, 2))

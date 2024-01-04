@@ -38,7 +38,7 @@ func TestMakeST(t *testing.T) {
 	//7
 	//9
 	for _, q := range querySlice {
-		fmt.Println(st.Query(q[0], q[1]))
+		fmt.Println(st.Query(q[0]-1, q[1]-1))
 	}
 }
 

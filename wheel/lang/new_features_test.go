@@ -26,4 +26,6 @@ func TestAReceiver_Inc(t *testing.T) {
 	a.Print()
 	a.Plus(1)
 	a.Print()
+	//gs := GenericStruct[int]{}
+	//fmt.Println(gs)
 }

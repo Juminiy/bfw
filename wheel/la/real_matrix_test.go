@@ -542,3 +542,10 @@ func TestAddRealMatrix(t *testing.T) {
 	//m, _ = m.Convergence()
 	//v.MulMatrix(m).Display()
 }
+
+func TestMatrix_EigenValues4(t *testing.T) {
+	aat := ConstructMatrix([][]float64{{5, 10, 15}, {10, 20, 30}, {15, 30, 45}})
+	ata := ConstructMatrix([][]float64{{14, 28}, {28, 56}})
+	aat.EigenValues().Display(true)
+	ata.EigenValues().Display(true)
+}

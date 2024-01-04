@@ -33,8 +33,8 @@ func (st *ST) make(slice []int) {
 	st.clear()
 	st.slice = make([][]int, sLen)
 	st.log2 = GenIntLog2(sLen)
-	for step := 0; step <= st.log2[sLen]; step++ {
-		for index := 0; index+(1<<step) < sLen; index++ {
+	for step := 0; step <= st.log2[sLen]+1; step++ {
+		for index := 0; index+(1<<step) <= sLen; index++ {
 			if len(st.slice[index]) == 0 {
 				st.slice[index] = make([]int, st.log2[sLen]+1)
 			}
@@ -60,7 +60,7 @@ func (st *ST) Query(l, r int) int {
 func (st *ST) query(l, r int) int {
 	step := st.log2[r-l+1]
 	return st.fn(st.slice[l][step],
-		st.slice[r-(1<<step)][step])
+		st.slice[r-(1<<step)+1][step])
 }
 
 // GenIntLog2

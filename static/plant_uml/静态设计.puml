@@ -1,0 +1,45 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class User {
+  String userID
+  String name
+  String email
+}
+
+class Train {
+  String trainID
+  String origin
+  String destination
+  Time departureTime
+  Time arrivalTime
+}
+
+class Ticket {
+  User user
+  Train train
+  Time purchaseTime
+}
+
+class TicketSystem {
+  Database database
+  PaymentSystem paymentSystem
+
+  Train searchTrain(String trainID)
+  Ticket purchaseTicket(String trainID, String userID)
+}
+
+class Database {
+  List<User> users
+  List<Train> trains
+
+  User getUserDetails(String userID)
+  Train getTrainDetails(String trainID)
+}
+
+class PaymentSystem {
+  boolean processPayment(User user, Train train)
+}
+
+
+@enduml

@@ -49,7 +49,8 @@ type (
 )
 
 // GenericValue
-// Generci Value foramt and regular
+// Generic Value format and regular
+
 type (
 	GenericZero[T any] interface {
 		Zero() T

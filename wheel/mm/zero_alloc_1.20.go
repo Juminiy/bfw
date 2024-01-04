@@ -17,3 +17,23 @@ func Bytes2String(a []byte) string {
 func GetAddressByString(a string) uintptr {
 	return uintptr(unsafe.Pointer(unsafe.StringData(a)))
 }
+
+func GetAddressByBytes(a []byte) uintptr {
+	return uintptr(unsafe.Pointer(unsafe.SliceData(a)))
+}
+
+func Int2Int64(a int) int64 {
+	return *(*int64)(unsafe.Pointer(&a))
+}
+
+func Int642Int(a int64) int {
+	return *(*int)(unsafe.Pointer(&a))
+}
+
+func GetAddressByInt64(a int64) uintptr {
+	return uintptr(unsafe.Pointer(&a))
+}
+
+func GetAddressByInt(a int) uintptr {
+	return uintptr(unsafe.Pointer(&a))
+}

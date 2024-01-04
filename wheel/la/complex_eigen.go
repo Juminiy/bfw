@@ -5,7 +5,6 @@ import (
 	"bfw/wheel/lang"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -116,12 +115,15 @@ func (evs *EigenValues) traverseToGetBool(funcPtr func(*EigenValue) bool, predic
 	return !predictResult
 }
 
-func (evs *EigenValues) Display(logger ...*log.Logger) {
+func (evs *EigenValues) Display(printLine ...bool) {
 	valueCnt := 1
 	for _, ev := range evs.values {
 		ev.DisplayV2(valueCnt)
 		fmt.Printf(", ")
 		valueCnt += ev.algebraicMultiplicity
+	}
+	if len(printLine) > 0 && printLine[0] {
+		fmt.Println()
 	}
 }
 

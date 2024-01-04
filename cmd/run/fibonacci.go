@@ -1,4 +1,4 @@
-package main
+package run
 
 import (
 	"bfw/wheel/algo/classical"
@@ -15,7 +15,7 @@ func Spinner(sleepTime time.Duration) {
 	}
 }
 
-func main() {
+func RunFibonacci() {
 	go Spinner(100 * time.Millisecond)
 	time0 := time.Now()
 	n := 45
