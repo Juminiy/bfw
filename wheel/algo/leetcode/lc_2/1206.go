@@ -67,12 +67,21 @@ func (l *Skiplist) Add(num int) {
 
 func (l *Skiplist) Search(target int) bool {
 	prev := l.walk(target)
-	return prev.next[0] != nil &&
-		prev.next[0].key == target
+	_, ex := l.exists(prev, target)
+	return ex
 }
 
 func (l *Skiplist) Erase(num int) bool {
-	return false
+	var cur *skipNode
+	prev := l.walk(num)
+	cur, ex := l.exists(prev, num)
+	if ex {
+		cur.cnt--
+		if cur.cnt == 0 {
+
+		}
+	}
+	return ex
 }
 
 func (l *Skiplist) walk(num int) *skipNode {
@@ -100,6 +109,17 @@ func (l *Skiplist) walkInLevel(walkNode *skipNode, level int, target int) *skipN
 func (l *Skiplist) growLevel() {
 	l.height++
 	l.head.next = append(l.head.next, l.tail)
+}
+
+func (l *Skiplist) exists(prev *skipNode, target int) (*skipNode, bool) {
+	var cur *skipNode
+	if prev != nil && len(prev.next) > 0 {
+		cur = prev.next[0]
+	}
+	return cur, prev != nil &&
+		cur != nil &&
+		cur.key == target &&
+		cur.next[0].cnt > 0
 }
 
 func getProb(size int) []bool {
