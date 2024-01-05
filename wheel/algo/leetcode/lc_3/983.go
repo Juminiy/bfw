@@ -1,12 +1,50 @@
 package lc_3
 
+const (
+	dpInf = 0xffffffff
+)
+
 func mincostTickets(days []int, costs []int) int {
-	//next := getNext(days, []int{1, 7, 30})
-	//return mctV2(costs, next, 0, 0)
-	pre := getPre(days, []int{1, 7, 30})
-	return mctV3(costs, pre)
+	next := getNext(days, []int{1, 7, 30})
+	dp := make([]int, len(days))
+	for i, _ := range dp {
+		dp[i] = dpInf
+	}
+	//return mctV2(costs, dp, next, 0)
+	//pre := getPre(days, []int{1, 7, 30})
+	return mctV3(costs, dp, next)
 }
 
+func mctV3(costs, dp []int, next [][]int) int {
+	ei, cur := len(dp)-1, 0
+	for j := ei; j >= 0; j-- {
+		for i, cost := range costs {
+			if next[j][i] == -1 {
+				cur = 0
+			} else {
+				cur = dp[next[j][i]]
+			}
+			dp[j] = min(dp[j], cur+cost)
+		}
+	}
+	return dp[0]
+}
+
+func mctV2(costs, dp []int, next [][]int, cur int) int {
+	if cur == -1 {
+		return 0
+	}
+	if dp[cur] != dpInf {
+		return dp[cur]
+	}
+	dp[cur] = dpInf
+	for i, cost := range costs {
+		dp[cur] = min(dp[cur], mctV2(costs, dp, next, next[cur][i])+cost)
+	}
+	return dp[cur]
+}
+
+// 1. 写出暴力的dfs算法
 // days = [1,4,6,7,8,20], costs = [2,7,15]
 func mctV1(days []int, c1, c2, c3 int, res int) int {
 	dL := len(days)
@@ -23,56 +61,6 @@ func mctV1(days []int, c1, c2, c3 int, res int) int {
 	}
 	r3 := mctV1(days[end30:], c1, c2, c3, res+c3)
 	return min(r1, r2, r3)
-}
-
-func mctV2(costs []int, next [][]int, cur, res int) int {
-	if cur == -1 {
-		return res
-	}
-	minRes := 0xffffffff
-	for i, cost := range costs {
-		minRes = min(minRes, mctV2(costs, next, next[cur][i], res+cost))
-	}
-	return minRes
-}
-
-// days = [1,4,6,7,8,20], costs = [2,7,15]
-// index= [0,1,2,3,4,5]
-// next = [[1 4 0] [2 5 0] [3 5 0] [4 5 0] [5 5 0] [0 0 0]]
-func getNext(days, dayDuration []int) [][]int {
-
-	dL, ddL := len(days), len(dayDuration)
-	next := make([][]int, dL)
-	for i := 0; i < dL; i++ {
-		next[i] = make([]int, ddL)
-		for k := 0; k < ddL; k++ {
-			for j := i + 1; j < dL; j++ {
-				if days[j]-days[i] >= dayDuration[k] {
-					next[i][k] = j
-					break
-				}
-			}
-			if next[i][k] == 0 {
-				next[i][k] = -1
-			}
-		}
-	}
-
-	//fmt.Println(next)
-
-	return next
-}
-
-func mctV3(costs []int, pre [][]int) int {
-	//dp[i][j] =
-	//	min
-	//dp[i][j-1] + cost[0],
-	//	dp[i][j-per[j]] + cost[1]
-	//dp[i][j-pre2[j]] + cost[2]
-	//dp := make([]int, 0)
-	//fmt.Println(pre)
-	//for i, _ := range {}
-	return 0
 }
 
 // days = [1,4,6,7,8,20], costs = [2,7,15]
@@ -93,4 +81,27 @@ func getPre(days, dayDuration []int) [][]int {
 		}
 	}
 	return pre
+}
+
+// days = [1,4,6,7,8,20], costs = [2,7,15]
+// index= [0,1,2,3,4,5]
+// next = [[1 4 0] [2 5 0] [3 5 0] [4 5 0] [5 5 0] [0 0 0]]
+func getNext(days, dayDuration []int) [][]int {
+	dL, ddL := len(days), len(dayDuration)
+	next := make([][]int, dL)
+	for i := 0; i < dL; i++ {
+		next[i] = make([]int, ddL)
+		for k := 0; k < ddL; k++ {
+			for j := i + 1; j < dL; j++ {
+				if days[j]-days[i] >= dayDuration[k] {
+					next[i][k] = j
+					break
+				}
+			}
+			if next[i][k] == 0 {
+				next[i][k] = -1
+			}
+		}
+	}
+	return next
 }
