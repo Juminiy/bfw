@@ -3,14 +3,15 @@ package lc_3
 // 7,1,5,3,6,4
 // 7,1,
 func maxProfitQ2(prices []int) int {
-	pl := len(prices)
-	dp := make([]int, pl)
-	curMin := 0
-	for i := range prices {
-		dp[i] = max(dp[i], dp[curMin]+prices[i]-prices[curMin])
-		if prices[i] < prices[curMin] {
-			curMin = i
+	curMin, totProf, curProf := prices[0], 0, 0
+	for i := 1; i < len(prices); i++ {
+		if prices[i]-curMin > curProf {
+			totProf += prices[i] - curMin - curProf
+			curProf = prices[i] - curMin
+		} else {
+			curProf = 0
+			curMin = prices[i]
 		}
 	}
-	return dp[pl-1]
+	return totProf
 }
