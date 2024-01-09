@@ -94,3 +94,7 @@ func TestLRUCache_Get(t *testing.T) {
 	fmt.Println(c.Get(2))
 	fmt.Println(c.Get(3))
 }
+
+func TestSortList(t *testing.T) {
+	sortList(GenList(6, 8, 7, 3, 1, 3, 8, 3, 4)).Print()
+}

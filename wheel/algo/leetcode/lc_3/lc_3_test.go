@@ -41,3 +41,12 @@ func TestLC7(t *testing.T) {
 func TestLC8(t *testing.T) {
 	fmt.Println(canConstruct("f", "aad"))
 }
+
+func TestLC9(t *testing.T) {
+	//fmt.Println(subsets([]int{1, 2, 3}))
+	fmt.Println(combine(5, 3))
+}
+
+func TestLC10(t *testing.T) {
+	fmt.Println(letterCombinations("234"))
+}

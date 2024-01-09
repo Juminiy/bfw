@@ -69,5 +69,5 @@ func TestLC3(t *testing.T) {
 }
 
 func TestLC4(t *testing.T) {
-
+	candy([]int{10, 9, 8, 7, 6, 5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1})
 }
