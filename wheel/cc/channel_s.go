@@ -3,34 +3,90 @@ package cc
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"strconv"
 	"time"
 )
 
 func SendSign(ch chan int, s int) {
-	ch <- s
-}
+	for {
+		select {
+		case ch <- s:
+			{
 
-func ReceiveSign(ch chan int) {
-	s := <-ch
-	fmt.Println(s)
-}
-
-func PipelineSquare() {
-	numChan := make(chan int)
-	nsqChan := make(chan int)
-
-	go genNum(numChan)
-
-	go calNum(nsqChan, numChan)
-
-	for nsq := range nsqChan {
-		fmt.Printf("%d,", nsq)
+			}
+		default:
+			{
+				time.Sleep(5 * time.Second)
+			}
+		}
 	}
 }
 
-func genNum(out chan<- int) {
-	for num := 0; num < 100; num++ {
-		out <- num
+func ReceiveSign(ch chan int) {
+	for {
+		select {
+		case s := <-ch:
+			{
+				fmt.Println(s)
+			}
+		default:
+			{
+				time.Sleep(20 * time.Second)
+			}
+		}
+	}
+}
+
+func getFilePtr(dir string) *os.File {
+	filePtr, err := os.OpenFile(dir, os.O_CREATE|os.O_RDWR, 0777)
+	if err != nil {
+		panic(err)
+	}
+	return filePtr
+}
+
+func PipelineSquare(fi chan bool, maxSize int) {
+	numChan := make(chan int)
+	nsqChan := make(chan int)
+
+	go genNum(numChan, maxSize)
+
+	go calNum(nsqChan, numChan)
+
+	// write procedure
+	fptr := getFilePtr("num_square.txt")
+	defer func(fp *os.File) {
+		err := fp.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(fptr)
+	cnt := 0
+	for {
+		for nsq := range nsqChan {
+			_, err := fptr.WriteString(strconv.Itoa(nsq) + ",")
+			if err != nil {
+				panic(err)
+			}
+			cnt++
+			if cnt%100 == 0 && cnt > 0 {
+				_, err = fptr.WriteString("\n")
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+		if cnt == maxSize {
+			fi <- true
+		}
+	}
+
+}
+
+func genNum(out chan<- int, maxSize int) {
+	for num := 0; num < maxSize; num++ {
+		out <- rand.Intn(num + 1)
 	}
 	close(out)
 }
