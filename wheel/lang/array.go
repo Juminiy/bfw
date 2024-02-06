@@ -264,3 +264,13 @@ func EqualInt641DArray(a, b []int64) bool {
 func PairIntEqual(a1, b1, a2, b2 int) bool {
 	return a1 == a2 && b1 == b2
 }
+
+func RunChangeSlice(a *[]int) {
+	*a = append(*a, 1, 2, 3)
+	fmt.Printf("param address: %p\nparam value address: %p\nparam value pointer to address: %p\n", &a, a, *a)
+}
+
+func RunNoChangeSlice(a []int) {
+	a = append(a, 1, 2, 3)
+	fmt.Printf("param address: %p\nparam value address: %p\nparam value pointer to address: %v\n", &a, a, 0x0)
+}

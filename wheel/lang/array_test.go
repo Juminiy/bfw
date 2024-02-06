@@ -55,3 +55,24 @@ func TestReal2DArray_Len(t *testing.T) {
 	revByteSlice(sl1)
 	fmt.Println(sl1)
 }
+
+func TestRunChangeSlice(t *testing.T) {
+	var arr []int
+	fmt.Printf("nih:(%p(%p))\n", &arr, arr)
+	RunChangeSlice(&arr)
+	fmt.Printf("nih:(%p(%p))\n", &arr, arr)
+	fmt.Println(arr)
+	RunNoChangeSlice(arr)
+	fmt.Printf("nih:(%p(%p))\n", &arr, arr)
+	fmt.Println(arr)
+}
+
+//nih:(0x1400012c0a8(0x0))
+//param address: 0x14000106048
+//param value address: 0x1400012c0a8
+//param value pointer to address: 0x1400011c060
+//nih:(0x1400012c0a8(0x1400011c060))
+//param address: 0x1400012c0f0
+//param value address: 0x1400012e060
+//param value pointer to address: 0
+//nih:(0x1400012c0a8(0x1400011c060))

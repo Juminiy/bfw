@@ -3,6 +3,7 @@ package lang
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"strconv"
 )
 
@@ -150,4 +151,33 @@ func RealArrayToComplex128Array(p []float64) []complex128 {
 		pC[idx] = complex(p[idx], 0.0)
 	}
 	return pC
+}
+
+func Div(x, y complex128) complex128 {
+	// x = a+bi
+	// y = c+di
+	// x/y= (a+bi)(c-di)/c^2+d^2
+	// ac+bd+(bc-ad)i/(c^2+d^2)
+	a, c := real(x), real(y)
+	b, d := imag(x), imag(y)
+	div := c*c + d*d
+	n1 := a*c + b*d
+	n2 := b*c - a*d
+	return complex(n1/div, n2/div)
+}
+
+func Eq(x, y complex128) bool {
+	return EqualFloat64Zero(real(x)-real(y)) &&
+		EqualFloat64Zero(imag(x)-imag(y))
+}
+
+func GenComplex128Slice(n int) ([]complex128, []complex128) {
+	sliceR := make([]complex128, n)
+	sliceI := make([]complex128, n)
+	for i := 0; i < n; i++ {
+		sliceR[i] = complex(rand.Float64(), rand.Float64())
+		sliceI[i] = complex(rand.Float64(), rand.Float64())
+	}
+
+	return sliceR, sliceI
 }

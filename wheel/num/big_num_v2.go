@@ -31,25 +31,7 @@ var (
 // BigNumberMultiply
 // Exam to definite how to choose the mul
 func BigNumberMultiply(A, B string) string {
-	randInt := lang.GetRandomIntValue(2)
-	switch randInt {
-	case 0:
-		{
-			return KaratsubaBigNumberMultiplication(A, B)
-		}
-	case 1:
-		{
-			return FFTBigNumberMultiplication(A, B)
-		}
-	case 2:
-		{
-			return LangBigNumberMultiplication(A, B)
-		}
-	default:
-		{
-			panic(errors.New("unsupported algorithm"))
-		}
-	}
+	return LangBigNumberMultiplication(A, B)
 }
 
 func BigNumberPower(Base, Exp int) string {

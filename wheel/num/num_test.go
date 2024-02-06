@@ -172,3 +172,7 @@ func TestXOR(t *testing.T) {
 	fmt.Printf("%x", ^0b1010)
 	fmt.Println(math.Pi)
 }
+
+func TestLangBigNumberMultiplication(t *testing.T) {
+	println(BigNumberPower(2, 2024))
+}

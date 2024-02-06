@@ -1,4 +1,4 @@
-package run_any
+package run
 
 import (
 	"bfw/wheel/cc"
