@@ -98,3 +98,10 @@ func TestLRUCache_Get(t *testing.T) {
 func TestSortList(t *testing.T) {
 	sortList(GenList(6, 8, 7, 3, 1, 3, 8, 3, 4)).Print()
 }
+
+func TestLongs(t *testing.T) {
+	fmt.Println(longestConsecutive([]int{0}))
+	fmt.Println(longestConsecutive([]int{0, 3, 7, 2, 5, 8, 4, 6, 0, 1}))
+	fmt.Println(longestConsecutive([]int{100, 4, 200, 1, 3, 2}))
+	fmt.Println(longestConsecutive([]int{0, 3, 7, 2, 5, 8, 4, 6, 0, 1}))
+}

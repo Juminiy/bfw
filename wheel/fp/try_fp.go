@@ -1,0 +1,4 @@
+package fp
+
+func tryFP() {
+}

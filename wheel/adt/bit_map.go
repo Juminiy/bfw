@@ -862,7 +862,6 @@ func absVar(x interface{}) interface{} {
 			panic(errors.New("unSupported int type"))
 		}
 	}
-	return nil
 }
 
 func BitMapSort(arr []int64, predictMaxVal int64) []int64 {

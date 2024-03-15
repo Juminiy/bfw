@@ -50,3 +50,7 @@ func TestLC9(t *testing.T) {
 func TestLC10(t *testing.T) {
 	fmt.Println(letterCombinations("234"))
 }
+
+func TestLC11(t *testing.T) {
+	fmt.Println(minLength("ACBBD"))
+}

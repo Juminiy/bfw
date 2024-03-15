@@ -12,3 +12,17 @@ func reverseList(head *ListNode) *ListNode {
 	}
 	return q
 }
+
+// 1->2->3->4->5
+
+// 1->2->nil
+// 1
+func reverseListV2(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	n := reverseListV2(head.Next)
+	head.Next.Next = n
+	head.Next = nil
+	return n
+}

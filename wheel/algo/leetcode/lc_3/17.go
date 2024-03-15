@@ -15,12 +15,15 @@ func letterCombinations(digits string) []string {
 		4: {"g", "h", "i"}, 5: {"j", "k", "l"}, 6: {"m", "n", "o"},
 		7: {"p", "q", "r", "s"}, 8: {"t", "u", "v"}, 9: {"w", "x", "y", "z"},
 	}
-	dfs(0, "", res, digits, m)
+	if len(digits) == 0 {
+		return res
+	}
+	dfs(0, "", &res, digits, m)
 	return res
 }
-func dfs(i int, s string, res []string, digits string, m map[int][]string) {
+func dfs(i int, s string, res *[]string, digits string, m map[int][]string) {
 	if i == len(digits) {
-		res = append(res, s)
+		*res = append(*res, s)
 		return
 	}
 	for _, si := range m[int(digits[i]-'1'+1)] {
